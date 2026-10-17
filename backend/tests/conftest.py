@@ -4,6 +4,7 @@ import os
 os.environ.setdefault("ENVIRONMENT", "test")
 os.environ.setdefault("JWT_SECRET", "test-secret-key-that-is-at-least-32-chars")
 os.environ["RESEND_API_KEY"] = ""
+os.environ["SMTP_HOST"] = ""
 os.environ["BLOB_READ_WRITE_TOKEN"] = ""
 os.environ["UPSTASH_REDIS_REST_URL"] = ""
 os.environ["CRON_SECRET"] = "test-cron-secret"

@@ -30,6 +30,11 @@ class Settings(BaseSettings):
 
     # Email (Resend). Blank → emails are logged instead of sent.
     resend_api_key: str = ""
+    # SMTP (e.g. Gmail with an app password). Takes precedence over Resend when set.
+    smtp_host: str = ""
+    smtp_port: int = 587
+    smtp_user: str = ""
+    smtp_password: str = ""
     email_from: str = "Proppros <noreply@proppros.app>"
 
     # File storage (Vercel Blob). Neither set → files saved to local_upload_dir.
@@ -62,8 +67,16 @@ class Settings(BaseSettings):
         return not (self.on_vercel and self.database_url.startswith("sqlite"))
 
     @property
+    def email_provider(self) -> str:
+        if self.smtp_host and self.smtp_user and self.smtp_password:
+            return "smtp"
+        if self.resend_api_key:
+            return "resend"
+        return "log-only"
+
+    @property
     def email_enabled(self) -> bool:
-        return bool(self.resend_api_key)
+        return self.email_provider != "log-only"
 
     @model_validator(mode="after")
     def validate_production(self) -> "Settings":

@@ -36,7 +36,7 @@ def _deployment_info() -> dict:
 def _email_status() -> dict:
     sender = settings.email_from
     domain = sender.split("@")[-1].strip(" >") if "@" in sender else None
-    return {"provider": "resend" if settings.email_enabled else "log-only", "from_domain": domain}
+    return {"provider": settings.email_provider, "from_domain": domain}
 
 
 @router.get("/health")

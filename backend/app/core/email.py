@@ -1,4 +1,7 @@
-"""Transactional email via Resend's HTTP API.
+"""Transactional email via SMTP (e.g. Gmail app password) or Resend's HTTP API.
+
+Provider: SMTP when SMTP_HOST/USER/PASSWORD are set, else Resend when
+RESEND_API_KEY is set, else emails are only logged (local dev).
 
 Sent inline (not in BackgroundTasks): on Vercel the function may be frozen as
 soon as the response is returned, so post-response work is not guaranteed.
@@ -7,6 +10,10 @@ import base64
 import html as _html
 import logging
 import re
+import smtplib
+import ssl
+from email.message import EmailMessage
+from email.utils import make_msgid
 from dataclasses import dataclass
 
 import httpx
@@ -68,11 +75,14 @@ def send_email(
             {"filename": a.filename, "content": base64.b64encode(a.content).decode()} for a in attachments
         ]
 
-    if not settings.email_enabled:
+    provider = settings.email_provider
+    if provider == "log-only":
         outbox.append(message)
         links = re.findall(r'href="([^"]+)"', html)
-        logger.info("Email (not sent, RESEND_API_KEY unset) to=%s subject=%r links=%s", recipients, subject, links)
+        logger.info("Email (not sent, no email provider configured) to=%s subject=%r links=%s", recipients, subject, links)
         return True, None
+    if provider == "smtp":
+        return _send_smtp(recipients, subject, html, text, attachments)
 
     try:
         resp = httpx.post(
@@ -88,3 +98,41 @@ def send_email(
     except httpx.HTTPError as exc:
         logger.error("Resend request failed: %s", exc)
         return False, str(exc)
+
+
+def _plain_text(html: str) -> str:
+    text = re.sub(r"<(br|/p|/h2|/div)>", "\n", html)
+    text = re.sub(r'<a [^>]*href="([^"]+)"[^>]*>([^<]*)</a>', lambda m: f"{m.group(2)}: {m.group(1)}", text)
+    return _html.unescape(re.sub(r"<[^>]+>", "", text)).strip()
+
+
+def _send_smtp(recipients, subject, html, text, attachments) -> tuple[bool, str | None]:
+    msg = EmailMessage()
+    msg["From"] = settings.email_from
+    msg["To"] = ", ".join(recipients)
+    msg["Subject"] = subject
+    msg["Message-ID"] = make_msgid(domain=settings.smtp_user.split("@")[-1] or None)
+    msg.set_content(text or _plain_text(html))
+    msg.add_alternative(html, subtype="html")
+    for a in attachments or []:
+        maintype, subtype = ("application", "pdf") if a.filename.lower().endswith(".pdf") else ("application", "octet-stream")
+        msg.add_attachment(a.content, maintype=maintype, subtype=subtype, filename=a.filename)
+    # Google shows app passwords in groups of four; spaces aren't part of it.
+    password = settings.smtp_password.replace(" ", "")
+    try:
+        if settings.smtp_port == 465:
+            with smtplib.SMTP_SSL(settings.smtp_host, 465, timeout=15, context=ssl.create_default_context()) as smtp:
+                smtp.login(settings.smtp_user, password)
+                smtp.send_message(msg)
+        else:
+            with smtplib.SMTP(settings.smtp_host, settings.smtp_port, timeout=15) as smtp:
+                smtp.starttls(context=ssl.create_default_context())
+                smtp.login(settings.smtp_user, password)
+                smtp.send_message(msg)
+        return True, None
+    except smtplib.SMTPAuthenticationError as exc:
+        logger.error("SMTP login failed for %s (check the app password): %s", settings.smtp_user, exc.smtp_code)
+        return False, "smtp auth failed"
+    except (smtplib.SMTPException, OSError) as exc:
+        logger.error("SMTP send failed: %s", exc)
+        return False, f"smtp error: {type(exc).__name__}"
