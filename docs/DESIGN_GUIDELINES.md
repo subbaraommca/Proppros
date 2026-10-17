@@ -2,7 +2,7 @@
 
 > **Version:** 1.0 · **Date:** 2026-10-17
 > **Implements:** `frontend/src/styles.css` (all tokens live there)
-> **Inspired by:** the principles in [HEX_DESIGN_SYSTEM.md](HEX_DESIGN_SYSTEM.md). Proppros uses its own palette, names and freely licensed fonts. Never copy Hex's brand colors or typefaces.
+> **Inspired by:** the principles of an external design-system reference ("HEX_DESIGN_SYSTEM.md", not kept in this repo). Proppros uses its own palette, names and freely licensed fonts. Never copy Hex's brand colors or typefaces.
 
 Strata is named for the mineral layers under every property: dark bedrock surfaces, warm mineral accents, and layers stacked by tone rather than shadow. Proppros is a working tool that landlords open every day to check money, leases and repairs. So the design goal is **calm, premium and very legible**, not flashy.
 
