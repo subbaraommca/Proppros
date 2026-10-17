@@ -33,6 +33,12 @@ def _deployment_info() -> dict:
     }
 
 
+def _email_status() -> dict:
+    sender = settings.email_from
+    domain = sender.split("@")[-1].strip(" >") if "@" in sender else None
+    return {"provider": "resend" if settings.email_enabled else "log-only", "from_domain": domain}
+
+
 @router.get("/health")
 def health():
     if not settings.database_configured:
@@ -53,6 +59,7 @@ def health():
         "status": "ok" if db_ok else "degraded",
         "db": "ok" if db_ok else "unreachable",
         "storage": _storage_status(),
+        "email": _email_status(),
         "environment": settings.environment,
     }
 

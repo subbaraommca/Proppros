@@ -22,3 +22,10 @@ def test_postgres_url_fallback(monkeypatch):
     s = Settings(_env_file=None)
     assert s.database_url == "postgresql+psycopg://u:p@host-pooler/db?sslmode=require"
     assert s.database_url_unpooled == "postgresql+psycopg://u:p@host/db?sslmode=require"
+
+
+def test_health_reports_email_mode(client, monkeypatch):
+    assert client.get("/api/health").json()["email"]["provider"] == "log-only"
+    monkeypatch.setattr(settings, "resend_api_key", "re_test")
+    monkeypatch.setattr(settings, "email_from", "Proppros <noreply@example.com>")
+    assert client.get("/api/health").json()["email"] == {"provider": "resend", "from_domain": "example.com"}
