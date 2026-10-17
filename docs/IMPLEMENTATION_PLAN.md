@@ -22,7 +22,7 @@ This is the step-by-step execution plan. Work is split into **iterations**. Each
 
 | # | Iteration | Phase | Status |
 |---|---|---|---|
-| 0 | Project setup & infrastructure | MVP | 🟦 Code done — create accounts & deploy |
+| 0 | Project setup & infrastructure | MVP | 🟨 Live at proppros.vercel.app — Resend, Sentry, Upstash, preview DB branches still open |
 | 1 | Auth, organizations & roles | MVP | ✅ |
 | 2 | Properties & units | MVP | 🟦 Code done — enter your properties |
 | 3 | Tenants & leases | MVP | 🟦 Code done — enter your leases |
@@ -66,10 +66,10 @@ Legend: ⬜ Not started · 🟨 In progress · 🟦 Code complete, waiting on a 
 **Goal:** an empty app that deploys to Vercel, has a working database connection, and passes CI.
 
 **Accounts / services**
-- [ ] Create a GitHub repo `proppros`, then `git init` locally and push
-- [ ] Create a Vercel project linked to the repo
-- [ ] Add Neon Postgres from the Vercel Marketplace (creates `DATABASE_URL` + unpooled URL)
-- [ ] Create a Vercel Blob store
+- [x] Create a GitHub repo `proppros`, then `git init` locally and push
+- [x] Create a Vercel project linked to the repo
+- [x] Add Neon Postgres from the Vercel Marketplace (creates `DATABASE_URL` + unpooled URL)
+- [x] Create a Vercel Blob store
 - [ ] Create a Resend account and verify the sending domain
 - [ ] Create a Sentry project (backend + frontend)
 - [ ] Create an Upstash Redis database
@@ -95,9 +95,9 @@ Legend: ⬜ Not started · 🟨 In progress · 🟦 Code complete, waiting on a 
 - [x] Document local dev in README (`vercel dev` or uvicorn + vite)
 
 **Done when:**
-- [ ] The production URL shows the landing page, and `/api/health` returns `{"db": "ok"}`
+- [x] The production URL shows the landing page, and `/api/health` returns `{"db": "ok"}`
 - [ ] A PR creates a preview deployment with its own DB branch
-- [ ] CI is green
+- [x] CI is green
 
 ---
 
@@ -364,3 +364,4 @@ Record notes when each iteration closes.
 | 2026-10-17 | 0–8 | MVP code built: FastAPI backend (44 Pytest tests), React frontend (Vitest + build), Alembic `0001`, Vercel config, CI. Smoke-tested end to end locally (owner → lease → rent/late fee → payment/receipt → tenant portal → work order). Decisions: money in integer cents; balance-forward ledger with idempotent `source_key`; one daily cron; uploads through the API; `api/index.py` restores the original path because `@vercel/python` ≥ 6.52 passes the rewrite destination. Deferred: full i18n extraction, prorated first-month rent (add as a manual charge), ~~private Blob storage~~ (done 2026-10-17). Not yet verified on a real Vercel/Neon deployment. |
 | 2026-10-17 | UI | Adopted the "Strata" design system ([DESIGN_GUIDELINES.md](DESIGN_GUIDELINES.md)), adapted from the principles in HEX_DESIGN_SYSTEM.md: dark-first Basalt + Limestone themes, mineral accents with one job each, Archivo/DM Sans/JetBrains Mono, sharp radii, borders over shadows, noise texture. All text pairs ≥ 4.5:1; chart pair validated for colorblind safety. Checked by screenshots at 1440px and 390px in both themes. |
 | 2026-10-17 | 0 | Switched hosting config to **Vercel Services** after the first import built only the frontend (Root Directory was `frontend`). `vercel.json` now defines `frontend` (Vite) and `backend` (FastAPI) services; runtime deps moved to `backend/requirements.txt`; `api/index.py` removed (services pass the original path). Cron with services to be confirmed after the first deploy. |
+| 2026-10-17 | 0 | **Deployed** to https://proppros.vercel.app (Vercel Services: Vite frontend + FastAPI backend), Neon Postgres (migration 0001 applied, `alembic check` clean on Postgres), private Vercel Blob. Fixes made during setup: no crash on startup without a DB, private-Blob support, `POSTGRES_URL` fallback, setup diagnostics in `/api/health`. Neon password rotated after it was shared in chat. |
