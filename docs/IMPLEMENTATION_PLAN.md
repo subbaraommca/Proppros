@@ -78,7 +78,7 @@ Legend: ⬜ Not started · 🟨 In progress · 🟦 Code complete, waiting on a 
 - [x] Scaffold `backend/app` (`main.py`, `core/config.py` with pydantic-settings, `core/db.py`)
 - [x] Configure the SQLAlchemy engine for serverless (`NullPool`, pooled URL)
 - [x] Set up Alembic using `DATABASE_URL_UNPOOLED`, plus an initial empty migration
-- [x] Add `api/index.py` exposing the FastAPI app to Vercel
+- [x] Expose the FastAPI app to Vercel — *now a Vercel Service (`backend/`, entrypoint `app.main:app`); `api/index.py` removed*
 - [x] Add a `GET /api/health` endpoint that checks the DB connection
 - [x] Add Sentry init and structured logging
 
@@ -89,7 +89,7 @@ Legend: ⬜ Not started · 🟨 In progress · 🟦 Code complete, waiting on a 
 - [x] Build a placeholder landing page that calls `/api/health`
 
 **DevOps**
-- [x] Add `vercel.json`: rewrites `/api/*` → `api/index.py`, plus a cron section (empty for now)
+- [x] Add `vercel.json`: Vercel Services (frontend at `/`, backend at `/api/*`) plus the daily cron
 - [x] Add a GitHub Actions workflow: lint → pytest → vitest → `alembic upgrade head` on merge to main
 - [ ] Add a Neon branch per preview deployment (Vercel–Neon integration)
 - [x] Document local dev in README (`vercel dev` or uvicorn + vite)
@@ -363,3 +363,4 @@ Record notes when each iteration closes.
 | 2026-10-17 | — | Requirements, tech stack and plan drafted |
 | 2026-10-17 | 0–8 | MVP code built: FastAPI backend (44 Pytest tests), React frontend (Vitest + build), Alembic `0001`, Vercel config, CI. Smoke-tested end to end locally (owner → lease → rent/late fee → payment/receipt → tenant portal → work order). Decisions: money in integer cents; balance-forward ledger with idempotent `source_key`; one daily cron; uploads through the API; `api/index.py` restores the original path because `@vercel/python` ≥ 6.52 passes the rewrite destination. Deferred: full i18n extraction, prorated first-month rent (add as a manual charge), private Blob storage. Not yet verified on a real Vercel/Neon deployment. |
 | 2026-10-17 | UI | Adopted the "Strata" design system ([DESIGN_GUIDELINES.md](DESIGN_GUIDELINES.md)), adapted from the principles in HEX_DESIGN_SYSTEM.md: dark-first Basalt + Limestone themes, mineral accents with one job each, Archivo/DM Sans/JetBrains Mono, sharp radii, borders over shadows, noise texture. All text pairs ≥ 4.5:1; chart pair validated for colorblind safety. Checked by screenshots at 1440px and 390px in both themes. |
+| 2026-10-17 | 0 | Switched hosting config to **Vercel Services** after the first import built only the frontend (Root Directory was `frontend`). `vercel.json` now defines `frontend` (Vite) and `backend` (FastAPI) services; runtime deps moved to `backend/requirements.txt`; `api/index.py` removed (services pass the original path). Cron with services to be confirmed after the first deploy. |

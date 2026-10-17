@@ -13,7 +13,7 @@ Keep Pickzona's stack wherever possible so patterns and code carry over. Vercel 
 | Layer | Pickzona | Proppros on Vercel |
 |---|---|---|
 | Frontend | React 18 + Vite + TypeScript + React Router | **Same**, deployed as Vercel static output. Add TanStack Query for data fetching |
-| Backend | FastAPI + SQLModel (Pydantic v2) | **Same**, deployed as a Vercel Python Function under `/api/*` in the same project |
+| Backend | FastAPI + SQLModel (Pydantic v2) | **Same**, deployed as a Vercel **service** (`backend/`) routed at `/api/*` in the same project |
 | Database | Self-hosted Postgres in Docker | **Neon Postgres** (Vercel Marketplace). Use the **pooled** connection string |
 | Migrations | Alembic, run at container start | **Alembic**, run from GitHub Actions or a pre-deploy step, never at function startup |
 | Auth | JWT in httpOnly cookie + Bearer | **Same**. Frontend and API share one domain, so no CORS needed |
@@ -34,8 +34,6 @@ Keep Pickzona's stack wherever possible so patterns and code carry over. Vercel 
 
 ```
 Proppros/
-├── api/                  # Vercel Python Function entrypoint (imports FastAPI app)
-│   └── index.py
 ├── backend/
 │   ├── app/
 │   │   ├── main.py       # FastAPI app, routers registered here
@@ -44,14 +42,15 @@ Proppros/
 │   │   └── routers/      # one *_router.py per feature (Pickzona pattern)
 │   ├── alembic/
 │   ├── tests/
-│   └── requirements.txt
+│   ├── requirements.txt  # runtime deps (Vercel installs these for the backend service)
+│   └── requirements-dev.txt
 ├── frontend/             # React + Vite + TS
 │   └── src/
 ├── mobile/               # Expo app (later phase)
 ├── docs/
 │   ├── FEATURES.md
 │   └── TECH_STACK.md
-├── vercel.json           # rewrites /api/* → api/index.py, cron schedule
+├── vercel.json           # Vercel Services: frontend at /, backend at /api/*, daily cron
 └── README.md
 ```
 
@@ -139,7 +138,7 @@ All tenant-scoped tables carry `organization_id`, and every query filters by it.
 | File uploads | Blob client uploads | **Multipart through the API** → Vercel Blob (or `backend/.uploads` locally), 4 MB cap | Every file is authorized and recorded as a `Document`; Blob URLs are unguessable but public — switch to private storage before storing sensitive IDs |
 | Cron | 5 jobs | **1 daily job** running all steps | Hobby-plan friendly, simpler, idempotent |
 | Datetimes | — | **Timezone-aware UTC** everywhere | Required by SQLModel ≥ 0.0.4x (`UTCDateTime`) |
-| Vercel routing | `/api/*` → `api/index.py` | Rewrite passes `?__path=`; `api/index.py` restores the original path | `@vercel/python` ≥ 6.52 gives the function the rewrite *destination* as its path |
+| Vercel routing | `/api/*` → `api/index.py` function | **Vercel Services** (`vercel.json` → `services`): `frontend` (Vite, root `frontend/`) and `backend` (FastAPI, root `backend/`, entrypoint `app.main:app`); top-level rewrites send `/api/*` to the backend, which receives the original path | Vercel's import flow now requires a services config for frontend + Python repos; it also removes the path-restoring wrapper needed by `@vercel/python` ≥ 6.52 |
 | Local DB | Neon dev branch | **SQLite file** by default (`DATABASE_URL` unset); Postgres via `docker compose up` or a Neon branch | Zero-setup local dev |
 | Emails in dev | — | Logged (with links) instead of sent when `RESEND_API_KEY` is blank | Lets you click invite/reset links locally |
 

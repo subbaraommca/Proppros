@@ -12,7 +12,8 @@ Proppros is an intuitive property management app for independent landlords and g
 ## Stack
 
 - **Frontend:** React 19 + Vite + TypeScript, React Router, TanStack Query, i18next, Lucide icons, Strata design system (`frontend/`)
-- **Backend:** FastAPI + SQLModel, served as a Vercel Python Function (`backend/`, entry `api/index.py`)
+- **Backend:** FastAPI + SQLModel (`backend/`, entry `app.main:app`)
+- **Hosting:** one Vercel project using [Vercel Services](https://vercel.com/docs/services): `frontend` (Vite) at `/` and `backend` (FastAPI) at `/api/*`, configured in `vercel.json`
 - **Data:** Neon Postgres + Alembic (SQLite for zero-setup local dev)
 - **Services:** Vercel Blob, Vercel Cron, Resend, Upstash Redis, Sentry — all optional locally
 
@@ -60,7 +61,7 @@ Alembic uses `DATABASE_URL_UNPOOLED` (Neon's direct URL) when it is set.
 
 ## Deploy to Vercel
 
-1. Push this repo to GitHub and import it in Vercel. `vercel.json` already sets the build, `/api/*` routing and the daily cron.
+1. Push this repo to GitHub and import it in Vercel. Vercel detects the two **services** from `vercel.json` (frontend + backend) and the daily cron. Keep the Root Directory at the repo root.
 2. In Vercel → Storage, add **Neon Postgres** (sets `DATABASE_URL` and `DATABASE_URL_UNPOOLED`) and **Blob** (sets `BLOB_READ_WRITE_TOKEN`). Turn on Neon branching for preview deployments.
 3. Set the environment variables: `ENVIRONMENT=production`, `JWT_SECRET`, `COOKIE_SECURE=true`, `FRONTEND_URL=https://<your domain>`, `CRON_SECRET`, `RESEND_API_KEY`, `EMAIL_FROM`, and optionally `UPSTASH_REDIS_REST_URL`/`_TOKEN` and `SENTRY_DSN`. See [.env.example](.env.example).
 4. Run the migrations against Neon once: `DATABASE_URL_UNPOOLED=... alembic upgrade head`. After that, the `migrate` job in `.github/workflows/ci.yml` does it on every merge to `main` (add `DATABASE_URL_UNPOOLED` as a GitHub secret in a `production` environment).
