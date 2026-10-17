@@ -1,0 +1,15 @@
+# Optional local Postgres (mirrors Neon). Start with: docker compose up -d
+# Then set DATABASE_URL=postgresql+psycopg://proppros:proppros@localhost:5432/proppros in backend/.env
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: proppros
+      POSTGRES_PASSWORD: proppros
+      POSTGRES_DB: proppros
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+volumes:
+  pgdata:

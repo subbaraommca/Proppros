@@ -1,0 +1,67 @@
+{
+  "app": {
+    "name": "Proppros",
+    "tagline": "Rent, leases, tenants, maintenance and finances — in one place."
+  },
+  "nav": {
+    "dashboard": "Dashboard",
+    "properties": "Properties",
+    "tenants": "Tenants",
+    "leases": "Leases",
+    "payments": "Payments",
+    "expenses": "Expenses",
+    "maintenance": "Maintenance",
+    "documents": "Documents",
+    "reports": "Reports",
+    "settings": "Settings",
+    "home": "Home",
+    "signOut": "Sign out",
+    "theme": "Toggle theme",
+    "menu": "Menu"
+  },
+  "common": {
+    "save": "Save",
+    "saving": "Saving…",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "edit": "Edit",
+    "add": "Add",
+    "close": "Close",
+    "loading": "Loading…",
+    "search": "Search",
+    "optional": "optional",
+    "none": "None",
+    "all": "All",
+    "download": "Download",
+    "view": "View",
+    "back": "Back"
+  },
+  "auth": {
+    "signIn": "Sign in",
+    "signingIn": "Signing in…",
+    "createAccount": "Create account",
+    "creating": "Creating…",
+    "email": "Email",
+    "password": "Password",
+    "name": "Your name",
+    "orgName": "Portfolio or business name",
+    "forgot": "Forgot password?",
+    "noAccount": "New to Proppros?",
+    "haveAccount": "Already have an account?",
+    "passwordHint": "At least 10 characters, including a number or symbol.",
+    "resetTitle": "Reset your password",
+    "resetSent": "If an account exists for that email, we've sent a reset link.",
+    "sendReset": "Send reset link",
+    "newPassword": "New password",
+    "setPassword": "Set password",
+    "verifyBanner": "Please verify your email address.",
+    "resend": "Resend email"
+  },
+  "portal": {
+    "welcome": "Welcome, {{name}}",
+    "balance": "Current balance",
+    "nextDue": "Next rent due",
+    "requests": "Maintenance requests",
+    "newRequest": "New request"
+  }
+}

@@ -1,0 +1,365 @@
+# Proppros — Implementation Plan
+
+> **Version:** 0.1 · **Date:** 2026-10-17
+> **Companion docs:** [FEATURES.md](FEATURES.md) (what to build) · [TECH_STACK.md](TECH_STACK.md) (how to build it) · [DESIGN_GUIDELINES.md](DESIGN_GUIDELINES.md) (how it should look — "Strata")
+
+This is the step-by-step execution plan. Work is split into **iterations**. Each one is small enough to finish, test and deploy on its own.
+
+---
+
+## How to use this file
+
+1. **Work top to bottom.** Iterations are ordered by dependency, so don't start one until the one before it is ✅.
+2. **One iteration at a time.** Each has a goal, tasks, requirement IDs (from FEATURES.md) and a **Done when** checklist.
+3. **Tick boxes as you go** (`- [ ]` → `- [x]`), and update the status table below when an iteration finishes.
+4. **Deploy at the end of every iteration.** `main` should always be deployable to Vercel.
+5. **Starting an AI session:** say *"Continue Proppros: read docs/IMPLEMENTATION_PLAN.md, work on the first unchecked task in the current iteration."*
+6. **At the end of each iteration:** add notes to the [Iteration log](#iteration-log) (what changed, decisions, deferred items).
+7. **Scope changes:** add or edit requirements in FEATURES.md first, then add tasks here.
+8. **UI work:** follow [DESIGN_GUIDELINES.md](DESIGN_GUIDELINES.md). New colors, fonts or components go into the guideline and `styles.css` tokens first, then into pages.
+
+### Status
+
+| # | Iteration | Phase | Status |
+|---|---|---|---|
+| 0 | Project setup & infrastructure | MVP | 🟦 Code done — create accounts & deploy |
+| 1 | Auth, organizations & roles | MVP | ✅ |
+| 2 | Properties & units | MVP | 🟦 Code done — enter your properties |
+| 3 | Tenants & leases | MVP | 🟦 Code done — enter your leases |
+| 4 | Rent ledger & payments | MVP | 🟦 Code done — run a real rent cycle |
+| 5 | Expenses, reports & dashboard | MVP | 🟦 Code done — enter this year's expenses |
+| 6 | Maintenance & work orders | MVP | ✅ |
+| 7 | Tenant portal | MVP | 🟦 Code done — invite a real tenant |
+| 8 | Notifications, documents & audit | MVP | 🟨 i18n partial; needs Resend for real emails |
+| 9 | Hardening & go-live with own 3 properties | MVP | ⬜ |
+| 10 | Online payments (Stripe Connect) | v2 | ⬜ |
+| 11 | SaaS: subscriptions, onboarding, admin | v2 | ⬜ |
+| 12 | Leasing workflows (templates, e-sign, renewals) | v2 | ⬜ |
+| 13 | Vendors & preventive maintenance | v2 | ⬜ |
+| 14 | Vacancy, listings & screening | v2 | ⬜ |
+| 15 | Communication (messaging, SMS, notices) | v2 | ⬜ |
+| 16 | Advanced finance (Plaid, tax, exports) | v2 | ⬜ |
+| 17 | AI features | v2 | ⬜ |
+| 18 | Mobile app (Expo) | v3 | ⬜ |
+| 19 | Scale features | v3 | ⬜ |
+
+Legend: ⬜ Not started · 🟨 In progress · 🟦 Code complete, waiting on a go-live step only you can do · ✅ Done
+
+---
+
+## Definition of Done (applies to every task)
+
+- [ ] Backend endpoint(s) have Pytest tests (happy path + permission/tenant-isolation check)
+- [ ] Frontend screen works at phone width and desktop, in Basalt (dark) and Limestone (light) themes
+- [ ] UI follows [DESIGN_GUIDELINES.md](DESIGN_GUIDELINES.md): only `--pp-*` tokens (no hard-coded colors), status badges use the mineral mapping, text contrast ≥ 4.5:1, any new chart colors run through the palette validator
+- [ ] All queries filter by `organization_id`
+- [ ] Alembic migration created for any schema change, and applied to the Neon dev branch
+- [ ] No secrets in code; new env vars added to TECH_STACK.md §7 and to Vercel
+- [ ] Deployed to a Vercel preview, smoke-tested, then merged to `main`
+
+---
+
+# Phase 1 — MVP (run your own 3 properties)
+
+## Iteration 0 — Project setup & infrastructure
+
+**Goal:** an empty app that deploys to Vercel, has a working database connection, and passes CI.
+
+**Accounts / services**
+- [ ] Create a GitHub repo `proppros`, then `git init` locally and push
+- [ ] Create a Vercel project linked to the repo
+- [ ] Add Neon Postgres from the Vercel Marketplace (creates `DATABASE_URL` + unpooled URL)
+- [ ] Create a Vercel Blob store
+- [ ] Create a Resend account and verify the sending domain
+- [ ] Create a Sentry project (backend + frontend)
+- [ ] Create an Upstash Redis database
+
+**Backend**
+- [x] Scaffold `backend/app` (`main.py`, `core/config.py` with pydantic-settings, `core/db.py`)
+- [x] Configure the SQLAlchemy engine for serverless (`NullPool`, pooled URL)
+- [x] Set up Alembic using `DATABASE_URL_UNPOOLED`, plus an initial empty migration
+- [x] Add `api/index.py` exposing the FastAPI app to Vercel
+- [x] Add a `GET /api/health` endpoint that checks the DB connection
+- [x] Add Sentry init and structured logging
+
+**Frontend**
+- [x] Scaffold Vite + React + TS + React Router + TanStack Query + i18next + Lucide
+- [x] Set up design tokens in `styles.css` (`--pp-*`), with light/dark theme toggle — *replaced by the Strata system (dark-first; see DESIGN_GUIDELINES.md)*
+- [x] Add an API client (`src/services/api.ts`, same pattern as Pickzona)
+- [x] Build a placeholder landing page that calls `/api/health`
+
+**DevOps**
+- [x] Add `vercel.json`: rewrites `/api/*` → `api/index.py`, plus a cron section (empty for now)
+- [x] Add a GitHub Actions workflow: lint → pytest → vitest → `alembic upgrade head` on merge to main
+- [ ] Add a Neon branch per preview deployment (Vercel–Neon integration)
+- [x] Document local dev in README (`vercel dev` or uvicorn + vite)
+
+**Done when:**
+- [ ] The production URL shows the landing page, and `/api/health` returns `{"db": "ok"}`
+- [ ] A PR creates a preview deployment with its own DB branch
+- [ ] CI is green
+
+---
+
+## Iteration 1 — Auth, organizations & roles
+
+**Requirements:** ACC-01, ACC-02, ACC-03
+
+- [x] Models: `users`, `organizations`, `memberships` (role enum: owner, manager, accountant, maintenance, tenant, vendor)
+- [x] `POST /auth/register` creates the user and their first organization (as owner)
+- [x] `POST /auth/login` / `logout`, JWT in an httpOnly secure cookie
+- [x] `GET /auth/me` returns the user, memberships and current org
+- [x] Email verification and password reset via Resend (token tables + expiry)
+- [x] `get_current_user` + `require_role(...)` + `get_current_org` dependencies
+- [x] Rate limiting on auth endpoints (Upstash)
+- [x] Frontend: login, register, forgot/reset password, verify email pages
+- [x] Frontend: app shell (sidebar + topbar + outlet), org switcher, logout
+
+**Done when:**
+- [x] You can register, verify your email, log in, and see an empty dashboard
+- [x] Tests prove a user cannot read another organization's data
+
+---
+
+## Iteration 2 — Properties & units
+
+**Requirements:** PRP-01, PRP-02, PRP-03 (document upload is covered fully in Iteration 8; basic photo upload here)
+
+- [x] Models: `properties`, `units`
+- [x] CRUD endpoints for properties and for units nested under a property
+- [x] ~~Vercel Blob client-upload token endpoint~~ → uploads go through the API (multipart, 4 MB cap) so every file is authorized and recorded; switch to client uploads if larger files are needed
+- [x] Frontend: properties list (cards with photo, address, unit count, occupancy)
+- [x] Frontend: property detail page with a units tab, and add/edit unit forms
+- [x] Unit status (occupied / vacant / maintenance), derived later from leases
+
+**Done when:**
+- [ ] All 3 of your real properties and their units are entered in production
+
+---
+
+## Iteration 3 — Tenants & leases
+
+**Requirements:** LSE-01, LSE-02, LSE-03, LSE-04 (alerts wired in Iteration 8)
+
+- [x] Models: `tenants`, `leases`, `lease_tenants`, `recurring_charges`
+- [x] Tenant CRUD (contacts, emergency contact, vehicles, pets as JSON)
+- [x] Lease CRUD: unit, tenants, dates, rent, due day, deposit, late-fee rule, recurring charges
+- [x] Validation: no overlapping active leases on one unit
+- [x] Upload a lease PDF to Blob and attach it to the lease
+- [x] Unit status auto-updates from the active lease
+- [x] Frontend: tenants list and detail; lease create wizard; lease detail page
+
+**Done when:**
+- [ ] Your current tenants and leases (with PDFs) are entered in production
+
+---
+
+## Iteration 4 — Rent ledger & payments
+
+**Requirements:** PAY-01, PAY-02, PAY-03, PAY-04
+
+- [x] Models: `ledger_entries`, `payments` (unique constraint on lease + charge type + period)
+- [x] Service: `post_rent_charges(date)`, idempotent, creates rent + recurring charges for leases due today
+- [x] Service: `apply_late_fees(date)` after the grace period (flat or %)
+- [x] One cron endpoint `/api/cron/daily` (runs every step per org in its time zone), protected by `CRON_SECRET`, in `vercel.json` — a single daily cron fits the Vercel Hobby plan
+- [x] Record manual payment (cash, check, Zelle, Venmo) and apply it to the oldest open charges
+- [x] Payment receipt PDF + email to the tenant
+- [x] Ledger view with running balance, plus manual credit/adjustment entries
+- [x] Backfill: a one-time "opening balance" entry per lease
+- [x] Tests: running cron twice never duplicates charges; late fee is applied only after the grace period
+
+**Done when:**
+- [ ] Rent posts automatically on the 1st (or due day), and you record this month's real payments
+
+---
+
+## Iteration 5 — Expenses, reports & dashboard
+
+**Requirements:** FIN-01, FIN-02, FIN-03
+
+- [x] Model: `expenses` (categories seeded to match Schedule E lines for later)
+- [x] Expense CRUD with receipt photo upload
+- [x] Report endpoints: P&L by property / unit / month, rent roll, outstanding balances
+- [x] Dashboard: cash flow chart (12 months), occupancy %, collected vs. outstanding, upcoming lease expiries
+- [x] CSV export for each report
+
+**Done when:**
+- [ ] This year's expenses are entered, and the dashboard matches your own records
+
+---
+
+## Iteration 6 — Maintenance & work orders
+
+**Requirements:** MNT-01, MNT-02, MNT-03
+
+- [x] Models: `work_orders`, `work_order_comments`
+- [x] Status state machine: New → Assigned → Scheduled → In progress → Completed → Closed
+- [x] Photo/video attachments via Blob
+- [x] Assign to a user with the maintenance role (vendors come in Iteration 13)
+- [x] Optional link to an expense when the work is completed
+- [x] Frontend: work order board (by status) + detail page with comments timeline
+
+**Done when:**
+- [x] A work order goes through its full lifecycle, with photos and comments
+
+---
+
+## Iteration 7 — Tenant portal
+
+**Requirements:** TPT-01, TPT-02
+
+- [x] Invite a tenant to the portal (creates a user + tenant membership, linked to the tenant record)
+- [x] Separate tenant layout and routes (`/portal/*`)
+- [x] Portal pages: home (balance + next due), lease and documents, payment history + receipts
+- [x] Portal maintenance: submit a request with photos, track status, add comments
+- [x] Permission tests: a tenant sees only their own lease, ledger and work orders
+
+**Done when:**
+- [ ] One of your real tenants logs in, sees the correct balance, and submits a request
+
+---
+
+## Iteration 8 — Notifications, documents & audit
+
+**Requirements:** COM-01, LSE-04, DOC-01, PLT-01, PLT-02
+
+- [x] Model: `notifications` + email templates (rent due, receipt, maintenance update, lease expiry)
+- [x] Cron: rent reminders (before due / due / overdue), lease expiry (90/60/30)
+- [x] Model: `documents` (polymorphic owner, kind, expires_at) + document vault UI
+- [x] Cron: document-expiry alerts (run daily, deduplicated — one email per document per expiry date)
+- [x] Audit log service called from every create/update/delete + audit viewer (Settings → Audit log)
+- [ ] i18n pass: extract all UI strings to `locales/` — *partial: i18next is set up; navigation, auth and portal strings are extracted, page bodies are still English literals*
+- [x] Notification preferences per user
+
+**Done when:**
+- [ ] Reminders and alerts arrive by email on schedule, and every change appears in the audit log
+
+---
+
+## Iteration 9 — Hardening & go-live
+
+- [ ] Security review: auth flows, org isolation, upload access (signed URLs only), rate limits
+- [ ] Backups: confirm Neon point-in-time restore; test a restore to a branch
+- [ ] Error handling and empty/loading states on every screen
+- [ ] Performance: DB indexes on `organization_id` + foreign keys *(indexes done)*; check cold start time
+- [ ] Accessibility pass (keyboard, contrast, labels) *(contrast done: all Strata text pairs ≥ 4.5:1, CVD-safe chart pair; keyboard and screen-reader pass still to do)*
+- [ ] Custom domain on Vercel + SSL
+- [ ] Privacy policy and terms pages
+- [ ] Use it for one full month for all 3 properties, and log issues found
+
+**Done when:**
+- [ ] One full rent cycle is run entirely in Proppros, with no spreadsheet backup needed
+
+---
+
+# Phase 2 — v2 (open to other landlords)
+
+## Iteration 10 — Online payments (Stripe Connect)
+
+**Requirements:** PAY-05, PAY-06, PAY-07, TPT-03
+
+- [ ] Stripe Connect onboarding for owners (Express accounts)
+- [ ] Tenant pays via ACH / card (Stripe Checkout or Payment Element); fee pass-through option
+- [ ] Stripe webhooks → ledger payment entries (idempotent on event ID)
+- [ ] Autopay (saved payment method + cron charge on the due date)
+- [ ] Partial-payment rules and the block-payments flag
+- [ ] Handle failed/returned ACH (reverse the entry + fee + notify)
+
+## Iteration 11 — SaaS: subscriptions, onboarding & admin
+
+**Requirements:** PLT-03, PLT-04, PLT-05, ACC-04, ACC-05
+
+- [ ] Plans + Stripe Billing (per-unit pricing), with limits enforced by plan
+- [ ] Onboarding wizard for new landlords (org → first property → first lease)
+- [ ] Team invites with property-scoped access
+- [ ] 2FA (TOTP) + Google sign-in
+- [ ] Super-admin console (orgs, plans, usage, impersonation with audit)
+- [ ] Port Pickzona's help center and feedback features
+- [ ] Marketing landing page + pricing page
+
+## Iteration 12 — Leasing workflows
+
+**Requirements:** LSE-05, LSE-06, LSE-07, LSE-08
+
+- [ ] Lease templates with merge fields → PDF generation (queued job)
+- [ ] E-signature integration
+- [ ] Renewal workflow (offer → accept/decline → new lease)
+- [ ] Move-in/move-out inspections with photos + deposit disposition letter
+
+## Iteration 13 — Vendors & preventive maintenance
+
+**Requirements:** MNT-04, MNT-05, MNT-06, PRP-04, PRP-05
+
+- [ ] Vendor directory (trades, rates, W-9, insurance expiry, ratings)
+- [ ] Quotes → approval → invoice → automatic expense
+- [ ] Recurring maintenance schedules (cron creates work orders)
+- [ ] Appliance/asset tracking with warranty reminders; key and access-code tracking
+
+## Iteration 14 — Vacancy, listings & screening
+
+**Requirements:** VAC-01 – VAC-04
+
+- [ ] Listing builder + public listing page (SEO-friendly)
+- [ ] Online application form + application fee (Stripe)
+- [ ] Screening integration
+- [ ] Applicant pipeline → convert to tenant + lease
+
+## Iteration 15 — Communication
+
+**Requirements:** COM-02 – COM-05, TPT-04, TPT-05
+
+- [ ] In-app message threads (by property / work order)
+- [ ] Property-wide announcements
+- [ ] Twilio SMS channel
+- [ ] Notice templates (rent increase, entry, violation, pay-or-quit)
+- [ ] Tenant: upload renter's insurance, give move-out notice
+
+## Iteration 16 — Advanced finance
+
+**Requirements:** FIN-04 – FIN-07, DOC-02, DOC-03
+
+- [ ] Plaid bank feeds + categorization rules + match transactions to ledger entries
+- [ ] Mortgage/loan tracking
+- [ ] Schedule E report, depreciation schedule, 1099-NEC export
+- [ ] Excel/PDF exports; QuickBooks/Xero sync
+- [ ] Insurance/tax/license reminders; inspection scheduling
+
+## Iteration 17 — AI features
+
+**Requirements:** AI-01 – AI-03
+
+- [ ] Receipt/invoice extraction → prefilled expense (Claude API, with user confirmation)
+- [ ] Lease PDF abstraction → prefilled lease form
+- [ ] Maintenance triage suggestions
+- [ ] Cost controls: per-org usage limits, logging
+
+---
+
+# Phase 3 — v3 (scale)
+
+## Iteration 18 — Mobile app (Expo)
+
+**Requirements:** PLT-07, COM-04 (push)
+
+- [ ] Expo app reusing Pickzona's mobile patterns (Expo Router, secure-store JWT), with a `tokens.ts` mirroring the Strata tokens
+- [ ] Owner: dashboard, work orders, record payment, receipt capture
+- [ ] Tenant: pay rent, submit maintenance with camera
+- [ ] Push notifications; EAS builds; App Store / Play Store submission
+
+## Iteration 19 — Scale features
+
+**Requirements:** ACC-06, PRP-06, PAY-08, FIN-08, FIN-09, MNT-07, MNT-08, VAC-05, VAC-06, LSE-09, DOC-04, AI-04, AI-05, PLT-06
+
+Break into separate iterations when this phase begins, prioritized by customer demand.
+
+---
+
+## Iteration log
+
+Record notes when each iteration closes.
+
+| Date | Iteration | Notes / decisions / deferred items |
+|---|---|---|
+| 2026-10-17 | — | Requirements, tech stack and plan drafted |
+| 2026-10-17 | 0–8 | MVP code built: FastAPI backend (44 Pytest tests), React frontend (Vitest + build), Alembic `0001`, Vercel config, CI. Smoke-tested end to end locally (owner → lease → rent/late fee → payment/receipt → tenant portal → work order). Decisions: money in integer cents; balance-forward ledger with idempotent `source_key`; one daily cron; uploads through the API; `api/index.py` restores the original path because `@vercel/python` ≥ 6.52 passes the rewrite destination. Deferred: full i18n extraction, prorated first-month rent (add as a manual charge), private Blob storage. Not yet verified on a real Vercel/Neon deployment. |
+| 2026-10-17 | UI | Adopted the "Strata" design system ([DESIGN_GUIDELINES.md](DESIGN_GUIDELINES.md)), adapted from the principles in HEX_DESIGN_SYSTEM.md: dark-first Basalt + Limestone themes, mineral accents with one job each, Archivo/DM Sans/JetBrains Mono, sharp radii, borders over shadows, noise texture. All text pairs ≥ 4.5:1; chart pair validated for colorblind safety. Checked by screenshots at 1440px and 390px in both themes. |
