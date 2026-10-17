@@ -131,7 +131,7 @@ def invite_tenant(tenant_id: uuid.UUID, ctx: Ctx = Depends(writer)):
     ).first()
     if staff_member:
         raise HTTPException(status_code=400, detail="That email belongs to a team member of this organization.")
-    inv = create_invitation(ctx, t.email, "tenant", tenant_id=t.id)
+    inv, link, email_sent = create_invitation(ctx, t.email, "tenant", tenant_id=t.id)
     audit.log(ctx, "tenant", t.id, "invite", f"Invited {t.email} to the tenant portal")
     ctx.session.commit()
-    return {"ok": True, "invitation_id": str(inv.id)}
+    return {"ok": True, "invitation_id": str(inv.id), "invite_url": link, "email_sent": email_sent}

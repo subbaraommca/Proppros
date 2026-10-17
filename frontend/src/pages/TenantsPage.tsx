@@ -6,7 +6,7 @@ import { api } from "../services/api";
 import { useAuth } from "../hooks/useAuth";
 import type { Tenant } from "../types";
 import { DocumentsPanel } from "../components/Documents";
-import { Badge, BalanceText, Card, Empty, ErrorBox, Field, Input, Modal, PageHeader, Spinner, Textarea } from "../components/ui";
+import { Badge, BalanceText, Card, Empty, ErrorBox, Field, Input, InviteLink, Modal, PageHeader, Spinner, Textarea } from "../components/ui";
 import { date, money } from "../utils/format";
 
 type TenantForm = {
@@ -205,7 +205,10 @@ export function TenantDetailPage() {
   const [editing, setEditing] = useState(false);
   const canEdit = can("owner", "manager");
   const { data: t, error, isLoading } = useQuery({ queryKey: ["tenant", id], queryFn: () => api.get<Tenant>(`/tenants/${id}`) });
-  const invite = useMutation({ mutationFn: () => api.post(`/tenants/${id}/invite`), onSuccess: () => qc.invalidateQueries({ queryKey: ["tenant", id] }) });
+  const invite = useMutation({
+    mutationFn: () => api.post<{ invite_url: string; email_sent: boolean }>(`/tenants/${id}/invite`),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["tenant", id] }),
+  });
   const remove = useMutation({
     mutationFn: () => api.del(`/tenants/${id}`),
     onSuccess: () => {
@@ -333,7 +336,7 @@ export function TenantDetailPage() {
                     </button>
                   )}
                   {!t.email && <p className="small muted">Add an email address first.</p>}
-                  {invite.isSuccess && <div className="success-box">Invitation sent to {t.email}.</div>}
+                  {invite.data && <InviteLink url={invite.data.invite_url} emailSent={invite.data.email_sent} email={t.email} />}
                 </div>
               )}
             </Card>

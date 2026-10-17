@@ -18,8 +18,14 @@ router = APIRouter(prefix="/org", tags=["organization"])
 INVITE_DAYS = 7
 
 
-def create_invitation(ctx: Ctx, email: str, role: str, tenant_id: uuid.UUID | None = None) -> Invitation:
-    """Create (or refresh) an invitation and email the link."""
+def create_invitation(
+    ctx: Ctx, email: str, role: str, tenant_id: uuid.UUID | None = None
+) -> tuple[Invitation, str, bool]:
+    """Create (or refresh) an invitation and email the link.
+
+    Returns (invitation, link, email_sent). The link is also shown to the inviter so it
+    can be shared by text/WhatsApp when email isn't set up or doesn't arrive.
+    """
     email = email.lower()
     for old in ctx.session.exec(
         select(Invitation).where(Invitation.org_id == ctx.org_id, Invitation.email == email, Invitation.accepted_at.is_(None))
@@ -38,7 +44,7 @@ def create_invitation(ctx: Ctx, email: str, role: str, tenant_id: uuid.UUID | No
     ctx.session.add(inv)
     link = f"{settings.frontend_url}/invite?token={raw}"
     what = "your tenant portal" if role == "tenant" else f"the {esc(ctx.org.name)} team as {role}"
-    send_email(
+    email_sent, _ = send_email(
         email,
         f"You're invited to {ctx.org.name} on Proppros",
         layout(
@@ -49,7 +55,7 @@ def create_invitation(ctx: Ctx, email: str, role: str, tenant_id: uuid.UUID | No
             link,
         ),
     )
-    return inv
+    return inv, link, email_sent and settings.email_enabled
 
 
 @router.get("")
@@ -126,10 +132,10 @@ def invite_member(payload: InviteIn, ctx: Ctx = Depends(writer)):
     ).first()
     if existing:
         raise HTTPException(status_code=409, detail="That person is already a member.")
-    inv = create_invitation(ctx, payload.email, payload.role)
+    inv, link, email_sent = create_invitation(ctx, payload.email, payload.role)
     audit.log(ctx, "invitation", inv.id, "create", f"Invited {payload.email} as {payload.role}")
     ctx.session.commit()
-    return {"id": str(inv.id), "email": inv.email, "role": inv.role}
+    return {"id": str(inv.id), "email": inv.email, "role": inv.role, "invite_url": link, "email_sent": email_sent}
 
 
 @router.delete("/invitations/{invitation_id}")

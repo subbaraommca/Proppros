@@ -1,5 +1,5 @@
-import { useEffect, useId, type ReactNode, type InputHTMLAttributes, type SelectHTMLAttributes, type TextareaHTMLAttributes } from "react";
-import { X } from "lucide-react";
+import { useEffect, useId, useState, type ReactNode, type InputHTMLAttributes, type SelectHTMLAttributes, type TextareaHTMLAttributes } from "react";
+import { Check, Copy, X } from "lucide-react";
 import { label as fmtLabel } from "../utils/format";
 
 export function PageHeader({
@@ -212,5 +212,33 @@ export function BalanceText({ cents, currency }: { cents: number; currency?: str
     <span className={`mono ${cls}`}>
       {cents < 0 ? `${text} credit` : text}
     </span>
+  );
+}
+
+/** Invitation link with copy button — shareable by text/WhatsApp when email isn't set up. */
+export function InviteLink({ url, emailSent, email }: { url: string; emailSent: boolean; email?: string | null }) {
+  const [copied, setCopied] = useState(false);
+  const copy = async () => {
+    try {
+      await navigator.clipboard.writeText(url);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch {
+      /* clipboard blocked — the field is selectable */
+    }
+  };
+  return (
+    <div className="stack" style={{ gap: 8 }}>
+      <div className={emailSent ? "success-box" : "info-box"}>
+        {emailSent ? `Invitation emailed to ${email}. You can also share this link:` : "The invitation email wasn't sent (email isn't set up yet). Share this link yourself — by text, WhatsApp, or open it in a private window:"}
+      </div>
+      <div style={{ display: "flex", gap: 6 }}>
+        <input className="input mono" readOnly value={url} onFocus={(e) => e.target.select()} aria-label="Invitation link" />
+        <button className="btn" onClick={copy} type="button">
+          {copied ? <Check size={14} /> : <Copy size={14} />} {copied ? "Copied" : "Copy"}
+        </button>
+      </div>
+      <p className="small muted">Works once, for 7 days. Anyone with this link can claim the invitation — share it only with the invitee.</p>
+    </div>
   );
 }

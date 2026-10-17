@@ -182,3 +182,13 @@ def test_portal_maintenance_request_flow(outbox):
     tc.post(f"/api/portal/work-orders/{wo['id']}/comments", json={"body": "Thanks!"})
     staff_view = c.get(f"/api/work-orders/{wo['id']}").json()
     assert any(cm["body"] == "Thanks!" for cm in staff_view["comments"])
+
+
+def test_invite_returns_shareable_link_without_email():
+    c, prop, unit_id, t, lease = _portfolio()
+    r = c.post(f"/api/tenants/{t['id']}/invite").json()
+    assert r["email_sent"] is False  # no email provider configured in tests
+    token = r["invite_url"].split("token=")[1]
+    tc = new_client()
+    me = tc.post("/api/auth/invitations/accept", json={"token": token, "name": "Tina", "password": PASSWORD}).json()
+    assert me["organizations"][0]["role"] == "tenant"

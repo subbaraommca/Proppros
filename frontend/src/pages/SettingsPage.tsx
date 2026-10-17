@@ -4,7 +4,7 @@ import { Play, Trash2, UserPlus } from "lucide-react";
 import { api } from "../services/api";
 import { useAuth } from "../hooks/useAuth";
 import type { AuditEntry, Me } from "../types";
-import { Badge, Card, ErrorBox, Field, Input, PageHeader, Select, Spinner, Tabs } from "../components/ui";
+import { Badge, Card, ErrorBox, Field, Input, InviteLink, PageHeader, Select, Spinner, Tabs } from "../components/ui";
 import { dateTime, label } from "../utils/format";
 
 const TIMEZONES = [
@@ -104,7 +104,7 @@ function Team() {
   const [role, setRole] = useState("manager");
   const refresh = () => qc.invalidateQueries({ queryKey: ["members"] });
   const invite = useMutation({
-    mutationFn: () => api.post("/org/invitations", { email, role }),
+    mutationFn: () => api.post<{ invite_url: string; email_sent: boolean; email: string }>("/org/invitations", { email, role }),
     onSuccess: () => {
       setEmail("");
       refresh();
@@ -134,7 +134,11 @@ function Team() {
             <UserPlus size={15} /> Send invite
           </button>
         </div>
-        {invite.isSuccess && <div className="success-box" style={{ marginTop: 12 }}>Invitation sent.</div>}
+        {invite.data && (
+          <div style={{ marginTop: 12 }}>
+            <InviteLink url={invite.data.invite_url} emailSent={invite.data.email_sent} email={invite.data.email} />
+          </div>
+        )}
       </Card>
       <Card title="Members" pad={false}>
         <div className="table-wrap">
