@@ -23,6 +23,16 @@ def _storage_status() -> str:
     return "not_configured" if settings.on_vercel else "local"
 
 
+def _deployment_info() -> dict:
+    """Setup diagnostics shown only while the database is unconfigured: presence flags, never values."""
+    names = ("DATABASE_URL", "DATABASE_URL_UNPOOLED", "ENVIRONMENT", "JWT_SECRET", "CRON_SECRET", "COOKIE_SECURE", "FRONTEND_URL")
+    return {
+        "vercel_env": os.environ.get("VERCEL_ENV"),
+        "commit": (os.environ.get("VERCEL_GIT_COMMIT_SHA") or "")[:7] or None,
+        "variables_present": {n: bool(os.environ.get(n)) for n in names},
+    }
+
+
 @router.get("/health")
 def health():
     if not settings.database_configured:
@@ -36,6 +46,7 @@ def health():
             ),
             "storage": _storage_status(),
             "environment": settings.environment,
+            "deployment": _deployment_info(),
         }
     db_ok = check_db_connection()
     return {
@@ -90,4 +101,6 @@ def _check_cron(authorization: str | None) -> None:
 def cron_daily(authorization: str | None = Header(default=None), session: Session = Depends(get_session)):
     """Called by Vercel Cron (GET with Authorization: Bearer $CRON_SECRET)."""
     _check_cron(authorization)
+    if not settings.database_configured:
+        raise HTTPException(status_code=503, detail="Database not configured")
     return {"ok": True, "results": run_daily(session)}
