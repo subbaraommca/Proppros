@@ -70,4 +70,6 @@ def test_smtp_auth_failure_is_reported_not_raised(monkeypatch):
 def test_smtp_takes_precedence_and_health_shows_it(client, monkeypatch):
     _gmail(monkeypatch)
     monkeypatch.setattr(settings, "resend_api_key", "re_x")
-    assert client.get("/api/health").json()["email"] == {"provider": "smtp", "from_domain": "gmail.com"}
+    email = client.get("/api/health").json()["email"]
+    assert email["provider"] == "smtp" and email["from_domain"] == "gmail.com"
+    assert all(email["smtp_settings_present"].values())

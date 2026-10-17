@@ -36,7 +36,16 @@ def _deployment_info() -> dict:
 def _email_status() -> dict:
     sender = settings.email_from
     domain = sender.split("@")[-1].strip(" >") if "@" in sender else None
-    return {"provider": settings.email_provider, "from_domain": domain}
+    return {
+        "provider": settings.email_provider,
+        "from_domain": domain,
+        # Presence only (never values) — helps spot a missing SMTP setting.
+        "smtp_settings_present": {
+            "SMTP_HOST": bool(settings.smtp_host),
+            "SMTP_USER": bool(settings.smtp_user),
+            "SMTP_PASSWORD": bool(settings.smtp_password),
+        },
+    }
 
 
 @router.get("/health")
@@ -61,6 +70,7 @@ def health():
         "storage": _storage_status(),
         "email": _email_status(),
         "environment": settings.environment,
+        "commit": (os.environ.get("VERCEL_GIT_COMMIT_SHA") or "")[:7] or None,
     }
 
 

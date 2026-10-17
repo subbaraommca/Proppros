@@ -28,4 +28,5 @@ def test_health_reports_email_mode(client, monkeypatch):
     assert client.get("/api/health").json()["email"]["provider"] == "log-only"
     monkeypatch.setattr(settings, "resend_api_key", "re_test")
     monkeypatch.setattr(settings, "email_from", "Proppros <noreply@example.com>")
-    assert client.get("/api/health").json()["email"] == {"provider": "resend", "from_domain": "example.com"}
+    email = client.get("/api/health").json()["email"]
+    assert email["provider"] == "resend" and email["from_domain"] == "example.com"
