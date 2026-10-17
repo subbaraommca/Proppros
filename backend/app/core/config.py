@@ -1,4 +1,5 @@
 import logging
+import os
 import secrets
 
 from pydantic import model_validator
@@ -48,6 +49,15 @@ class Settings(BaseSettings):
     @property
     def is_production(self) -> bool:
         return self.environment == "production"
+
+    @property
+    def on_vercel(self) -> bool:
+        return bool(os.environ.get("VERCEL"))
+
+    @property
+    def database_configured(self) -> bool:
+        """False on Vercel until a real Postgres URL (Neon) is set — the SQLite default can't work there."""
+        return not (self.on_vercel and self.database_url.startswith("sqlite"))
 
     @property
     def email_enabled(self) -> bool:

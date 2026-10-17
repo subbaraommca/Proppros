@@ -25,12 +25,19 @@ def init_db() -> None:
     """Create tables directly — only for zero-setup local SQLite dev.
 
     Postgres environments (Neon dev/preview/prod) are managed by `alembic upgrade head`.
+    Never raises: a startup failure here would take down every request on Vercel.
     """
-    if settings.database_url.startswith("sqlite") and not settings.is_production:
+    if not settings.database_url.startswith("sqlite") or settings.is_production or settings.on_vercel:
+        return
+    try:
         SQLModel.metadata.create_all(engine)
+    except Exception:  # noqa: BLE001
+        logger.exception("Could not create local SQLite tables")
 
 
 def check_db_connection() -> bool:
+    if not settings.database_configured:
+        return False
     try:
         with engine.connect() as conn:
             conn.execute(text("SELECT 1"))

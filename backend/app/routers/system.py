@@ -16,6 +16,13 @@ router = APIRouter(tags=["system"])
 
 @router.get("/health")
 def health():
+    if not settings.database_configured:
+        return {
+            "status": "degraded",
+            "db": "not_configured",
+            "hint": "Connect Neon Postgres in Vercel → Storage so DATABASE_URL is set, then redeploy.",
+            "environment": settings.environment,
+        }
     db_ok = check_db_connection()
     return {"status": "ok" if db_ok else "degraded", "db": "ok" if db_ok else "unreachable", "environment": settings.environment}
 
