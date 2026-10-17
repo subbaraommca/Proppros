@@ -56,12 +56,18 @@ async function request<T>(method: string, path: string, body?: unknown): Promise
   const org = getOrgId();
   if (org) headers["X-Org-Id"] = org;
 
-  const res = await fetch(`/api${path}`, {
-    method,
-    credentials: "include",
-    headers,
-    body: body === undefined ? undefined : isForm ? body : JSON.stringify(body),
-  });
+  let res: Response;
+  try {
+    res = await fetch(`/api${path}`, {
+      method,
+      credentials: "include",
+      headers,
+      body: body === undefined ? undefined : isForm ? body : JSON.stringify(body),
+    });
+  } catch {
+    // fetch only rejects on network failure (offline, DNS, CORS) — never show "Failed to fetch".
+    throw new ApiError(0, "Can't reach Proppros. Check your internet connection and try again.");
+  }
   if (!res.ok) {
     let detail: unknown;
     try {

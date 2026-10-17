@@ -43,6 +43,9 @@ function AuthShell({ title, subtitle, children }: { title: string; subtitle?: Re
           <h2>{title}</h2>
           {subtitle && <p className="muted" style={{ marginBottom: 20 }}>{subtitle}</p>}
           {children}
+          <p className="small muted" style={{ marginTop: 28 }}>
+            <Link to="/privacy">Privacy</Link> · <Link to="/terms">Terms</Link>
+          </p>
         </div>
       </div>
     </div>
@@ -128,6 +131,9 @@ export function RegisterPage() {
         <button className="btn btn-primary btn-block" disabled={register.isPending}>
           {register.isPending ? t("auth.creating") : t("auth.createAccount")}
         </button>
+        <p className="small muted">
+          By creating an account you agree to the <Link to="/terms">Terms</Link> and <Link to="/privacy">Privacy policy</Link>.
+        </p>
         <p className="small">
           {t("auth.haveAccount")} <Link to="/login">{t("auth.signIn")}</Link>
         </p>

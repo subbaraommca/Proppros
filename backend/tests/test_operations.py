@@ -192,3 +192,19 @@ def test_invite_returns_shareable_link_without_email():
     tc = new_client()
     me = tc.post("/api/auth/invitations/accept", json={"token": token, "name": "Tina", "password": PASSWORD}).json()
     assert me["organizations"][0]["role"] == "tenant"
+
+
+def test_csv_export_neutralizes_formulas():
+    c, prop, _, _, _ = _portfolio()
+    c.post("/api/expenses", json={"property_id": prop["id"], "category": "repairs", "amount_cents": 100,
+                                  "expense_date": "2026-10-05", "vendor": "=HYPERLINK(\"http://evil\")"})
+    csv_text = c.get("/api/reports/expenses.csv?start=2026-01-01&end=2026-12-31").text
+    assert "'=HYPERLINK" in csv_text and ",=HYPERLINK" not in csv_text
+
+
+def test_non_ascii_filename_download(monkeypatch):
+    from app.routers.documents import content_disposition
+
+    header = content_disposition("inline", "lease-José 名前.pdf")
+    header.encode("latin-1")  # must not raise
+    assert "filename*=UTF-8''lease-Jos%C3%A9%20%E5%90%8D%E5%89%8D.pdf" in header

@@ -544,6 +544,20 @@ input[type="file"].input { padding: 7px 10px; font-size: var(--pp-text-sm); colo
   .portal-nav { order: 3; flex-basis: 100%; }
 }
 
+/* ── Skip link / legal ───────────────────────────────────────────────────── */
+.skip-link {
+  position: absolute; left: 12px; top: -48px; z-index: 200;
+  background: var(--pp-carnelian); color: var(--pp-on-carnelian); padding: 8px 14px; font-weight: 600;
+  transition: top var(--pp-fast);
+}
+.skip-link:focus { top: 12px; text-decoration: none; color: var(--pp-on-carnelian); }
+main:focus { outline: none; }
+.legal-body { max-width: 760px; }
+.legal-body h1 { margin-bottom: 4px; }
+.legal-body h2 { margin: 28px 0 8px; font-size: 17px; }
+.legal-body p, .legal-body li { line-height: 1.65; }
+.legal-body ul { padding-left: 20px; display: grid; gap: 6px; }
+
 /* ── Misc ─────────────────────────────────────────────────────────────────── */
 .doc-list { display: grid; gap: 6px; }
 .doc-row {

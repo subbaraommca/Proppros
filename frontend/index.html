@@ -7,13 +7,7 @@
     <meta name="theme-color" content="#0d0e12" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <title>Proppros</title>
-    <script>
-      try {
-        var t = localStorage.getItem("pp-theme");
-        // Dark-first (Strata): Basalt unless the user chose Limestone.
-        document.documentElement.dataset.theme = t === "light" ? "light" : "dark";
-      } catch (e) {}
-    </script>
+    <script src="/theme-init.js"></script>
   </head>
   <body>
     <div id="root"></div>

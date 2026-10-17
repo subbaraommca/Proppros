@@ -256,11 +256,21 @@ def _default_range(ctx: Ctx, start: date | None, end: date | None) -> tuple[date
     return start or date(today.year, 1, 1), end or today
 
 
+_FORMULA_START = ("=", "+", "-", "@", "\t", "\r")
+
+
+def _cell(value):
+    """Neutralize spreadsheet formula injection: text starting with = + - @ runs as a formula in Excel."""
+    if isinstance(value, str) and value.startswith(_FORMULA_START):
+        return "'" + value
+    return value
+
+
 def _csv(filename: str, header: list[str], rows: list[list]) -> StreamingResponse:
     buf = io.StringIO()
     w = csv.writer(buf)
     w.writerow(header)
-    w.writerows(rows)
+    w.writerows([[_cell(v) for v in row] for row in rows])
     buf.seek(0)
     return StreamingResponse(
         iter([buf.getvalue()]), media_type="text/csv", headers={"Content-Disposition": f'attachment; filename="{filename}"'}

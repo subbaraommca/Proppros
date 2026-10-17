@@ -8,6 +8,9 @@ export function PortalLayout() {
   const { theme, toggle } = useTheme();
   return (
     <>
+      <a className="skip-link" href="#main">
+        Skip to content
+      </a>
       <header className="portal-top">
         <div className="portal-top-inner">
           <Brand />
@@ -36,7 +39,7 @@ export function PortalLayout() {
           </button>
         </div>
       </header>
-      <main className="portal-content">
+      <main id="main" className="portal-content" tabIndex={-1}>
         <Outlet />
       </main>
     </>

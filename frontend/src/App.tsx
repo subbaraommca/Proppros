@@ -1,20 +1,46 @@
+import { lazy, Suspense, type ComponentType, type ReactNode } from "react";
 import { Link, Navigate, Route, Routes, useLocation } from "react-router-dom";
 import { useAuth } from "./hooks/useAuth";
 import { Layout } from "./components/Layout";
 import { PortalLayout } from "./components/PortalLayout";
 import { Spinner } from "./components/ui";
 import { AcceptInvitePage, ForgotPasswordPage, LoginPage, RegisterPage, ResetPasswordPage, VerifyEmailPage } from "./pages/auth/AuthPages";
-import { DashboardPage } from "./pages/DashboardPage";
-import { PropertiesPage } from "./pages/PropertiesPage";
-import { PropertyDetailPage } from "./pages/PropertyDetailPage";
-import { TenantDetailPage, TenantsPage } from "./pages/TenantsPage";
-import { LeaseNewPage, LeasesPage } from "./pages/LeasesPage";
-import { LeaseDetailPage } from "./pages/LeaseDetailPage";
-import { ExpensesPage, PaymentsPage, ReportsPage } from "./pages/FinancePages";
-import { WorkOrderDetailPage, WorkOrdersPage } from "./pages/MaintenancePages";
-import { DocumentsPage } from "./pages/DocumentsPage";
-import { SettingsPage } from "./pages/SettingsPage";
-import { PortalDocumentsPage, PortalHomePage, PortalLeasePage, PortalMaintenancePage, PortalPaymentsPage, PortalWorkOrderPage } from "./pages/portal/PortalPages";
+import { ErrorBoundary } from "./components/ErrorBoundary";
+
+// Pages load on demand so the first screen downloads less JavaScript.
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const page = <K extends string>(load: () => Promise<Record<K, ComponentType<any>>>, name: K) =>
+  lazy(() => load().then((m) => ({ default: m[name] })));
+const DashboardPage = page(() => import("./pages/DashboardPage"), "DashboardPage");
+const PropertiesPage = page(() => import("./pages/PropertiesPage"), "PropertiesPage");
+const PropertyDetailPage = page(() => import("./pages/PropertyDetailPage"), "PropertyDetailPage");
+const TenantsPage = page(() => import("./pages/TenantsPage"), "TenantsPage");
+const TenantDetailPage = page(() => import("./pages/TenantsPage"), "TenantDetailPage");
+const LeasesPage = page(() => import("./pages/LeasesPage"), "LeasesPage");
+const LeaseNewPage = page(() => import("./pages/LeasesPage"), "LeaseNewPage");
+const LeaseDetailPage = page(() => import("./pages/LeaseDetailPage"), "LeaseDetailPage");
+const PaymentsPage = page(() => import("./pages/FinancePages"), "PaymentsPage");
+const ExpensesPage = page(() => import("./pages/FinancePages"), "ExpensesPage");
+const ReportsPage = page(() => import("./pages/FinancePages"), "ReportsPage");
+const WorkOrdersPage = page(() => import("./pages/MaintenancePages"), "WorkOrdersPage");
+const WorkOrderDetailPage = page(() => import("./pages/MaintenancePages"), "WorkOrderDetailPage");
+const DocumentsPage = page(() => import("./pages/DocumentsPage"), "DocumentsPage");
+const SettingsPage = page(() => import("./pages/SettingsPage"), "SettingsPage");
+const PortalHomePage = page(() => import("./pages/portal/PortalPages"), "PortalHomePage");
+const PortalLeasePage = page(() => import("./pages/portal/PortalPages"), "PortalLeasePage");
+const PortalPaymentsPage = page(() => import("./pages/portal/PortalPages"), "PortalPaymentsPage");
+const PortalMaintenancePage = page(() => import("./pages/portal/PortalPages"), "PortalMaintenancePage");
+const PortalWorkOrderPage = page(() => import("./pages/portal/PortalPages"), "PortalWorkOrderPage");
+const PortalDocumentsPage = page(() => import("./pages/portal/PortalPages"), "PortalDocumentsPage");
+const LegalPage = page(() => import("./pages/LegalPages"), "LegalPage");
+
+function wrap(routes: ReactNode) {
+  return (
+    <ErrorBoundary>
+      <Suspense fallback={<Spinner />}>{routes}</Suspense>
+    </ErrorBoundary>
+  );
+}
 
 function NotFound() {
   return (
@@ -37,11 +63,13 @@ export default function App() {
       <Route path="/invite" element={<AcceptInvitePage />} />
       <Route path="/verify-email" element={<VerifyEmailPage />} />
       <Route path="/reset-password" element={<ResetPasswordPage />} />
+      <Route path="/privacy" element={<LegalPage doc="privacy" />} />
+      <Route path="/terms" element={<LegalPage doc="terms" />} />
     </>
   );
 
   if (!me) {
-    return (
+    return wrap(
       <Routes>
         {publicRoutes}
         <Route path="/login" element={<LoginPage />} />
@@ -53,7 +81,7 @@ export default function App() {
   }
 
   if (org?.role === "tenant") {
-    return (
+    return wrap(
       <Routes>
         {publicRoutes}
         <Route path="/portal" element={<PortalLayout />}>
@@ -70,7 +98,7 @@ export default function App() {
   }
 
   const isMaintenance = org?.role === "maintenance";
-  return (
+  return wrap(
     <Routes>
       {publicRoutes}
       <Route path="/login" element={<Navigate to="/" replace />} />

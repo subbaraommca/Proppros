@@ -1,4 +1,5 @@
 import uuid
+from urllib.parse import quote
 from datetime import date, timedelta
 
 from fastapi import APIRouter, Depends, File, Form, HTTPException, Response, UploadFile
@@ -109,6 +110,12 @@ async def store_upload(
     return doc
 
 
+def content_disposition(kind: str, filename: str) -> str:
+    """RFC 6266 header that survives non-ASCII names (headers must be latin-1)."""
+    ascii_name = filename.encode("ascii", "replace").decode().replace('"', "").replace("?", "_") or "file"
+    return f"{kind}; filename=\"{ascii_name}\"; filename*=UTF-8''{quote(filename)}"
+
+
 def serve(doc: Document, download: bool = False):
     disposition = "attachment" if download else "inline"
     if doc.storage_backend == "blob":  # public store: unguessable URL
@@ -118,11 +125,10 @@ def serve(doc: Document, download: bool = False):
             data = storage.read_private(doc.storage_key)
         except FileNotFoundError:
             raise HTTPException(status_code=404, detail="File missing from storage.")
-        safe_name = doc.name.replace('"', "")
         return Response(
             content=data,
             media_type=doc.content_type,
-            headers={"Content-Disposition": f'{disposition}; filename="{safe_name}"', "Cache-Control": "private, max-age=300"},
+            headers={"Content-Disposition": content_disposition(disposition, doc.name), "Cache-Control": "private, max-age=300"},
         )
     path = storage.local_path(doc.storage_key)
     if not path.exists():

@@ -92,6 +92,9 @@ export function Layout() {
 
   return (
     <div className="shell">
+      <a className="skip-link" href="#main">
+        Skip to content
+      </a>
       <aside className={`sidebar${open ? " open" : ""}`} aria-label="Main navigation">
         <Brand />
         {(me?.organizations.length ?? 0) > 1 && (
@@ -144,7 +147,7 @@ export function Layout() {
           </button>
         </header>
         <VerifyBanner />
-        <main className="content">
+        <main id="main" className="content" tabIndex={-1}>
           <Outlet />
         </main>
       </div>
