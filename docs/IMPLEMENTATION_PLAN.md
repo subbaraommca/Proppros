@@ -32,7 +32,7 @@ This is the step-by-step execution plan. Work is split into **iterations**. Each
 | 7 | Tenant portal | MVP | 🟦 Code done — invite a real tenant |
 | 8 | Notifications, documents & audit | MVP | 🟦 Code done — real email needs a verified sending domain |
 | 9 | Hardening & go-live with own 3 properties | MVP | 🟨 Code hardening done — custom domain, backups check, 1-month trial left |
-| 10 | Online payments (Stripe Connect) | v2 | ⬜ |
+| 10 | Online payments (Stripe Connect) | v2 | 🟦 Code done (hidden until Stripe keys are set) — create a Stripe account to test |
 | 11 | SaaS: subscriptions, onboarding, admin | v2 | ⬜ |
 | 12 | Leasing workflows (templates, e-sign, renewals) | v2 | ⬜ |
 | 13 | Vendors & preventive maintenance | v2 | ⬜ |
@@ -258,12 +258,13 @@ Legend: ⬜ Not started · 🟨 In progress · 🟦 Code complete, waiting on a 
 
 **Requirements:** PAY-05, PAY-06, PAY-07, TPT-03
 
-- [ ] Stripe Connect onboarding for owners (Express accounts)
-- [ ] Tenant pays via ACH / card (Stripe Checkout or Payment Element); fee pass-through option
-- [ ] Stripe webhooks → ledger payment entries (idempotent on event ID)
-- [ ] Autopay (saved payment method + cron charge on the due date)
-- [ ] Partial-payment rules and the block-payments flag
-- [ ] Handle failed/returned ACH (reverse the entry + fee + notify)
+- [x] Stripe Connect onboarding for owners (Express accounts) — *Settings → Payments; status synced via `account.updated`*
+- [x] Tenant pays via ACH / card (Stripe Checkout); fee pass-through option — *destination charges to the owner's account; optional 2.9% + 30¢ card fee*
+- [x] Stripe webhooks → ledger payment entries (idempotent on event ID) — *`stripe_events` table + ledger `source_key`; ACH shows "processing" until it clears*
+- [x] Autopay (saved payment method + cron charge on the due date) — *Stripe idempotency key per lease+period*
+- [x] Partial-payment rules and the block-payments flag
+- [x] Handle failed/returned ACH (reverse the entry + fee + notify)
+- [ ] **Your part:** create a Stripe account, add `STRIPE_SECRET_KEY` + `STRIPE_WEBHOOK_SECRET`, register the webhook (README → "Optional: online rent payments"), and run one test payment
 
 ## Iteration 11 — SaaS: subscriptions, onboarding & admin
 
@@ -367,3 +368,4 @@ Record notes when each iteration closes.
 | 2026-10-17 | 0 | **Deployed** to https://proppros.vercel.app (Vercel Services: Vite frontend + FastAPI backend), Neon Postgres (migration 0001 applied, `alembic check` clean on Postgres), private Vercel Blob. Fixes made during setup: no crash on startup without a DB, private-Blob support, `POSTGRES_URL` fallback, setup diagnostics in `/api/health`. Neon password rotated after it was shared in chat. |
 | 2026-10-17 | 7, 9 | Shareable invite links (copy button) so tenants/team can join without email. Iteration 9 hardening: CSV formula-injection fix, RFC 6266 filenames, CSP + security headers, ErrorBoundary/offline handling, route code-splitting, modal focus management + skip link, draft Privacy/Terms. Verified on production: headers present, no CSP violations on public pages. |
 | 2026-10-17 | 8 | Full UI string extraction to `en.json` (~665 keys across 23 sections), i18next plurals (fixes “1 properties”-style grammar), language-aware ordinals/money/dates, central enum labels, language picker (shown once a 2nd locale exists), and a Vitest guard for missing keys. Checked 23 screens + modals in a browser for raw keys. |
+| 2026-10-17 | 10 | Online payments via Stripe Connect Express (destination charges): owner onboarding, Checkout (ACH/card, optional card-fee pass-through), webhook-driven ledger with processing/succeeded/failed/reversed states, returned-payment fee, autopay with idempotent off-session charges, partial-payment and per-lease block rules. Migration `0002` (server defaults so existing rows migrate). 15 new tests with a faked Stripe gateway; feature hidden until `STRIPE_SECRET_KEY` is set. Not yet tested against real Stripe. |

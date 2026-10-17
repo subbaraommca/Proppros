@@ -115,7 +115,7 @@ All tenant-scoped tables carry `organization_id`, and every query filters by it.
 | `CRON_SECRET` | Protects cron endpoints |
 | `BLOB_READ_WRITE_TOKEN` | Vercel Blob |
 | `RESEND_API_KEY` | Email |
-| `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET` | Payments and billing |
+| `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET` | Online rent payments (Stripe Connect). Optional — the feature is hidden until set |
 | `UPSTASH_REDIS_REST_URL`, `UPSTASH_REDIS_REST_TOKEN` | Rate limiting |
 | `SENTRY_DSN` | Error monitoring |
 | `ANTHROPIC_API_KEY` | AI features (v2) |
@@ -141,6 +141,15 @@ All tenant-scoped tables carry `organization_id`, and every query filters by it.
 | Vercel routing | `/api/*` → `api/index.py` function | **Vercel Services** (`vercel.json` → `services`): `frontend` (Vite, root `frontend/`) and `backend` (FastAPI, root `backend/`, entrypoint `app.main:app`); top-level rewrites send `/api/*` to the backend, which receives the original path | Vercel's import flow now requires a services config for frontend + Python repos; it also removes the path-restoring wrapper needed by `@vercel/python` ≥ 6.52 |
 | Local DB | Neon dev branch | **SQLite file** by default (`DATABASE_URL` unset); Postgres via `docker compose up` or a Neon branch | Zero-setup local dev |
 | Emails in dev | — | Logged (with links) instead of sent when `RESEND_API_KEY` is blank | Lets you click invite/reset links locally |
+
+### Online payments (Iteration 10)
+
+Stripe Connect **Express** with **destination charges**: each owner onboards their own Express account from Settings → Payments; tenant payments are created on the platform with `transfer_data.destination` = the owner's account, so money lands with the owner and all events arrive at one webhook (`POST /api/stripe/webhook`, signature-verified). All Stripe calls live in `app/services/stripe_gateway.py`; business rules in `app/services/online_payments.py`.
+
+- **Checkout:** Stripe-hosted Checkout (ACH via `us_bank_account`, or card). Optional card fee pass-through (2.9% + 30¢, configurable via `STRIPE_CARD_FEE_BPS` / `STRIPE_CARD_FEE_FIXED_CENTS`).
+- **Ledger:** payments are `processing` until `payment_intent.succeeded`; only then credited (ledger `source_key = stripe:<pi>`). `payment_intent.payment_failed`, `charge.refunded` and `charge.dispute.created` reverse a succeeded payment (`payment_reversal`) and add the owner's returned-payment fee. Each event is applied once (`stripe_events` table).
+- **Autopay:** Checkout in `setup` mode saves a payment method (`AutopayEnrollment`); the daily cron charges the balance on the due date with Stripe idempotency key `autopay:<lease>:<period>`.
+- **Rules:** owner toggles for accepting online payments, partial payments and card-fee pass-through; per-lease `block_online_payments`.
 
 ### Translations (i18n)
 

@@ -96,5 +96,7 @@ def test_last_owner_cannot_be_removed():
 def test_rate_limit_on_login():
     register()
     c = new_client()
-    codes = [c.post("/api/auth/login", json={"email": "owner@example.com", "password": "wrong-pass-1"}).status_code for _ in range(12)]
+    # The limiter counts per clock minute; 25 attempts guarantee one minute bucket exceeds 10
+    # even if the test straddles a minute boundary.
+    codes = [c.post("/api/auth/login", json={"email": "owner@example.com", "password": "wrong-pass-1"}).status_code for _ in range(25)]
     assert 429 in codes

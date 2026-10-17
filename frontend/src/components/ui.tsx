@@ -217,6 +217,12 @@ const STATUS_TONES: Record<string, string> = {
   maintenance: "amethyst",
   manager: "amethyst",
   owner: "carnelian",
+  succeeded: "jade",
+  processing: "lapis",
+  failed: "garnet",
+  reversed: "garnet",
+  online: "lapis",
+  autopay: "amethyst",
 };
 
 export function Badge({ value, children, tone }: { value?: string; children?: ReactNode; tone?: string }) {

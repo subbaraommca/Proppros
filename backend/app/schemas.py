@@ -229,6 +229,7 @@ class LeaseUpdate(Base):
     grace_days: int | None = Field(default=None, ge=0, le=27)
     notes: str | None = Field(default=None, max_length=5000)
     tenant_ids: list[uuid.UUID] | None = Field(default=None, min_length=1, max_length=10)
+    block_online_payments: bool | None = None
 
 
 class LeaseEndIn(Base):

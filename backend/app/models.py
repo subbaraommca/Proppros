@@ -30,7 +30,9 @@ UNIT_STATUSES = ("vacant", "occupied", "maintenance")
 LEASE_STATUSES = ("active", "ended")
 LATE_FEE_TYPES = ("none", "flat", "percent")
 CHARGE_TYPES = ("parking", "pet", "utility", "storage", "other")
-LEDGER_TYPES = ("rent", "recurring", "late_fee", "payment", "credit", "adjustment", "opening_balance", "charge")
+LEDGER_TYPES = ("rent", "recurring", "late_fee", "payment", "credit", "adjustment", "opening_balance", "charge", "payment_reversal", "returned_fee")
+PAYMENT_STATUSES = ("processing", "succeeded", "failed", "reversed")
+PAYMENT_SOURCES = ("manual", "online", "autopay")
 PAYMENT_METHODS = ("cash", "check", "zelle", "venmo", "bank_transfer", "card", "other")
 EXPENSE_CATEGORIES = (
     "advertising",
@@ -84,6 +86,15 @@ class Organization(TimestampMixin, table=True):
     timezone: str = Field(default="America/New_York", max_length=64)
     currency: str = Field(default="USD", max_length=3)
     plan: str = Field(default="free", max_length=32)
+    # Online payments (Stripe Connect Express — money goes to the owner's connected account)
+    stripe_account_id: str | None = Field(default=None, max_length=64)
+    stripe_charges_enabled: bool = False
+    stripe_payouts_enabled: bool = False
+    stripe_details_submitted: bool = False
+    online_payments_enabled: bool = False
+    allow_partial_payments: bool = True
+    pass_card_fee: bool = False  # tenant pays the card processing fee
+    returned_payment_fee_cents: int = 0
 
 
 class Membership(TimestampMixin, table=True):
@@ -177,6 +188,7 @@ class Tenant(TimestampMixin, table=True):
     vehicles: list[dict[str, Any]] = Field(default_factory=list, sa_column=Column(JSON, nullable=False))
     pets: list[dict[str, Any]] = Field(default_factory=list, sa_column=Column(JSON, nullable=False))
     notes: str | None = None
+    stripe_customer_id: str | None = Field(default=None, max_length=64)
 
 
 class Lease(TimestampMixin, table=True):
@@ -198,6 +210,7 @@ class Lease(TimestampMixin, table=True):
     charges_start_on: date
     ended_on: date | None = None
     notes: str | None = None
+    block_online_payments: bool = False  # e.g. after an eviction notice
 
 
 class LeaseTenant(SQLModel, table=True):
@@ -222,6 +235,7 @@ class RecurringCharge(TimestampMixin, table=True):
 
 class Payment(TimestampMixin, table=True):
     __tablename__ = "payments"
+    __table_args__ = (UniqueConstraint("stripe_payment_intent_id", name="uq_payments_stripe_payment_intent_id"),)
     id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
     org_id: uuid.UUID = Field(foreign_key="organizations.id", index=True)
     lease_id: uuid.UUID = Field(foreign_key="leases.id", index=True)
@@ -234,6 +248,11 @@ class Payment(TimestampMixin, table=True):
     notes: str | None = None
     voided_at: datetime | None = None
     created_by_user_id: uuid.UUID | None = Field(default=None, foreign_key="users.id")
+    status: str = Field(default="succeeded", max_length=12)  # only succeeded payments are in the ledger
+    source: str = Field(default="manual", max_length=10)
+    fee_cents: int = 0  # card fee charged to the tenant on top of the rent amount
+    stripe_payment_intent_id: str | None = Field(default=None, max_length=64)
+    failure_reason: str | None = Field(default=None, max_length=300)
 
 
 class LedgerEntry(SQLModel, table=True):
@@ -253,6 +272,31 @@ class LedgerEntry(SQLModel, table=True):
     payment_id: uuid.UUID | None = Field(default=None, foreign_key="payments.id", index=True)
     created_by_user_id: uuid.UUID | None = Field(default=None, foreign_key="users.id")
     created_at: datetime = Field(default_factory=utcnow)
+
+
+class AutopayEnrollment(TimestampMixin, table=True):
+    """A tenant's saved payment method, charged automatically on the lease's due date."""
+
+    __tablename__ = "autopay_enrollments"
+    __table_args__ = (UniqueConstraint("lease_id", "tenant_id", name="uq_autopay_lease_tenant"),)
+    id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
+    org_id: uuid.UUID = Field(foreign_key="organizations.id", index=True)
+    lease_id: uuid.UUID = Field(foreign_key="leases.id", index=True)
+    tenant_id: uuid.UUID = Field(foreign_key="tenants.id")
+    stripe_customer_id: str = Field(max_length=64)
+    stripe_payment_method_id: str = Field(max_length=64)
+    method_type: str = Field(max_length=20)  # card | us_bank_account
+    method_label: str = Field(default="", max_length=60)  # e.g. "Visa •••• 4242"
+    active: bool = True
+
+
+class StripeEvent(SQLModel, table=True):
+    """Processed webhook events — Stripe retries deliveries, so each is applied once."""
+
+    __tablename__ = "stripe_events"
+    id: str = Field(primary_key=True, max_length=64)
+    event_type: str = Field(max_length=60)
+    processed_at: datetime = Field(default_factory=utcnow)
 
 
 # ── Expenses ─────────────────────────────────────────────────────────────────

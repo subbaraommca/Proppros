@@ -6,6 +6,7 @@ import { CreditCard, Download, FileDown, Paperclip, Pencil, Plus, Receipt, Trash
 import { api, fileUrl } from "../services/api";
 import { useAuth } from "../hooks/useAuth";
 import type { DocumentRow, Expense, Payment, Property, Unit } from "../types";
+import { PaymentBadges } from "../components/OnlinePayments";
 import { BalanceText, Card, Empty, ErrorBox, Field, Input, Modal, MoneyInput, PageHeader, Select, Spinner, Tabs, Textarea } from "../components/ui";
 import { date, fromCents, label, money, toCents, todayISO } from "../utils/format";
 
@@ -72,7 +73,7 @@ export function PaymentsPage() {
                       </Link>
                     </td>
                     <td>
-                      {label(p.method)}
+                      {label(p.method)} <PaymentBadges p={p} />
                       {p.reference && <div className="small muted">{p.reference}</div>}
                     </td>
                     <td className="small">{p.receipt_number}</td>

@@ -66,3 +66,12 @@ Alembic uses `DATABASE_URL_UNPOOLED` (Neon's direct URL) when it is set.
 3. Set the environment variables: `ENVIRONMENT=production`, `JWT_SECRET`, `COOKIE_SECURE=true`, `FRONTEND_URL=https://<your domain>`, `CRON_SECRET`, `RESEND_API_KEY`, `EMAIL_FROM`, and optionally `UPSTASH_REDIS_REST_URL`/`_TOKEN` and `SENTRY_DSN`. See [.env.example](.env.example).
 4. Run the migrations against Neon once: `DATABASE_URL_UNPOOLED=... alembic upgrade head`. After that, the `migrate` job in `.github/workflows/ci.yml` does it on every merge to `main` (add `DATABASE_URL_UNPOOLED` as a GitHub secret in a `production` environment).
 5. Open `https://<deployment>/api/health`. It should return `{"status":"ok","db":"ok"}`.
+
+### Optional: online rent payments (Stripe)
+
+Online payments stay hidden until these are set.
+
+1. Create a Stripe account (test mode needs no business verification) and enable **Connect** (Express accounts).
+2. In Vercel, add `STRIPE_SECRET_KEY` (`sk_test_…` while testing).
+3. In Stripe → Developers → Webhooks, add the endpoint `https://<your-domain>/api/stripe/webhook` with these events: `payment_intent.processing`, `payment_intent.succeeded`, `payment_intent.payment_failed`, `charge.refunded`, `charge.dispute.created`, `checkout.session.completed`, `account.updated`. Copy its signing secret into `STRIPE_WEBHOOK_SECRET`, then redeploy.
+4. In Proppros, go to **Settings → Payments → Connect with Stripe**, finish onboarding, and turn on **Accept online payments**. Test with card `4242 4242 4242 4242` or Stripe's test bank account.

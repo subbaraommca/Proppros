@@ -6,6 +6,7 @@ import { CalendarDays, FileDown, FolderOpen, Plus, Upload, Wrench } from "lucide
 import { api, fileUrl } from "../../services/api";
 import type { DocumentRow, Lease, LedgerRow, Payment, WorkOrder } from "../../types";
 import { DocIcon } from "../../components/Documents";
+import { PortalPayActions, PaymentBadges, usePortalPayOptions } from "../../components/OnlinePayments";
 import { Badge, BalanceText, Card, Empty, ErrorBox, Field, Input, Modal, PageHeader, Select, Spinner, Textarea } from "../../components/ui";
 import { date, dateTime, fileSize, label, money, ordinal } from "../../utils/format";
 import { WO_CATEGORIES } from "../MaintenancePages";
@@ -25,13 +26,17 @@ interface Home {
 export function PortalHomePage() {
   const { t } = useTranslation();
   const { data, error, isLoading } = useQuery({ queryKey: ["portal-home"], queryFn: () => api.get<Home>("/portal/home") });
+  const payEnabled = usePortalPayOptions().data?.enabled ?? false;
   if (isLoading) return <Spinner />;
   if (error || !data) return <ErrorBox error={error} />;
   const active = data.leases.filter((l) => l.status === "active");
+  const params = new URLSearchParams(window.location.search);
+  const flash = params.get("payment") === "success" ? "payment_success" : params.get("payment") === "cancelled" ? "payment_cancelled" : params.get("autopay") === "on" ? "autopay_enabled" : null;
   return (
     <>
       <PageHeader title={t("portal.welcome", { name: data.tenant_name })} subtitle={data.organization} />
       <div className="stack">
+        {flash && <div className={flash === "payment_cancelled" ? "info-box" : "success-box"}>{t(`online.${flash}`)}</div>}
         {data.leases.length === 0 && (
           <Card>
             <Empty title={t("portal.no_lease_title")}>{t("portal.no_lease_body")}</Empty>
@@ -56,13 +61,16 @@ export function PortalHomePage() {
                 )}
               </div>
             </div>
-            <div className="actions">
-              <Link className="btn" to={`/portal/leases/${l.id}`}>
-                {t("portal.view_statement")}
-              </Link>
-              <Link className="btn btn-primary" to="/portal/maintenance?new=1">
-                <Wrench size={15} /> {t("portal.request_maintenance")}
-              </Link>
+            <div className="stack" style={{ gap: 10, alignItems: "end" }}>
+              <PortalPayActions leaseId={l.id} />
+              <div className="actions">
+                <Link className="btn" to={`/portal/leases/${l.id}`}>
+                  {t("portal.view_statement")}
+                </Link>
+                <Link className="btn" to="/portal/maintenance?new=1">
+                  <Wrench size={15} /> {t("portal.request_maintenance")}
+                </Link>
+              </div>
             </div>
           </div>
         ))}
@@ -89,9 +97,11 @@ export function PortalHomePage() {
                 ))}
               </ul>
             )}
-            <p className="small muted" style={{ marginTop: 12 }}>
-              {t("portal.pay_as_usual")}
-            </p>
+            {!payEnabled && (
+              <p className="small muted" style={{ marginTop: 12 }}>
+                {t("portal.pay_as_usual")}
+              </p>
+            )}
           </Card>
           <Card
             title={t("portal.requests")}
@@ -233,7 +243,9 @@ export function PortalPaymentsPage() {
                 {data?.map((p) => (
                   <tr key={p.id}>
                     <td>{date(p.received_on)}</td>
-                    <td>{label(p.method)}</td>
+                    <td>
+                      {label(p.method)} <PaymentBadges p={p} />
+                    </td>
                     <td>{p.receipt_number}</td>
                     <td className="num">{money(p.amount_cents)}</td>
                     <td className="right">

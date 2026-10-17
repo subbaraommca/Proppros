@@ -437,6 +437,8 @@ def void_payment(payment_id: uuid.UUID, ctx: Ctx = Depends(writer)):
     payment = get_owned(ctx, Payment, payment_id, "Payment")
     if payment.voided_at:
         raise HTTPException(status_code=400, detail="This payment is already voided.")
+    if payment.source != "manual":
+        raise HTTPException(status_code=400, detail="Online payments can't be voided here — refund them in your Stripe dashboard instead.")
     payment.voided_at = utcnow()
     ctx.session.add(payment)
     for entry in ctx.session.exec(select(LedgerEntry).where(LedgerEntry.payment_id == payment.id)).all():

@@ -149,7 +149,7 @@ def run_daily_for_org(
     actor_user_id=None,
 ) -> dict[str, int]:
     today = today or today_in(org.timezone)
-    stats = {"rent_entries": 0, "late_fees": 0, "reminders": 0, "lease_alerts": 0, "document_alerts": 0}
+    stats = {"rent_entries": 0, "late_fees": 0, "reminders": 0, "lease_alerts": 0, "document_alerts": 0, "autopay": 0}
     for lease in billing.active_leases(session, org.id):
         stats["rent_entries"] += billing.post_rent_for_lease(session, lease, today)
         stats["late_fees"] += int(billing.apply_late_fee_for_lease(session, lease, today))
@@ -157,6 +157,10 @@ def run_daily_for_org(
         stats["reminders"] += rent_reminders(session, org, lease, today)
         stats["lease_alerts"] += lease_expiry_alerts(session, org, lease, today)
     stats["document_alerts"] += document_expiry_alerts(session, org, today)
+    # Autopay runs after rent has posted, so it charges the up-to-date balance.
+    from app.services.online_payments import run_autopay_for_org
+
+    stats["autopay"] += run_autopay_for_org(session, org, today)
     # Each run leaves a trace in the audit log (Settings → Audit log), so owners can confirm
     # the scheduled job ran without any Vercel tooling.
     audit.record(

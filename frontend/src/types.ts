@@ -111,6 +111,7 @@ export interface Lease {
   charges_start_on: string;
   ended_on: string | null;
   notes?: string | null;
+  block_online_payments?: boolean;
   balance_cents: number;
   tenants: LeaseTenant[];
   unit_name?: string;
@@ -144,6 +145,10 @@ export interface Payment {
   reference: string | null;
   notes: string | null;
   voided_at: string | null;
+  status: "processing" | "succeeded" | "failed" | "reversed";
+  source: "manual" | "online" | "autopay";
+  fee_cents: number;
+  failure_reason: string | null;
   unit_name?: string;
   property_name?: string;
   tenant_name?: string | null;

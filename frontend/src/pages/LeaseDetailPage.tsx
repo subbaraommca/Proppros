@@ -7,6 +7,7 @@ import { api, fileUrl } from "../services/api";
 import { useAuth } from "../hooks/useAuth";
 import type { Lease, LedgerRow, Payment } from "../types";
 import { DocumentsPanel } from "../components/Documents";
+import { PaymentBadges } from "../components/OnlinePayments";
 import { Badge, BalanceText, Card, ErrorBox, Field, Input, Modal, MoneyInput, PageHeader, Select, Spinner, Tabs, Textarea } from "../components/ui";
 import { date, fromCents, label, money, ordinal, toCents, todayISO } from "../utils/format";
 
@@ -358,6 +359,13 @@ export function LeaseDetailPage() {
   const voidPayment = useMutation({ mutationFn: (pid: string) => api.post(`/payments/${pid}/void`), onSuccess: refresh });
   const removeCharge = useMutation({ mutationFn: (cid: string) => api.del(`/leases/${id}/charges/${cid}`), onSuccess: refresh });
   const resend = useMutation({ mutationFn: (pid: string) => api.post(`/payments/${pid}/send-receipt`) });
+  const onlineConfigured =
+    useQuery({
+      queryKey: ["payment-settings"],
+      queryFn: () => api.get<{ stripe_configured: boolean }>("/online-payments/settings"),
+      enabled: canEdit,
+    }).data?.stripe_configured ?? false;
+  const toggleBlock = useMutation({ mutationFn: (block: boolean) => api.patch(`/leases/${id}`, { block_online_payments: block }), onSuccess: refresh });
   const deleteLease = useMutation({
     mutationFn: () => api.del(`/leases/${id}`),
     onSuccess: () => {
@@ -524,10 +532,12 @@ export function LeaseDetailPage() {
                             {p.receipt_number}
                             {p.reference && <div className="small muted">{p.reference}</div>}
                           </td>
-                          <td>{label(p.method)}</td>
+                          <td>
+                            {label(p.method)} <PaymentBadges p={p} />
+                          </td>
                           <td className="num">{money(p.amount_cents)}</td>
                           <td className="right nowrap">
-                            {!p.voided_at && (
+                            {!p.voided_at && p.status === "succeeded" && (
                               <>
                                 <a
                                   className="icon-btn"
@@ -539,7 +549,7 @@ export function LeaseDetailPage() {
                                 >
                                   <FileDown size={15} />
                                 </a>
-                                {canEdit && (
+                                {canEdit && p.source === "manual" && (
                                   <>
                                     <button className="btn btn-sm btn-ghost" onClick={() => resend.mutate(p.id)} disabled={resend.isPending}>
                                       {t("payments.email_action")}
@@ -635,6 +645,14 @@ export function LeaseDetailPage() {
                 <dd>{lease.property?.address}</dd>
                 <dt>{t("leases.auto_billing_from")}</dt>
                 <dd>{date(lease.charges_start_on)}</dd>
+              </dl>
+              {canEdit && onlineConfigured && (
+                <label className="check small" style={{ marginTop: 12 }} title={t("online.block_hint")}>
+                  <input type="checkbox" checked={!!lease.block_online_payments} onChange={(e) => toggleBlock.mutate(e.target.checked)} disabled={toggleBlock.isPending} />
+                  {t("online.block_label")}
+                </label>
+              )}
+              <dl className="dl small">
                 {lease.notes && (
                   <>
                     <dt>{t("common.notes")}</dt>

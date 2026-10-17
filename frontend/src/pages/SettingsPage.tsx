@@ -8,6 +8,8 @@ import type { AuditEntry, Me } from "../types";
 import { Badge, Card, ErrorBox, Field, Input, InviteLink, PageHeader, Select, Spinner, Tabs } from "../components/ui";
 import { dateTime, label } from "../utils/format";
 import { LANGUAGES, setLanguage } from "../i18n";
+import { PaymentsSettingsTab } from "../components/OnlinePayments";
+import { useSearchParams } from "react-router-dom";
 
 const TIMEZONES = [
   "America/New_York",
@@ -372,12 +374,16 @@ export function SettingsPage() {
   const { t } = useTranslation();
   const { can } = useAuth();
   const isWriter = can("owner", "manager");
-  const [tab, setTab] = useState<"org" | "team" | "account" | "audit">(isWriter ? "org" : "account");
+  type TabId = "org" | "team" | "payments" | "account" | "audit";
+  const [params] = useSearchParams();
+  const requested = params.get("tab") as TabId | null;
+  const [tab, setTab] = useState<TabId>(requested && (isWriter || requested === "account") ? requested : isWriter ? "org" : "account");
   const tabs = [
     ...(isWriter
       ? [
           { id: "org" as const, label: t("settings.portfolio") },
           { id: "team" as const, label: t("settings.team") },
+          { id: "payments" as const, label: t("settings.payments_tab") },
         ]
       : []),
     { id: "account" as const, label: t("settings.my_account") },
@@ -389,6 +395,7 @@ export function SettingsPage() {
       <Tabs tabs={tabs} value={tab} onChange={setTab} />
       {tab === "org" && <OrgSettings />}
       {tab === "team" && <Team />}
+      {tab === "payments" && <PaymentsSettingsTab />}
       {tab === "account" && <Account />}
       {tab === "audit" && <AuditLog />}
     </>

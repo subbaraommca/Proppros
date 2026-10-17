@@ -44,6 +44,12 @@ class Settings(BaseSettings):
     local_upload_dir: str = "./.uploads"
     max_upload_bytes: int = 4 * 1024 * 1024  # Vercel function body limit is 4.5 MB
 
+    # Online payments (Stripe Connect). Blank → online payments are hidden.
+    stripe_secret_key: str = ""
+    stripe_webhook_secret: str = ""
+    stripe_card_fee_bps: int = 290  # used when the owner passes the card fee to tenants (2.9% …
+    stripe_card_fee_fixed_cents: int = 30  # … + 30¢)
+
     # Rate limiting (Upstash Redis REST). Blank → in-memory (dev only).
     upstash_redis_rest_url: str = ""
     upstash_redis_rest_token: str = ""
@@ -65,6 +71,10 @@ class Settings(BaseSettings):
     def database_configured(self) -> bool:
         """False on Vercel until a real Postgres URL (Neon) is set — the SQLite default can't work there."""
         return not (self.on_vercel and self.database_url.startswith("sqlite"))
+
+    @property
+    def stripe_enabled(self) -> bool:
+        return bool(self.stripe_secret_key)
 
     @property
     def email_provider(self) -> str:
