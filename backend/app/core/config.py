@@ -32,8 +32,10 @@ class Settings(BaseSettings):
     resend_api_key: str = ""
     email_from: str = "Proppros <noreply@proppros.app>"
 
-    # File storage (Vercel Blob). Blank → files saved to local_upload_dir.
+    # File storage (Vercel Blob). Neither set → files saved to local_upload_dir.
     blob_read_write_token: str = ""
+    blob_store_id: str = ""  # with Vercel OIDC auth (no static token)
+    blob_access: str = "private"  # must match the store: "private" | "public"
     local_upload_dir: str = "./.uploads"
     max_upload_bytes: int = 4 * 1024 * 1024  # Vercel function body limit is 4.5 MB
 

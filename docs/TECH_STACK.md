@@ -135,7 +135,7 @@ All tenant-scoped tables carry `organization_id`, and every query filters by it.
 |---|---|---|---|
 | JWT / passwords | python-jose + passlib (Pickzona) | **PyJWT + bcrypt** directly | passlib is unmaintained and breaks with current bcrypt |
 | Rate limiting | Upstash Redis | **Upstash REST** fixed-window limiter (`core/limiter.py`), in-memory fallback in dev | No SlowAPI dependency; works across serverless instances |
-| File uploads | Blob client uploads | **Multipart through the API** → Vercel Blob (or `backend/.uploads` locally), 4 MB cap | Every file is authorized and recorded as a `Document`; Blob URLs are unguessable but public — switch to private storage before storing sensitive IDs |
+| File uploads | Blob client uploads | **Multipart through the API** → **private** Vercel Blob store (or `backend/.uploads` locally), 4 MB cap; downloads stream through the API after its permission checks | Every file is authorized and recorded as a `Document`; private storage keeps leases and IDs unreachable without the app (`BLOB_ACCESS=public` is still supported) |
 | Cron | 5 jobs | **1 daily job** running all steps | Hobby-plan friendly, simpler, idempotent |
 | Datetimes | — | **Timezone-aware UTC** everywhere | Required by SQLModel ≥ 0.0.4x (`UTCDateTime`) |
 | Vercel routing | `/api/*` → `api/index.py` function | **Vercel Services** (`vercel.json` → `services`): `frontend` (Vite, root `frontend/`) and `backend` (FastAPI, root `backend/`, entrypoint `app.main:app`); top-level rewrites send `/api/*` to the backend, which receives the original path | Vercel's import flow now requires a services config for frontend + Python repos; it also removes the path-restoring wrapper needed by `@vercel/python` ≥ 6.52 |

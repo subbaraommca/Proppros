@@ -1,7 +1,7 @@
 import uuid
 from datetime import date, timedelta
 
-from fastapi import APIRouter, Depends, File, Form, HTTPException, UploadFile
+from fastapi import APIRouter, Depends, File, Form, HTTPException, Response, UploadFile
 from fastapi.responses import FileResponse, RedirectResponse
 from sqlmodel import Session, select
 
@@ -110,8 +110,20 @@ async def store_upload(
 
 
 def serve(doc: Document, download: bool = False):
-    if doc.storage_backend == "blob":
+    disposition = "attachment" if download else "inline"
+    if doc.storage_backend == "blob":  # public store: unguessable URL
         return RedirectResponse(doc.storage_key + ("?download=1" if download else ""), status_code=307)
+    if doc.storage_backend == "blobpriv":  # private store: stream through after our permission check
+        try:
+            data = storage.read_private(doc.storage_key)
+        except FileNotFoundError:
+            raise HTTPException(status_code=404, detail="File missing from storage.")
+        safe_name = doc.name.replace('"', "")
+        return Response(
+            content=data,
+            media_type=doc.content_type,
+            headers={"Content-Disposition": f'{disposition}; filename="{safe_name}"', "Cache-Control": "private, max-age=300"},
+        )
     path = storage.local_path(doc.storage_key)
     if not path.exists():
         raise HTTPException(status_code=404, detail="File missing from storage.")
@@ -119,7 +131,7 @@ def serve(doc: Document, download: bool = False):
         path,
         media_type=doc.content_type,
         filename=doc.name,
-        content_disposition_type="attachment" if download else "inline",
+        content_disposition_type=disposition,
     )
 
 

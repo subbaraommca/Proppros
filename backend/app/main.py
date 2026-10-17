@@ -6,6 +6,7 @@ from fastapi.responses import JSONResponse
 
 from app import models  # noqa: F401 — registers SQLModel metadata
 from app.core.config import settings
+from app.core import storage
 from app.core.database import init_db
 from app.routers import auth, documents, finance, leases, orgs, portal, properties, system, tenants, work_orders
 
@@ -50,6 +51,8 @@ async def unhandled(request: Request, exc: Exception):
 
 @app.middleware("http")
 async def security_headers(request: Request, call_next):
+    # Vercel passes a short-lived OIDC token per request; Blob auth can use it.
+    storage.oidc_token_var.set(request.headers.get("x-vercel-oidc-token"))
     response = await call_next(request)
     response.headers.setdefault("X-Content-Type-Options", "nosniff")
     response.headers.setdefault("Referrer-Policy", "strict-origin-when-cross-origin")

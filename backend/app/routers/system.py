@@ -5,6 +5,7 @@ import uuid
 from fastapi import APIRouter, Depends, Header, HTTPException, Query
 from sqlmodel import Session, select
 
+from app.core import storage
 from app.core.config import settings
 from app.core.database import check_db_connection, get_session
 from app.core.deps import Ctx, writer
@@ -14,6 +15,13 @@ from app.services.jobs import run_daily, run_daily_for_org
 router = APIRouter(tags=["system"])
 
 
+def _storage_status() -> str:
+    if storage.blob_enabled():
+        return f"vercel-blob ({'public' if settings.blob_access == 'public' else 'private'})"
+    # Vercel's filesystem is read-only, so uploads need Blob there.
+    return "not_configured" if settings.on_vercel else "local"
+
+
 @router.get("/health")
 def health():
     if not settings.database_configured:
@@ -21,10 +29,16 @@ def health():
             "status": "degraded",
             "db": "not_configured",
             "hint": "Connect Neon Postgres in Vercel → Storage so DATABASE_URL is set, then redeploy.",
+            "storage": _storage_status(),
             "environment": settings.environment,
         }
     db_ok = check_db_connection()
-    return {"status": "ok" if db_ok else "degraded", "db": "ok" if db_ok else "unreachable", "environment": settings.environment}
+    return {
+        "status": "ok" if db_ok else "degraded",
+        "db": "ok" if db_ok else "unreachable",
+        "storage": _storage_status(),
+        "environment": settings.environment,
+    }
 
 
 @router.get("/audit-log")
