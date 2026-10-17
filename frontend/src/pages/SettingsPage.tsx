@@ -275,7 +275,7 @@ function AuditLog() {
           value={entity}
           onChange={(e) => setEntity(e.target.value)}
           aria-label="Record type"
-          options={[{ value: "", label: "All changes" }, ...["property", "unit", "tenant", "lease", "payment", "expense", "work_order", "document", "membership", "organization"].map((x) => ({ value: x, label: label(x) }))]}
+          options={[{ value: "", label: "All changes" }, ...["property", "unit", "tenant", "lease", "payment", "expense", "work_order", "document", "membership", "organization", "automation"].map((x) => ({ value: x, label: label(x) }))]}
         />
       </div>
       <ErrorBox error={error} />

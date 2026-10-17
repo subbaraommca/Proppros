@@ -84,7 +84,7 @@ def notification_log(limit: int = Query(default=100, le=500), ctx: Ctx = Depends
 @router.post("/automation/run")
 def run_now(ctx: Ctx = Depends(writer)):
     """Let an owner trigger today's automation for their org (same idempotent job as the cron)."""
-    return run_daily_for_org(ctx.session, ctx.org)
+    return run_daily_for_org(ctx.session, ctx.org, trigger="manual", actor_user_id=ctx.user.id)
 
 
 def _check_cron(authorization: str | None) -> None:

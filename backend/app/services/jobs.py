@@ -9,6 +9,7 @@ from datetime import date, timedelta
 
 from sqlmodel import Session, select
 
+from app.core import audit
 from app.core.config import settings
 from app.core.dates import period_of, today_in
 from app.core.email import esc, layout
@@ -140,7 +141,13 @@ def document_expiry_alerts(session: Session, org: Organization, today: date) -> 
     return sent
 
 
-def run_daily_for_org(session: Session, org: Organization, today: date | None = None) -> dict[str, int]:
+def run_daily_for_org(
+    session: Session,
+    org: Organization,
+    today: date | None = None,
+    trigger: str = "scheduled",
+    actor_user_id=None,
+) -> dict[str, int]:
     today = today or today_in(org.timezone)
     stats = {"rent_entries": 0, "late_fees": 0, "reminders": 0, "lease_alerts": 0, "document_alerts": 0}
     for lease in billing.active_leases(session, org.id):
@@ -150,6 +157,19 @@ def run_daily_for_org(session: Session, org: Organization, today: date | None = 
         stats["reminders"] += rent_reminders(session, org, lease, today)
         stats["lease_alerts"] += lease_expiry_alerts(session, org, lease, today)
     stats["document_alerts"] += document_expiry_alerts(session, org, today)
+    # Each run leaves a trace in the audit log (Settings → Audit log), so owners can confirm
+    # the scheduled job ran without any Vercel tooling.
+    audit.record(
+        session,
+        org.id,
+        actor_user_id,
+        "automation",
+        None,
+        f"{trigger}_run",
+        f"Daily automation ({trigger}) for {today}: {stats['rent_entries']} charges, {stats['late_fees']} late fees, "
+        f"{stats['reminders']} reminders, {stats['lease_alerts'] + stats['document_alerts']} alerts",
+        {"date": str(today), **stats},
+    )
     session.commit()
     return stats
 

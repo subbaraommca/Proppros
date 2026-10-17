@@ -185,3 +185,14 @@ def test_notification_prefs_respected(session, outbox):
     org = session.exec(select(Organization)).first()
     lease = session.get(Lease, uuid.UUID(lease_json["id"]))
     assert jobs.lease_expiry_alerts(session, org, lease, d("2026-10-05")) == 0
+
+
+def test_automation_runs_are_audited():
+    c, _, _, _ = _setup(charges_start_on="2026-10-01")
+    new_client().get("/api/cron/daily", headers={"Authorization": "Bearer test-cron-secret"})
+    c.post("/api/automation/run")
+    runs = [e for e in c.get("/api/audit-log?entity_type=automation").json()]
+    actions = sorted(e["action"] for e in runs)
+    assert actions == ["manual_run", "scheduled_run"]
+    scheduled = next(e for e in runs if e["action"] == "scheduled_run")
+    assert scheduled["actor_name"] == "System" and "Daily automation (scheduled)" in scheduled["summary"]
