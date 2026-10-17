@@ -2,6 +2,8 @@
  * API client (same shape as Pickzona's): JSON in/out, httpOnly cookie auth,
  * and the active organization sent as X-Org-Id.
  */
+import i18n from "../i18n";
+
 const ORG_KEY = "pp-org";
 
 export class ApiError extends Error {
@@ -30,23 +32,23 @@ export function setOrgId(id: string | null) {
 }
 
 function toUserMessage(status: number, detail: unknown): string {
-  if (status >= 500) return "Something went wrong on our end. Please try again.";
+  if (status >= 500) return i18n.t("errors.server");
   if (Array.isArray(detail)) {
     const first = detail[0] as { msg?: string; loc?: string[] } | undefined;
     if (first?.msg) {
       const field = first.loc?.[first.loc.length - 1];
       return field ? `${String(field).replace(/_/g, " ")}: ${first.msg.replace(/^Value error, /, "")}` : first.msg;
     }
-    return "Please check your input and try again.";
+    return i18n.t("errors.check_input");
   }
   if (typeof detail === "string" && detail) return detail;
-  if (status === 403) return "You don't have permission to do that.";
-  if (status === 404) return "Not found.";
-  return `Request failed (${status})`;
+  if (status === 403) return i18n.t("errors.forbidden");
+  if (status === 404) return i18n.t("errors.not_found");
+  return i18n.t("errors.request_failed", { status });
 }
 
 export function friendlyError(err: unknown): string {
-  return err instanceof Error ? err.message : "An unexpected error occurred.";
+  return err instanceof Error ? err.message : i18n.t("errors.unexpected");
 }
 
 async function request<T>(method: string, path: string, body?: unknown): Promise<T> {
@@ -66,7 +68,7 @@ async function request<T>(method: string, path: string, body?: unknown): Promise
     });
   } catch {
     // fetch only rejects on network failure (offline, DNS, CORS) — never show "Failed to fetch".
-    throw new ApiError(0, "Can't reach Proppros. Check your internet connection and try again.");
+    throw new ApiError(0, i18n.t("errors.offline"));
   }
   if (!res.ok) {
     let detail: unknown;

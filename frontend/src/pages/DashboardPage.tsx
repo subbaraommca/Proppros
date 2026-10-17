@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
+import { useTranslation } from "react-i18next";
 import { AlertTriangle, Building2, CalendarClock, DollarSign, Wrench } from "lucide-react";
 import { api } from "../services/api";
 import { useAuth } from "../hooks/useAuth";
@@ -23,6 +24,7 @@ interface Dashboard {
 }
 
 export function DashboardPage() {
+  const { t } = useTranslation();
   const { org, me } = useAuth();
   const { data, error, isLoading } = useQuery({ queryKey: ["dashboard"], queryFn: () => api.get<Dashboard>("/dashboard") });
   if (isLoading) return <Spinner />;
@@ -31,10 +33,18 @@ export function DashboardPage() {
   if (data.properties === 0) {
     return (
       <>
-        <PageHeader title={`Welcome, ${me?.name.split(" ")[0]}`} subtitle={org?.name} />
+        <PageHeader title={t("dashboard.welcome", { name: me?.name.split(" ")[0] })} subtitle={org?.name} />
         <Card>
-          <Empty icon={<Building2 size={40} />} title="Add your first property" action={<Link className="btn btn-primary" to="/properties?new=1">Add property</Link>}>
-            Start with a property and its units, then add tenants and leases. Rent will post automatically every month.
+          <Empty
+            icon={<Building2 size={40} />}
+            title={t("dashboard.first_property_title")}
+            action={
+              <Link className="btn btn-primary" to="/properties?new=1">
+                {t("properties.add")}
+              </Link>
+            }
+          >
+            {t("dashboard.first_property_body")}
           </Empty>
         </Card>
       </>
@@ -42,52 +52,82 @@ export function DashboardPage() {
   }
 
   const collectionPct = data.month.billed_cents ? Math.round((data.month.collected_cents * 100) / data.month.billed_cents) : 0;
+  const wo = data.open_work_orders;
   return (
     <>
-      <PageHeader title="Dashboard" subtitle={`${org?.name} · ${date(data.today)}`} />
+      <PageHeader title={t("nav.dashboard")} subtitle={`${org?.name} · ${date(data.today)}`} />
       <div className="stack">
         <div className="grid grid-4">
-          <Stat icon={<DollarSign size={14} />} label="Collected this month" value={money(data.month.collected_cents)} sub={`${collectionPct}% of ${money(data.month.billed_cents)} billed`} />
-          <Stat icon={<AlertTriangle size={14} />} label="Outstanding" value={money(data.outstanding_cents)} sub={`${data.outstanding.length} lease${data.outstanding.length === 1 ? "" : "s"} with a balance`} />
-          <Stat icon={<Building2 size={14} />} label="Occupancy" value={`${data.occupancy_pct}%`} sub={`${data.occupied_units} of ${data.units} units · ${data.properties} properties`} />
+          <Stat
+            icon={<DollarSign size={14} />}
+            label={t("dashboard.collected")}
+            value={money(data.month.collected_cents)}
+            sub={t("dashboard.collected_sub", { pct: collectionPct, billed: money(data.month.billed_cents) })}
+          />
+          <Stat
+            icon={<AlertTriangle size={14} />}
+            label={t("dashboard.outstanding")}
+            value={money(data.outstanding_cents)}
+            sub={t("dashboard.outstanding_sub", { count: data.outstanding.length })}
+          />
+          <Stat
+            icon={<Building2 size={14} />}
+            label={t("dashboard.occupancy")}
+            value={`${data.occupancy_pct}%`}
+            sub={`${t("dashboard.units_occupied", { occupied: data.occupied_units, count: data.units })} · ${t("dashboard.property_count", { count: data.properties })}`}
+          />
           <Stat
             icon={<Wrench size={14} />}
-            label="Open work orders"
-            value={data.open_work_orders.total}
-            sub={data.open_work_orders.emergency ? `${data.open_work_orders.emergency} emergency` : `${data.open_work_orders.high} high priority`}
+            label={t("dashboard.open_work_orders")}
+            value={wo.total}
+            sub={wo.emergency ? t("dashboard.emergency_count", { count: wo.emergency }) : t("dashboard.high_count", { count: wo.high })}
           />
         </div>
 
         <div className="two-col">
-          <Card title="Cash flow — last 12 months" actions={<Link to="/reports" className="small">Reports →</Link>}>
+          <Card
+            title={t("dashboard.cash_flow")}
+            actions={
+              <Link to="/reports" className="small">
+                {t("common.reports_link")}
+              </Link>
+            }
+          >
             <CashFlowChart data={data.cash_flow} />
             <div className="figure-row">
               <div>
-                <div className="eyebrow">Income YTD</div>
+                <div className="eyebrow">{t("dashboard.income_ytd")}</div>
                 <strong>{money(data.ytd.income_cents)}</strong>
               </div>
               <div>
-                <div className="eyebrow">Expenses YTD</div>
+                <div className="eyebrow">{t("dashboard.expenses_ytd")}</div>
                 <strong>{money(data.ytd.expense_cents)}</strong>
               </div>
               <div>
-                <div className="eyebrow">Net YTD</div>
+                <div className="eyebrow">{t("dashboard.net_ytd")}</div>
                 <strong className={data.ytd.net_cents < 0 ? "danger-text" : ""}>{money(data.ytd.net_cents)}</strong>
               </div>
             </div>
           </Card>
 
           <div className="stack">
-            <Card title="Balances due" actions={<Link to="/reports?tab=outstanding" className="small">All →</Link>}>
+            <Card
+              title={t("dashboard.balances_due")}
+              actions={
+                <Link to="/reports?tab=outstanding" className="small">
+                  {t("common.all_link")}
+                </Link>
+              }
+            >
               {data.outstanding.length === 0 ? (
-                <p className="muted">Everyone is paid up. 🎉</p>
+                <p className="muted">{t("dashboard.all_paid")}</p>
               ) : (
                 <ul className="list-plain">
                   {data.outstanding.map((o) => (
                     <li key={o.lease_id}>
                       <div>
                         <Link to={`/leases/${o.lease_id}`} className="row-link">
-                          {o.tenants || "Lease"}
+                          {o.tenants || t("enums.lease")}
                         </Link>
                         <div className="small muted">
                           {o.property_name} · {o.unit_name}
@@ -99,9 +139,9 @@ export function DashboardPage() {
                 </ul>
               )}
             </Card>
-            <Card title="Leases ending in 90 days">
+            <Card title={t("dashboard.leases_ending")}>
               {data.expiring_leases.length === 0 ? (
-                <p className="muted">No leases ending soon.</p>
+                <p className="muted">{t("dashboard.no_leases_ending")}</p>
               ) : (
                 <ul className="list-plain">
                   {data.expiring_leases.map((l) => (
@@ -111,10 +151,10 @@ export function DashboardPage() {
                           {l.property_name} · {l.unit_name}
                         </Link>
                         <div className="small muted">
-                          <CalendarClock size={12} /> Ends {date(l.end_date)}
+                          <CalendarClock size={12} /> {t("dashboard.ends", { date: date(l.end_date) })}
                         </div>
                       </div>
-                      <span className={`badge ${l.days_left <= 30 ? "badge-garnet" : "badge-citrine"}`}>{l.days_left} days</span>
+                      <span className={`badge ${l.days_left <= 30 ? "badge-garnet" : "badge-citrine"}`}>{t("dashboard.days", { count: l.days_left })}</span>
                     </li>
                   ))}
                 </ul>

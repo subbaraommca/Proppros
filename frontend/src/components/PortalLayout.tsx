@@ -1,29 +1,31 @@
 import { NavLink, Outlet } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { LogOut, Moon, Sun } from "lucide-react";
 import { useAuth } from "../hooks/useAuth";
 import { Brand, useTheme } from "./Layout";
 
 export function PortalLayout() {
+  const { t } = useTranslation();
   const { me, org, switchOrg, logout } = useAuth();
   const { theme, toggle } = useTheme();
   return (
     <>
       <a className="skip-link" href="#main">
-        Skip to content
+        {t("nav.skip")}
       </a>
       <header className="portal-top">
         <div className="portal-top-inner">
           <Brand />
-          <nav className="portal-nav" aria-label="Portal navigation">
+          <nav className="portal-nav" aria-label={t("nav.portal_nav")}>
             <NavLink to="/portal" end>
-              Home
+              {t("nav.home")}
             </NavLink>
-            <NavLink to="/portal/payments">Payments</NavLink>
-            <NavLink to="/portal/maintenance">Maintenance</NavLink>
-            <NavLink to="/portal/documents">Documents</NavLink>
+            <NavLink to="/portal/payments">{t("nav.payments")}</NavLink>
+            <NavLink to="/portal/maintenance">{t("nav.maintenance")}</NavLink>
+            <NavLink to="/portal/documents">{t("nav.documents")}</NavLink>
           </nav>
           {me && me.organizations.length > 1 && (
-            <select className="org-select" value={org?.id} onChange={(e) => switchOrg(e.target.value)} aria-label="Switch account">
+            <select className="org-select" value={org?.id} onChange={(e) => switchOrg(e.target.value)} aria-label={t("nav.switch_account")}>
               {me.organizations.map((o) => (
                 <option key={o.id} value={o.id}>
                   {o.name}
@@ -31,10 +33,10 @@ export function PortalLayout() {
               ))}
             </select>
           )}
-          <button className="icon-btn" onClick={toggle} aria-label="Toggle theme">
+          <button className="icon-btn" onClick={toggle} aria-label={t("nav.theme")}>
             {theme === "dark" ? <Sun size={18} /> : <Moon size={18} />}
           </button>
-          <button className="icon-btn" onClick={() => void logout()} aria-label="Sign out" title="Sign out">
+          <button className="icon-btn" onClick={() => void logout()} aria-label={t("nav.signOut")} title={t("nav.signOut")}>
             <LogOut size={18} />
           </button>
         </div>

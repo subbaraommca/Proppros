@@ -1,6 +1,7 @@
 import { useMemo, useState } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { useMutation, useQuery } from "@tanstack/react-query";
+import { useTranslation } from "react-i18next";
 import { FileText, Plus, Trash2, UserPlus } from "lucide-react";
 import { api } from "../services/api";
 import { useAuth } from "../hooks/useAuth";
@@ -10,6 +11,7 @@ import { date, money, ordinal, toCents, todayISO } from "../utils/format";
 import { TenantFormModal } from "./TenantsPage";
 
 export function LeasesPage() {
+  const { t } = useTranslation();
   const { can } = useAuth();
   const [status, setStatus] = useState("active");
   const navigate = useNavigate();
@@ -20,11 +22,11 @@ export function LeasesPage() {
   return (
     <>
       <PageHeader
-        title="Leases"
+        title={t("nav.leases")}
         actions={
           can("owner", "manager") && (
             <Link className="btn btn-primary" to="/leases/new">
-              <Plus size={16} /> New lease
+              <Plus size={16} /> {t("leases.new")}
             </Link>
           )
         }
@@ -33,11 +35,11 @@ export function LeasesPage() {
         <Select
           value={status}
           onChange={(e) => setStatus(e.target.value)}
-          aria-label="Filter by status"
+          aria-label={t("leases.filter_status")}
           options={[
-            { value: "active", label: "Active" },
-            { value: "ended", label: "Ended" },
-            { value: "", label: "All leases" },
+            { value: "active", label: t("enums.active") },
+            { value: "ended", label: t("enums.ended") },
+            { value: "", label: t("leases.all") },
           ]}
         />
       </div>
@@ -46,8 +48,8 @@ export function LeasesPage() {
         <Spinner />
       ) : data?.length === 0 ? (
         <Card>
-          <Empty icon={<FileText size={40} />} title={status === "active" ? "No active leases" : "No leases"}>
-            Create a lease to start posting rent automatically.
+          <Empty icon={<FileText size={40} />} title={status === "active" ? t("leases.empty_active") : t("leases.empty")}>
+            {t("leases.empty_body")}
           </Empty>
         </Card>
       ) : (
@@ -56,12 +58,12 @@ export function LeasesPage() {
             <table className="table">
               <thead>
                 <tr>
-                  <th>Property · Unit</th>
-                  <th>Tenants</th>
-                  <th>Term</th>
-                  <th>Status</th>
-                  <th className="num">Rent</th>
-                  <th className="num">Balance</th>
+                  <th>{t("leases.property_unit")}</th>
+                  <th>{t("common.tenants")}</th>
+                  <th>{t("leases.term")}</th>
+                  <th>{t("common.status")}</th>
+                  <th className="num">{t("common.rent")}</th>
+                  <th className="num">{t("common.balance")}</th>
                 </tr>
               </thead>
               <tbody>
@@ -72,9 +74,9 @@ export function LeasesPage() {
                         {l.property_name} · {l.unit_name}
                       </Link>
                     </td>
-                    <td>{l.tenants.map((t) => t.name).join(", ")}</td>
+                    <td>{l.tenants.map((tn) => tn.name).join(", ")}</td>
                     <td className="small nowrap">
-                      {date(l.start_date)} – {l.ended_on ? date(l.ended_on) : l.end_date ? date(l.end_date) : "Month-to-month"}
+                      {date(l.start_date)} – {l.ended_on ? date(l.ended_on) : l.end_date ? date(l.end_date) : t("common.month_to_month")}
                     </td>
                     <td>
                       <Badge value={l.status} />
@@ -97,6 +99,7 @@ export function LeasesPage() {
 type ChargeDraft = { charge_type: string; description: string; amount: string };
 
 export function LeaseNewPage() {
+  const { t } = useTranslation();
   const [params] = useSearchParams();
   const navigate = useNavigate();
   const { data: units } = useQuery({ queryKey: ["units"], queryFn: () => api.get<Unit[]>("/units") });
@@ -122,8 +125,11 @@ export function LeaseNewPage() {
   const set = (k: keyof typeof f) => (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => setF({ ...f, [k]: e.target.value });
 
   const unitOptions = useMemo(
-    () => [{ value: "", label: "Select a unit…" }, ...(units ?? []).map((u) => ({ value: u.id, label: `${u.property_name} · ${u.name}${u.status === "occupied" ? " (occupied)" : ""}` }))],
-    [units],
+    () => [
+      { value: "", label: t("leases.select_unit") },
+      ...(units ?? []).map((u) => ({ value: u.id, label: `${u.property_name} · ${u.name}${u.status === "occupied" ? t("leases.occupied_suffix") : ""}` })),
+    ],
+    [units, t],
   );
   const selectedUnit = units?.find((u) => u.id === f.unit_id);
 
@@ -153,90 +159,90 @@ export function LeaseNewPage() {
     onSuccess: (lease) => navigate(`/leases/${lease.id}`),
   });
 
-  const toggleTenant = (id: string) =>
-    setF({ ...f, tenant_ids: f.tenant_ids.includes(id) ? f.tenant_ids.filter((x) => x !== id) : [...f.tenant_ids, id] });
+  const toggleTenant = (id: string) => setF({ ...f, tenant_ids: f.tenant_ids.includes(id) ? f.tenant_ids.filter((x) => x !== id) : [...f.tenant_ids, id] });
   const valid = f.unit_id && f.tenant_ids.length > 0 && f.start_date && toCents(f.rent);
   const isPast = f.start_date < today;
+  const dueDayOptions = Array.from({ length: 28 }, (_, i) => ({ value: String(i + 1), label: t("leases.due_day_option", { day: ordinal(i + 1) }) }));
 
   return (
     <>
-      <PageHeader breadcrumb={<Link to="/leases">Leases</Link>} title="New lease" />
+      <PageHeader breadcrumb={<Link to="/leases">{t("nav.leases")}</Link>} title={t("leases.new")} />
       <div className="two-col">
         <div className="stack">
           <ErrorBox error={create.error} />
-          <Card title="Unit & tenants">
+          <Card title={t("leases.unit_and_tenants")}>
             <div className="form">
-              <Field label="Unit">
+              <Field label={t("common.unit")}>
                 <Select value={f.unit_id} onChange={set("unit_id")} options={unitOptions} />
               </Field>
               {selectedUnit?.market_rent_cents && !f.rent && (
                 <p className="small muted">
-                  Market rent for this unit: {money(selectedUnit.market_rent_cents)}{" "}
+                  {t("leases.market_rent_hint", { amount: money(selectedUnit.market_rent_cents) })}{" "}
                   <button className="link-btn" onClick={() => setF({ ...f, rent: (selectedUnit.market_rent_cents! / 100).toFixed(2) })}>
-                    Use it
+                    {t("leases.use_it")}
                   </button>
                 </p>
               )}
               <div className="field">
-                <span>Tenants on the lease</span>
+                <span>{t("leases.tenants_on_lease")}</span>
                 <div className="stack" style={{ gap: 6 }}>
-                  {tenants?.map((t) => (
-                    <label key={t.id} className="check">
-                      <input type="checkbox" checked={f.tenant_ids.includes(t.id)} onChange={() => toggleTenant(t.id)} />
-                      {t.first_name} {t.last_name} {t.email && <span className="muted small">· {t.email}</span>}
+                  {tenants?.map((tn) => (
+                    <label key={tn.id} className="check">
+                      <input type="checkbox" checked={f.tenant_ids.includes(tn.id)} onChange={() => toggleTenant(tn.id)} />
+                      {tn.first_name} {tn.last_name} {tn.email && <span className="muted small">· {tn.email}</span>}
                     </label>
                   ))}
-                  {tenants?.length === 0 && <p className="muted small">No tenants yet.</p>}
+                  {tenants?.length === 0 && <p className="muted small">{t("tenants.empty_title")}.</p>}
                 </div>
                 <div>
                   <button className="btn btn-sm" type="button" onClick={() => setAddingTenant(true)}>
-                    <UserPlus size={14} /> New tenant
+                    <UserPlus size={14} /> {t("leases.new_tenant")}
                   </button>
                 </div>
               </div>
             </div>
           </Card>
 
-          <Card title="Terms">
+          <Card title={t("leases.terms")}>
             <div className="form">
               <div className="form-row">
-                <Field label="Start date">
+                <Field label={t("leases.start_date")}>
                   <Input type="date" value={f.start_date} onChange={set("start_date")} />
                 </Field>
-                <Field label="End date" hint="leave blank for month-to-month">
+                <Field label={t("leases.end_date")} hint={t("leases.end_date_hint")}>
                   <Input type="date" value={f.end_date} onChange={set("end_date")} />
                 </Field>
               </div>
               <div className="form-row-3">
-                <Field label="Monthly rent">
+                <Field label={t("leases.monthly_rent")}>
                   <MoneyInput value={f.rent} onChange={(v) => setF({ ...f, rent: v })} />
                 </Field>
-                <Field label="Due day">
-                  <Select value={f.due_day} onChange={set("due_day")} options={Array.from({ length: 28 }, (_, i) => ({ value: String(i + 1), label: `${ordinal(i + 1)} of the month` }))} />
+                <Field label={t("leases.due_day")}>
+                  <Select value={f.due_day} onChange={set("due_day")} options={dueDayOptions} />
                 </Field>
-                <Field label="Security deposit">
+                <Field label={t("leases.deposit")}>
                   <MoneyInput value={f.deposit} onChange={(v) => setF({ ...f, deposit: v })} />
                 </Field>
               </div>
               <div className="form-row-3">
-                <Field label="Late fee">
+                <Field label={t("leases.late_fee")}>
                   <Select
                     value={f.late_fee_type}
                     onChange={set("late_fee_type")}
                     options={[
-                      { value: "flat", label: "Flat amount" },
-                      { value: "percent", label: "% of rent" },
+                      { value: "flat", label: t("enums.flat") },
+                      { value: "percent", label: t("enums.percent") },
                     ]}
                   />
                 </Field>
-                <Field label={f.late_fee_type === "percent" ? "Percent" : "Amount"} hint="blank = no late fee">
+                <Field label={f.late_fee_type === "percent" ? t("leases.percent") : t("common.amount")} hint={t("leases.late_fee_blank")}>
                   {f.late_fee_type === "percent" ? (
                     <Input type="number" min={0} max={100} step="0.5" value={f.late_fee} onChange={set("late_fee")} placeholder="5" />
                   ) : (
                     <MoneyInput value={f.late_fee} onChange={(v) => setF({ ...f, late_fee: v })} />
                   )}
                 </Field>
-                <Field label="Grace period (days)">
+                <Field label={t("leases.grace_days")}>
                   <Input type="number" min={0} max={27} value={f.grace_days} onChange={set("grace_days")} />
                 </Field>
               </div>
@@ -244,15 +250,15 @@ export function LeaseNewPage() {
           </Card>
 
           <Card
-            title="Recurring charges"
+            title={t("leases.recurring_charges")}
             actions={
               <button className="btn btn-sm" onClick={() => setCharges([...charges, { charge_type: "parking", description: "", amount: "" }])}>
-                <Plus size={14} /> Add charge
+                <Plus size={14} /> {t("leases.add_charge")}
               </button>
             }
           >
             {charges.length === 0 ? (
-              <p className="muted small">Parking, pet rent, utilities… posted together with rent each month.</p>
+              <p className="muted small">{t("leases.recurring_hint")}</p>
             ) : (
               <div className="stack" style={{ gap: 8 }}>
                 {charges.map((c, i) => (
@@ -261,12 +267,16 @@ export function LeaseNewPage() {
                       value={c.charge_type}
                       onChange={(e) => setCharges(charges.map((x, j) => (j === i ? { ...x, charge_type: e.target.value } : x)))}
                       options={["parking", "pet", "utility", "storage", "other"]}
-                      aria-label="Charge type"
+                      aria-label={t("leases.charge_type")}
                     />
-                    <Input placeholder="Description" value={c.description} onChange={(e) => setCharges(charges.map((x, j) => (j === i ? { ...x, description: e.target.value } : x)))} />
+                    <Input
+                      placeholder={t("common.description")}
+                      value={c.description}
+                      onChange={(e) => setCharges(charges.map((x, j) => (j === i ? { ...x, description: e.target.value } : x)))}
+                    />
                     <div style={{ display: "flex", gap: 6 }}>
-                      <MoneyInput value={c.amount} onChange={(v) => setCharges(charges.map((x, j) => (j === i ? { ...x, amount: v } : x)))} aria-label="Amount" />
-                      <button className="icon-btn" aria-label="Remove charge" onClick={() => setCharges(charges.filter((_, j) => j !== i))}>
+                      <MoneyInput value={c.amount} onChange={(v) => setCharges(charges.map((x, j) => (j === i ? { ...x, amount: v } : x)))} aria-label={t("common.amount")} />
+                      <button className="icon-btn" aria-label={t("leases.remove_charge")} onClick={() => setCharges(charges.filter((_, j) => j !== i))}>
                         <Trash2 size={15} />
                       </button>
                     </div>
@@ -278,41 +288,41 @@ export function LeaseNewPage() {
         </div>
 
         <div className="stack">
-          <Card title="Billing start">
+          <Card title={t("leases.billing_start")}>
             <div className="form">
               <label className="check">
                 <input type="checkbox" checked={f.existing} onChange={(e) => setF({ ...f, existing: e.target.checked })} />
-                This lease is already in progress
+                {t("leases.in_progress")}
               </label>
               {f.existing ? (
                 <>
-                  <p className="small muted">Automatic rent starts from the next due date. Enter what the tenant owes today (if anything) as an opening balance.</p>
-                  <Field label="Opening balance" hint="amount owed today; negative = credit">
+                  <p className="small muted">{t("leases.in_progress_hint")}</p>
+                  <Field label={t("leases.opening_balance")} hint={t("leases.opening_balance_hint")}>
                     <MoneyInput value={f.opening_balance} onChange={(v) => setF({ ...f, opening_balance: v })} />
                   </Field>
                 </>
               ) : (
                 <p className="small muted">
-                  Rent posts automatically on each due date from {date(f.start_date)}.
-                  {isPast && " Because the start date is in the past, rent for past due dates will be posted now."}
+                  {t("leases.auto_rent_from", { date: date(f.start_date) })}
+                  {isPast && ` ${t("leases.past_start_note")}`}
                 </p>
               )}
             </div>
           </Card>
-          <Card title="Notes">
-            <Textarea value={f.notes} onChange={set("notes")} placeholder="Private notes (not shown to tenants)" aria-label="Notes" />
+          <Card title={t("common.notes")}>
+            <Textarea value={f.notes} onChange={set("notes")} placeholder={t("leases.notes_placeholder")} aria-label={t("common.notes")} />
           </Card>
           <button className="btn btn-primary btn-block" disabled={!valid || create.isPending} onClick={() => create.mutate()}>
-            {create.isPending ? "Creating…" : "Create lease"}
+            {create.isPending ? t("auth.creating") : t("leases.create")}
           </button>
         </div>
       </div>
       {addingTenant && (
         <TenantFormModal
           onClose={() => setAddingTenant(false)}
-          onSaved={(t) => {
+          onSaved={(saved) => {
             void refetchTenants();
-            setF((prev) => ({ ...prev, tenant_ids: [...prev.tenant_ids, t.id] }));
+            setF((prev) => ({ ...prev, tenant_ids: [...prev.tenant_ids, saved.id] }));
           }}
         />
       )}

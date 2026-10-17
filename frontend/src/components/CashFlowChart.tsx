@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { money, monthLabel } from "../utils/format";
 
 interface Point {
@@ -12,6 +13,7 @@ interface Point {
  * CVD-safe in both themes — see docs/DESIGN_GUIDELINES.md §2.4).
  */
 export function CashFlowChart({ data }: { data: Point[] }) {
+  const { t } = useTranslation();
   const W = 720;
   const H = 220;
   const pad = { top: 12, right: 8, bottom: 26, left: 56 };
@@ -28,12 +30,12 @@ export function CashFlowChart({ data }: { data: Point[] }) {
 
   return (
     <div>
-      <svg className="chart" viewBox={`0 0 ${W} ${H}`} preserveAspectRatio="none" role="img" aria-label="Monthly income and expenses for the last 12 months">
-        {ticks.map((t) => (
-          <g key={t}>
-            {t > 0 && <line className="grid-line" x1={pad.left} x2={W - pad.right} y1={y(t)} y2={y(t)} />}
-            <text x={pad.left - 8} y={y(t) + 4} textAnchor="end">
-              {compact(t)}
+      <svg className="chart" viewBox={`0 0 ${W} ${H}`} preserveAspectRatio="none" role="img" aria-label={t("chart.aria")}>
+        {ticks.map((tick) => (
+          <g key={tick}>
+            {tick > 0 && <line className="grid-line" x1={pad.left} x2={W - pad.right} y1={y(tick)} y2={y(tick)} />}
+            <text x={pad.left - 8} y={y(tick) + 4} textAnchor="end">
+              {compact(tick)}
             </text>
           </g>
         ))}
@@ -44,7 +46,7 @@ export function CashFlowChart({ data }: { data: Point[] }) {
             <g key={d.period}>
               {/* Wide invisible hit target for the native tooltip */}
               <rect x={cx - slot / 2} y={pad.top} width={slot} height={innerH} fill="transparent">
-                <title>{`${monthLabel(d.period)} — income ${money(d.income_cents)}, expenses ${money(d.expense_cents)}`}</title>
+                <title>{t("chart.tooltip", { month: monthLabel(d.period), income: money(d.income_cents), expenses: money(d.expense_cents) })}</title>
               </rect>
               <path className="bar" d={barPath(cx - bar - 1, base, bar, base - y(d.income_cents))} fill="var(--pp-chart-1)" pointerEvents="none" />
               <path className="bar" d={barPath(cx + 1, base, bar, base - y(d.expense_cents))} fill="var(--pp-chart-2)" pointerEvents="none" />
@@ -58,11 +60,11 @@ export function CashFlowChart({ data }: { data: Point[] }) {
       <div className="legend">
         <span>
           <i style={{ background: "var(--pp-chart-1)" }} />
-          Income
+          {t("chart.income")}
         </span>
         <span>
           <i style={{ background: "var(--pp-chart-2)" }} />
-          Expenses
+          {t("chart.expenses")}
         </span>
       </div>
     </div>

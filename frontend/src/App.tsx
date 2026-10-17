@@ -1,5 +1,6 @@
 import { lazy, Suspense, type ComponentType, type ReactNode } from "react";
 import { Link, Navigate, Route, Routes, useLocation } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { useAuth } from "./hooks/useAuth";
 import { Layout } from "./components/Layout";
 import { PortalLayout } from "./components/PortalLayout";
@@ -43,10 +44,11 @@ function wrap(routes: ReactNode) {
 }
 
 function NotFound() {
+  const { t } = useTranslation();
   return (
     <div className="empty">
-      <h3>Page not found</h3>
-      <Link to="/">Go home</Link>
+      <h3>{t("common.page_not_found")}</h3>
+      <Link to="/">{t("common.go_home")}</Link>
     </div>
   );
 }

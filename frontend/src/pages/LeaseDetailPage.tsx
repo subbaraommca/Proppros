@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useTranslation } from "react-i18next";
 import { Ban, CalendarX, DollarSign, FileDown, Pencil, Plus, Trash2 } from "lucide-react";
 import { api, fileUrl } from "../services/api";
 import { useAuth } from "../hooks/useAuth";
@@ -12,12 +13,13 @@ import { date, fromCents, label, money, ordinal, toCents, todayISO } from "../ut
 const METHODS = ["zelle", "check", "cash", "venmo", "bank_transfer", "card", "other"];
 
 function PaymentModal({ lease, onClose }: { lease: Lease; onClose: () => void }) {
+  const { t } = useTranslation();
   const qc = useQueryClient();
   const [f, setF] = useState({
     amount: lease.balance_cents > 0 ? fromCents(lease.balance_cents) : "",
     method: "zelle",
     received_on: todayISO(),
-    tenant_id: lease.tenants.find((t) => t.is_primary)?.id ?? lease.tenants[0]?.id ?? "",
+    tenant_id: lease.tenants.find((tn) => tn.is_primary)?.id ?? lease.tenants[0]?.id ?? "",
     reference: "",
     notes: "",
     send_receipt: true,
@@ -41,18 +43,19 @@ function PaymentModal({ lease, onClose }: { lease: Lease; onClose: () => void })
       onClose();
     },
   });
-  const payer = lease.tenants.find((t) => t.id === f.tenant_id);
+  const payer = lease.tenants.find((tn) => tn.id === f.tenant_id);
+  const amount = toCents(f.amount);
   return (
     <Modal
-      title="Record payment"
+      title={t("payments.record")}
       onClose={onClose}
       footer={
         <>
           <button className="btn" onClick={onClose}>
-            Cancel
+            {t("common.cancel")}
           </button>
-          <button className="btn btn-primary" disabled={!toCents(f.amount) || save.isPending} onClick={() => save.mutate()}>
-            {save.isPending ? "Saving…" : `Record ${toCents(f.amount) ? money(toCents(f.amount)) : "payment"}`}
+          <button className="btn btn-primary" disabled={!amount || save.isPending} onClick={() => save.mutate()}>
+            {save.isPending ? t("common.saving") : amount ? t("payments.record_amount", { amount: money(amount) }) : t("payments.record")}
           </button>
         </>
       }
@@ -60,32 +63,32 @@ function PaymentModal({ lease, onClose }: { lease: Lease; onClose: () => void })
       <div className="form">
         <ErrorBox error={save.error} />
         <div className="form-row">
-          <Field label="Amount" hint={`balance ${money(lease.balance_cents)}`}>
+          <Field label={t("common.amount")} hint={t("payments.balance_hint", { amount: money(lease.balance_cents) })}>
             <MoneyInput value={f.amount} onChange={(v) => setF({ ...f, amount: v })} autoFocus />
           </Field>
-          <Field label="Date received">
+          <Field label={t("payments.date_received")}>
             <Input type="date" value={f.received_on} onChange={(e) => setF({ ...f, received_on: e.target.value })} />
           </Field>
         </div>
         <div className="form-row">
-          <Field label="Method">
+          <Field label={t("common.method")}>
             <Select value={f.method} onChange={(e) => setF({ ...f, method: e.target.value })} options={METHODS} />
           </Field>
-          <Field label="Reference" hint="check # / confirmation">
+          <Field label={t("payments.reference")} hint={t("payments.reference_hint")}>
             <Input value={f.reference} onChange={(e) => setF({ ...f, reference: e.target.value })} />
           </Field>
         </div>
         {lease.tenants.length > 1 && (
-          <Field label="Paid by">
-            <Select value={f.tenant_id} onChange={(e) => setF({ ...f, tenant_id: e.target.value })} options={lease.tenants.map((t) => ({ value: t.id, label: t.name }))} />
+          <Field label={t("payments.paid_by")}>
+            <Select value={f.tenant_id} onChange={(e) => setF({ ...f, tenant_id: e.target.value })} options={lease.tenants.map((tn) => ({ value: tn.id, label: tn.name }))} />
           </Field>
         )}
-        <Field label="Notes" hint="(optional)">
+        <Field label={t("common.notes")} hint={t("common.optional_hint")}>
           <Textarea value={f.notes} onChange={(e) => setF({ ...f, notes: e.target.value })} />
         </Field>
         <label className="check">
           <input type="checkbox" checked={f.send_receipt} disabled={!payer?.email} onChange={(e) => setF({ ...f, send_receipt: e.target.checked })} />
-          Email a PDF receipt {payer?.email ? `to ${payer.email}` : "(tenant has no email)"}
+          {payer?.email ? t("payments.email_receipt_to", { email: payer.email }) : t("payments.email_receipt_no_email")}
         </label>
       </div>
     </Modal>
@@ -93,6 +96,7 @@ function PaymentModal({ lease, onClose }: { lease: Lease; onClose: () => void })
 }
 
 function AdjustmentModal({ leaseId, onClose }: { leaseId: string; onClose: () => void }) {
+  const { t } = useTranslation();
   const qc = useQueryClient();
   const [f, setF] = useState({ entry_type: "charge", description: "", amount: "", entry_date: todayISO() });
   const save = useMutation({
@@ -105,15 +109,15 @@ function AdjustmentModal({ leaseId, onClose }: { leaseId: string; onClose: () =>
   });
   return (
     <Modal
-      title="Add charge or credit"
+      title={t("ledger.adjust_title")}
       onClose={onClose}
       footer={
         <>
           <button className="btn" onClick={onClose}>
-            Cancel
+            {t("common.cancel")}
           </button>
           <button className="btn btn-primary" disabled={!f.description || !toCents(f.amount) || save.isPending} onClick={() => save.mutate()}>
-            Save
+            {t("common.save")}
           </button>
         </>
       }
@@ -121,24 +125,28 @@ function AdjustmentModal({ leaseId, onClose }: { leaseId: string; onClose: () =>
       <div className="form">
         <ErrorBox error={save.error} />
         <div className="form-row">
-          <Field label="Type">
+          <Field label={t("common.type")}>
             <Select
               value={f.entry_type}
               onChange={(e) => setF({ ...f, entry_type: e.target.value })}
               options={[
-                { value: "charge", label: "Charge (tenant owes more)" },
-                { value: "credit", label: "Credit (tenant owes less)" },
+                { value: "charge", label: t("ledger.charge_option") },
+                { value: "credit", label: t("ledger.credit_option") },
               ]}
             />
           </Field>
-          <Field label="Date">
+          <Field label={t("common.date")}>
             <Input type="date" value={f.entry_date} onChange={(e) => setF({ ...f, entry_date: e.target.value })} />
           </Field>
         </div>
-        <Field label="Description">
-          <Input value={f.description} onChange={(e) => setF({ ...f, description: e.target.value })} placeholder={f.entry_type === "charge" ? "Prorated rent, damage repair…" : "Repair reimbursement, concession…"} />
+        <Field label={t("common.description")}>
+          <Input
+            value={f.description}
+            onChange={(e) => setF({ ...f, description: e.target.value })}
+            placeholder={f.entry_type === "charge" ? t("ledger.charge_placeholder") : t("ledger.credit_placeholder")}
+          />
         </Field>
-        <Field label="Amount">
+        <Field label={t("common.amount")}>
           <MoneyInput value={f.amount} onChange={(v) => setF({ ...f, amount: v })} />
         </Field>
       </div>
@@ -147,6 +155,7 @@ function AdjustmentModal({ leaseId, onClose }: { leaseId: string; onClose: () =>
 }
 
 function EditTermsModal({ lease, onClose }: { lease: Lease; onClose: () => void }) {
+  const { t } = useTranslation();
   const qc = useQueryClient();
   const isPct = lease.late_fee_type === "percent";
   const [f, setF] = useState({
@@ -180,60 +189,64 @@ function EditTermsModal({ lease, onClose }: { lease: Lease; onClose: () => void 
   });
   return (
     <Modal
-      title="Edit lease terms"
+      title={t("leases.edit_terms")}
       onClose={onClose}
       wide
       footer={
         <>
           <button className="btn" onClick={onClose}>
-            Cancel
+            {t("common.cancel")}
           </button>
           <button className="btn btn-primary" disabled={!toCents(f.rent) || save.isPending} onClick={() => save.mutate()}>
-            Save
+            {t("common.save")}
           </button>
         </>
       }
     >
       <div className="form">
         <ErrorBox error={save.error} />
-        <p className="small muted">Changes apply to future rent postings. Already-posted charges are not changed.</p>
+        <p className="small muted">{t("leases.edit_terms_note")}</p>
         <div className="form-row-3">
-          <Field label="Monthly rent">
+          <Field label={t("leases.monthly_rent")}>
             <MoneyInput value={f.rent} onChange={(v) => setF({ ...f, rent: v })} />
           </Field>
-          <Field label="Due day">
-            <Select value={f.due_day} onChange={(e) => setF({ ...f, due_day: e.target.value })} options={Array.from({ length: 28 }, (_, i) => ({ value: String(i + 1), label: ordinal(i + 1) }))} />
+          <Field label={t("leases.due_day")}>
+            <Select
+              value={f.due_day}
+              onChange={(e) => setF({ ...f, due_day: e.target.value })}
+              options={Array.from({ length: 28 }, (_, i) => ({ value: String(i + 1), label: ordinal(i + 1) }))}
+            />
           </Field>
-          <Field label="End date" hint="blank = month-to-month">
+          <Field label={t("leases.end_date")} hint={t("leases.end_date_blank")}>
             <Input type="date" value={f.end_date} onChange={(e) => setF({ ...f, end_date: e.target.value })} />
           </Field>
         </div>
         <div className="form-row-3">
-          <Field label="Late fee">
+          <Field label={t("leases.late_fee")}>
             <Select
               value={f.late_fee_type}
               onChange={(e) => setF({ ...f, late_fee_type: e.target.value as "flat" | "percent" })}
               options={[
-                { value: "flat", label: "Flat amount" },
-                { value: "percent", label: "% of rent" },
+                { value: "flat", label: t("enums.flat") },
+                { value: "percent", label: t("enums.percent") },
               ]}
             />
           </Field>
-          <Field label={f.late_fee_type === "percent" ? "Percent" : "Amount"} hint="blank = none">
+          <Field label={f.late_fee_type === "percent" ? t("leases.percent") : t("common.amount")} hint={t("leases.blank_none")}>
             {f.late_fee_type === "percent" ? (
               <Input type="number" min={0} max={100} step="0.5" value={f.late_fee} onChange={(e) => setF({ ...f, late_fee: e.target.value })} />
             ) : (
               <MoneyInput value={f.late_fee} onChange={(v) => setF({ ...f, late_fee: v })} />
             )}
           </Field>
-          <Field label="Grace days">
+          <Field label={t("leases.grace_days_short")}>
             <Input type="number" min={0} max={27} value={f.grace_days} onChange={(e) => setF({ ...f, grace_days: e.target.value })} />
           </Field>
         </div>
-        <Field label="Security deposit">
+        <Field label={t("leases.deposit")}>
           <MoneyInput value={f.deposit} onChange={(v) => setF({ ...f, deposit: v })} />
         </Field>
-        <Field label="Notes">
+        <Field label={t("common.notes")}>
           <Textarea value={f.notes} onChange={(e) => setF({ ...f, notes: e.target.value })} />
         </Field>
       </div>
@@ -242,6 +255,7 @@ function EditTermsModal({ lease, onClose }: { lease: Lease; onClose: () => void 
 }
 
 function ChargeModal({ leaseId, onClose }: { leaseId: string; onClose: () => void }) {
+  const { t } = useTranslation();
   const qc = useQueryClient();
   const [f, setF] = useState({ charge_type: "parking", description: "", amount: "" });
   const save = useMutation({
@@ -253,37 +267,38 @@ function ChargeModal({ leaseId, onClose }: { leaseId: string; onClose: () => voi
   });
   return (
     <Modal
-      title="Add recurring charge"
+      title={t("leases.add_recurring")}
       onClose={onClose}
       footer={
         <>
           <button className="btn" onClick={onClose}>
-            Cancel
+            {t("common.cancel")}
           </button>
           <button className="btn btn-primary" disabled={!f.description || !toCents(f.amount) || save.isPending} onClick={() => save.mutate()}>
-            Save
+            {t("common.save")}
           </button>
         </>
       }
     >
       <div className="form">
         <ErrorBox error={save.error} />
-        <Field label="Type">
+        <Field label={t("common.type")}>
           <Select value={f.charge_type} onChange={(e) => setF({ ...f, charge_type: e.target.value })} options={["parking", "pet", "utility", "storage", "other"]} />
         </Field>
-        <Field label="Description">
-          <Input value={f.description} onChange={(e) => setF({ ...f, description: e.target.value })} placeholder="Parking space #4" />
+        <Field label={t("common.description")}>
+          <Input value={f.description} onChange={(e) => setF({ ...f, description: e.target.value })} placeholder={t("leases.charge_placeholder")} />
         </Field>
-        <Field label="Monthly amount">
+        <Field label={t("leases.monthly_amount")}>
           <MoneyInput value={f.amount} onChange={(v) => setF({ ...f, amount: v })} />
         </Field>
-        <p className="small muted">Posted with rent starting from the next due date.</p>
+        <p className="small muted">{t("leases.charge_note")}</p>
       </div>
     </Modal>
   );
 }
 
 function EndLeaseModal({ lease, onClose }: { lease: Lease; onClose: () => void }) {
+  const { t } = useTranslation();
   const qc = useQueryClient();
   const [endedOn, setEndedOn] = useState(lease.end_date && lease.end_date < todayISO() ? lease.end_date : todayISO());
   const save = useMutation({
@@ -296,23 +311,23 @@ function EndLeaseModal({ lease, onClose }: { lease: Lease; onClose: () => void }
   });
   return (
     <Modal
-      title="End lease"
+      title={t("leases.end")}
       onClose={onClose}
       footer={
         <>
           <button className="btn" onClick={onClose}>
-            Cancel
+            {t("common.cancel")}
           </button>
           <button className="btn btn-primary" disabled={save.isPending} onClick={() => save.mutate()}>
-            End lease
+            {t("leases.end")}
           </button>
         </>
       }
     >
       <div className="form">
         <ErrorBox error={save.error} />
-        <p>No more rent will be posted after this date and the unit will be marked vacant. The ledger stays available so you can settle the final balance and deposit.</p>
-        <Field label="Move-out / end date">
+        <p>{t("leases.end_explainer")}</p>
+        <Field label={t("leases.end_date_label")}>
           <Input type="date" value={endedOn} onChange={(e) => setEndedOn(e.target.value)} />
         </Field>
       </div>
@@ -321,6 +336,7 @@ function EndLeaseModal({ lease, onClose }: { lease: Lease; onClose: () => void }
 }
 
 export function LeaseDetailPage() {
+  const { t } = useTranslation();
   const { id = "" } = useParams();
   const { can, org } = useAuth();
   const navigate = useNavigate();
@@ -354,33 +370,38 @@ export function LeaseDetailPage() {
   if (error || !lease) return <ErrorBox error={error} />;
 
   const lateFee =
-    lease.late_fee_type === "none" ? "None" : lease.late_fee_type === "flat" ? `${money(lease.late_fee_amount)} after ${lease.grace_days} days` : `${lease.late_fee_amount / 100}% of rent after ${lease.grace_days} days`;
+    lease.late_fee_type === "none"
+      ? t("common.none")
+      : lease.late_fee_type === "flat"
+        ? t("leases.late_fee_flat_desc", { amount: money(lease.late_fee_amount), days: lease.grace_days })
+        : t("leases.late_fee_pct_desc", { pct: lease.late_fee_amount / 100, days: lease.grace_days });
+  const balanceSub = lease.balance_cents > 0 ? t("leases.owed_by_tenant") : lease.balance_cents < 0 ? t("leases.tenant_credit") : t("leases.paid_in_full");
 
   return (
     <>
       <PageHeader
-        breadcrumb={<Link to="/leases">Leases</Link>}
+        breadcrumb={<Link to="/leases">{t("nav.leases")}</Link>}
         title={
           <>
             {lease.property?.name} · {lease.unit?.name} <Badge value={lease.status} />
           </>
         }
-        subtitle={lease.tenants.map((t) => t.name).join(", ")}
+        subtitle={lease.tenants.map((tn) => tn.name).join(", ")}
         actions={
           canEdit && (
             <>
               <button className="btn btn-primary" onClick={() => setModal("payment")}>
-                <DollarSign size={15} /> Record payment
+                <DollarSign size={15} /> {t("payments.record")}
               </button>
               <button className="btn" onClick={() => setModal("adjust")}>
-                <Plus size={15} /> Charge / credit
+                <Plus size={15} /> {t("ledger.charge_credit")}
               </button>
               <button className="btn" onClick={() => setModal("terms")}>
-                <Pencil size={15} /> Edit
+                <Pencil size={15} /> {t("common.edit")}
               </button>
               {lease.status === "active" && (
                 <button className="btn" onClick={() => setModal("end")}>
-                  <CalendarX size={15} /> End lease
+                  <CalendarX size={15} /> {t("leases.end")}
                 </button>
               )}
             </>
@@ -391,31 +412,31 @@ export function LeaseDetailPage() {
         <ErrorBox error={removeEntry.error || voidPayment.error || removeCharge.error || deleteLease.error} />
         <div className="grid grid-4">
           <div className="card stat">
-            <div className="stat-label">Balance</div>
+            <div className="stat-label">{t("common.balance")}</div>
             <div className="stat-value">
               <BalanceText cents={lease.balance_cents} currency={org?.currency} />
             </div>
-            <div className="stat-sub">{lease.balance_cents > 0 ? "owed by tenant" : lease.balance_cents < 0 ? "tenant has a credit" : "paid in full"}</div>
+            <div className="stat-sub">{balanceSub}</div>
           </div>
           <div className="card stat">
-            <div className="stat-label">Monthly</div>
+            <div className="stat-label">{t("leases.monthly")}</div>
             <div className="stat-value">{money(lease.monthly_total_cents)}</div>
             <div className="stat-sub">
-              Due on the {ordinal(lease.due_day)}
-              {lease.recurring_charges?.length ? ` · rent ${money(lease.rent_cents)}` : ""}
+              {t("leases.due_on", { day: ordinal(lease.due_day) })}
+              {lease.recurring_charges?.length ? ` · ${t("leases.rent_amount", { amount: money(lease.rent_cents) })}` : ""}
             </div>
           </div>
           <div className="card stat">
-            <div className="stat-label">Term</div>
+            <div className="stat-label">{t("leases.term")}</div>
             <div className="stat-value" style={{ fontSize: 16 }}>
-              {date(lease.start_date)} – {lease.end_date ? date(lease.end_date) : "M-to-M"}
+              {date(lease.start_date)} – {lease.end_date ? date(lease.end_date) : t("common.mtm_short")}
             </div>
-            {lease.ended_on && <div className="stat-sub">Ended {date(lease.ended_on)}</div>}
+            {lease.ended_on && <div className="stat-sub">{t("leases.ended_on", { date: date(lease.ended_on) })}</div>}
           </div>
           <div className="card stat">
-            <div className="stat-label">Deposit</div>
+            <div className="stat-label">{t("leases.deposit_short")}</div>
             <div className="stat-value">{money(lease.deposit_cents)}</div>
-            <div className="stat-sub">Late fee: {lateFee}</div>
+            <div className="stat-sub">{t("leases.late_fee_line", { desc: lateFee })}</div>
           </div>
         </div>
 
@@ -425,9 +446,9 @@ export function LeaseDetailPage() {
               value={tab}
               onChange={setTab}
               tabs={[
-                { id: "ledger", label: "Ledger" },
-                { id: "payments", label: "Payments" },
-                { id: "documents", label: "Documents" },
+                { id: "ledger", label: t("ledger.title") },
+                { id: "payments", label: t("nav.payments") },
+                { id: "documents", label: t("documents.title") },
               ]}
             />
             {tab === "ledger" && (
@@ -436,11 +457,11 @@ export function LeaseDetailPage() {
                   <table className="table">
                     <thead>
                       <tr>
-                        <th>Date</th>
-                        <th>Description</th>
-                        <th className="num">Charges</th>
-                        <th className="num">Payments</th>
-                        <th className="num">Balance</th>
+                        <th>{t("common.date")}</th>
+                        <th>{t("common.description")}</th>
+                        <th className="num">{t("ledger.charges")}</th>
+                        <th className="num">{t("ledger.payments")}</th>
+                        <th className="num">{t("common.balance")}</th>
                         {canEdit && <th />}
                       </tr>
                     </thead>
@@ -449,7 +470,7 @@ export function LeaseDetailPage() {
                         <tr key={r.id}>
                           <td className="nowrap">{date(r.entry_date)}</td>
                           <td>
-                            {r.description} {r.entry_type === "late_fee" && <Badge tone="citrine">Late fee</Badge>}
+                            {r.description} {r.entry_type === "late_fee" && <Badge tone="citrine">{label("late_fee")}</Badge>}
                           </td>
                           <td className="num">{r.amount_cents > 0 ? money(r.amount_cents) : ""}</td>
                           <td className="num success-text">{r.amount_cents < 0 ? money(-r.amount_cents) : ""}</td>
@@ -459,9 +480,9 @@ export function LeaseDetailPage() {
                               {!r.payment_id && (
                                 <button
                                   className="icon-btn"
-                                  aria-label="Remove entry"
-                                  title={["rent", "recurring", "late_fee"].includes(r.entry_type) ? "Reverse this charge" : "Delete entry"}
-                                  onClick={() => window.confirm(`Remove “${r.description}”?`) && removeEntry.mutate(r.id)}
+                                  aria-label={t("ledger.remove_entry")}
+                                  title={["rent", "recurring", "late_fee"].includes(r.entry_type) ? t("ledger.reverse_title") : t("ledger.delete_title")}
+                                  onClick={() => window.confirm(t("ledger.remove_confirm", { description: r.description })) && removeEntry.mutate(r.id)}
                                 >
                                   <Trash2 size={14} />
                                 </button>
@@ -473,7 +494,7 @@ export function LeaseDetailPage() {
                       {ledger?.length === 0 && (
                         <tr>
                           <td colSpan={6} className="muted">
-                            No entries yet. Rent posts automatically on the due date.
+                            {t("ledger.empty")}
                           </td>
                         </tr>
                       )}
@@ -488,10 +509,10 @@ export function LeaseDetailPage() {
                   <table className="table">
                     <thead>
                       <tr>
-                        <th>Date</th>
-                        <th>Receipt</th>
-                        <th>Method</th>
-                        <th className="num">Amount</th>
+                        <th>{t("common.date")}</th>
+                        <th>{t("payments.receipt")}</th>
+                        <th>{t("common.method")}</th>
+                        <th className="num">{t("common.amount")}</th>
                         <th />
                       </tr>
                     </thead>
@@ -508,64 +529,76 @@ export function LeaseDetailPage() {
                           <td className="right nowrap">
                             {!p.voided_at && (
                               <>
-                                <a className="icon-btn" href={fileUrl(`/payments/${p.id}/receipt.pdf`)} target="_blank" rel="noreferrer" aria-label="Receipt PDF" title="Receipt PDF">
+                                <a
+                                  className="icon-btn"
+                                  href={fileUrl(`/payments/${p.id}/receipt.pdf`)}
+                                  target="_blank"
+                                  rel="noreferrer"
+                                  aria-label={t("payments.receipt_pdf")}
+                                  title={t("payments.receipt_pdf")}
+                                >
                                   <FileDown size={15} />
                                 </a>
                                 {canEdit && (
                                   <>
                                     <button className="btn btn-sm btn-ghost" onClick={() => resend.mutate(p.id)} disabled={resend.isPending}>
-                                      Email
+                                      {t("payments.email_action")}
                                     </button>
-                                    <button className="icon-btn" aria-label="Void payment" title="Void payment" onClick={() => window.confirm("Void this payment? It will be removed from the ledger.") && voidPayment.mutate(p.id)}>
+                                    <button
+                                      className="icon-btn"
+                                      aria-label={t("payments.void")}
+                                      title={t("payments.void")}
+                                      onClick={() => window.confirm(t("payments.void_confirm")) && voidPayment.mutate(p.id)}
+                                    >
                                       <Ban size={15} />
                                     </button>
                                   </>
                                 )}
                               </>
                             )}
-                            {p.voided_at && <span className="badge">Voided</span>}
+                            {p.voided_at && <span className="badge">{t("payments.voided")}</span>}
                           </td>
                         </tr>
                       ))}
                       {payments?.length === 0 && (
                         <tr>
                           <td colSpan={5} className="muted">
-                            No payments recorded.
+                            {t("payments.none_recorded")}
                           </td>
                         </tr>
                       )}
                     </tbody>
                   </table>
                 </div>
-                {resend.isSuccess && <div className="card-body success-box">Receipt sent.</div>}
+                {resend.isSuccess && <div className="card-body success-box">{t("payments.receipt_sent")}</div>}
               </Card>
             )}
             {tab === "documents" && <DocumentsPanel ownerType="lease" ownerId={lease.id} allowTenantShare />}
           </div>
 
           <div className="stack">
-            <Card title="Tenants">
+            <Card title={t("common.tenants")}>
               <ul className="list-plain">
-                {lease.tenants.map((t) => (
-                  <li key={t.id}>
+                {lease.tenants.map((tn) => (
+                  <li key={tn.id}>
                     <div>
-                      <Link to={`/tenants/${t.id}`} className="row-link">
-                        {t.name}
+                      <Link to={`/tenants/${tn.id}`} className="row-link">
+                        {tn.name}
                       </Link>{" "}
-                      {t.is_primary && <Badge tone="carnelian">Primary</Badge>}
-                      <div className="small muted">{t.email ?? t.phone ?? "No contact info"}</div>
+                      {tn.is_primary && <Badge tone="carnelian">{t("leases.primary")}</Badge>}
+                      <div className="small muted">{tn.email ?? tn.phone ?? t("leases.no_contact")}</div>
                     </div>
                   </li>
                 ))}
               </ul>
             </Card>
             <Card
-              title="Recurring charges"
+              title={t("leases.recurring_charges")}
               actions={
                 canEdit &&
                 lease.status === "active" && (
                   <button className="btn btn-sm" onClick={() => setModal("charge")}>
-                    <Plus size={14} /> Add
+                    <Plus size={14} /> {t("common.add")}
                   </button>
                 )
               }
@@ -580,7 +613,11 @@ export function LeaseDetailPage() {
                       <span className="nowrap">
                         <span className="mono">{money(c.amount_cents)}</span>
                         {canEdit && (
-                          <button className="icon-btn" aria-label={`Remove ${c.description}`} onClick={() => window.confirm(`Stop charging ${c.description}?`) && removeCharge.mutate(c.id)}>
+                          <button
+                            className="icon-btn"
+                            aria-label={t("leases.remove_charge_label", { name: c.description })}
+                            onClick={() => window.confirm(t("leases.stop_charge_confirm", { name: c.description })) && removeCharge.mutate(c.id)}
+                          >
                             <Trash2 size={14} />
                           </button>
                         )}
@@ -589,25 +626,29 @@ export function LeaseDetailPage() {
                   ))}
                 </ul>
               ) : (
-                <p className="muted small">None.</p>
+                <p className="muted small">{t("common.none")}.</p>
               )}
             </Card>
-            <Card title="Details">
+            <Card title={t("leases.details")}>
               <dl className="dl small">
-                <dt>Address</dt>
+                <dt>{t("leases.address")}</dt>
                 <dd>{lease.property?.address}</dd>
-                <dt>Auto-billing from</dt>
+                <dt>{t("leases.auto_billing_from")}</dt>
                 <dd>{date(lease.charges_start_on)}</dd>
                 {lease.notes && (
                   <>
-                    <dt>Notes</dt>
+                    <dt>{t("common.notes")}</dt>
                     <dd style={{ whiteSpace: "pre-wrap" }}>{lease.notes}</dd>
                   </>
                 )}
               </dl>
               {canEdit && (
-                <button className="btn btn-sm btn-danger" style={{ marginTop: 14 }} onClick={() => window.confirm("Delete this lease? Only possible when no payments were recorded.") && deleteLease.mutate()}>
-                  <Trash2 size={14} /> Delete lease
+                <button
+                  className="btn btn-sm btn-danger"
+                  style={{ marginTop: 14 }}
+                  onClick={() => window.confirm(t("leases.delete_confirm")) && deleteLease.mutate()}
+                >
+                  <Trash2 size={14} /> {t("leases.delete")}
                 </button>
               )}
             </Card>

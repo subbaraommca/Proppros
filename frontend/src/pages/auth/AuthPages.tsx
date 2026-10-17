@@ -1,12 +1,13 @@
 import { useEffect, useRef, useState, type FormEvent, type ReactNode } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { useTranslation } from "react-i18next";
+import { Trans, useTranslation } from "react-i18next";
 import { CheckCircle2, Home } from "lucide-react";
 import { api } from "../../services/api";
 import { useAuth } from "../../hooks/useAuth";
 import type { Me } from "../../types";
 import { ErrorBox, Field, Input, Spinner } from "../../components/ui";
+import { label } from "../../utils/format";
 
 function AuthShell({ title, subtitle, children }: { title: string; subtitle?: ReactNode; children: ReactNode }) {
   const { t } = useTranslation();
@@ -20,12 +21,12 @@ function AuthShell({ title, subtitle, children }: { title: string; subtitle?: Re
           Proppros
         </div>
         <div>
-          <span className="eyebrow">Property management for independent landlords</span>
+          <span className="eyebrow">{t("auth.hero_eyebrow")}</span>
           <h1>
-            Less admin. <em>More portfolio.</em>
+            <Trans i18nKey="auth.hero_title" components={{ em: <em /> }} />
           </h1>
           <ul>
-            {["Rent posts automatically, with late fees and reminders", "Every lease, tenant and document in one place", "Maintenance requests tracked from report to repair", "Cash flow and tax-ready reports per property"].map((x) => (
+            {(["hero_point_rent", "hero_point_records", "hero_point_maintenance", "hero_point_reports"] as const).map((k) => t(`auth.${k}`)).map((x) => (
               <li key={x}>
                 <CheckCircle2 size={18} /> {x}
               </li>
@@ -33,7 +34,7 @@ function AuthShell({ title, subtitle, children }: { title: string; subtitle?: Re
           </ul>
         </div>
         <div>
-          <p className="quote">Built by a landlord, for landlords.</p>
+          <p className="quote">{t("auth.hero_quote")}</p>
           <p className="quote-by">{t("app.tagline")}</p>
         </div>
       </div>
@@ -44,7 +45,7 @@ function AuthShell({ title, subtitle, children }: { title: string; subtitle?: Re
           {subtitle && <p className="muted" style={{ marginBottom: 20 }}>{subtitle}</p>}
           {children}
           <p className="small muted" style={{ marginTop: 28 }}>
-            <Link to="/privacy">Privacy</Link> · <Link to="/terms">Terms</Link>
+            <Link to="/privacy">{t("nav.privacy")}</Link> · <Link to="/terms">{t("nav.terms")}</Link>
           </p>
         </div>
       </div>
@@ -70,7 +71,7 @@ export function LoginPage() {
     login.mutate();
   };
   return (
-    <AuthShell title={t("auth.signIn")} subtitle={<>Welcome back to Proppros.</>}>
+    <AuthShell title={t("auth.signIn")} subtitle={t("auth.welcome_back")}>
       <form className="form" onSubmit={submit}>
         <ErrorBox error={login.error} />
         <Field label={t("auth.email")}>
@@ -107,7 +108,7 @@ export function RegisterPage() {
     },
   });
   return (
-    <AuthShell title={t("auth.createAccount")} subtitle="Set up your portfolio in a couple of minutes.">
+    <AuthShell title={t("auth.createAccount")} subtitle={t("auth.register_subtitle")}>
       <form
         className="form"
         onSubmit={(e) => {
@@ -125,14 +126,14 @@ export function RegisterPage() {
         <Field label={t("auth.password")} hint={t("auth.passwordHint")}>
           <Input type="password" required minLength={10} autoComplete="new-password" value={form.password} onChange={set("password")} />
         </Field>
-        <Field label={t("auth.orgName")} hint="(optional — e.g. your LLC)">
-          <Input value={form.organization_name} onChange={set("organization_name")} placeholder="Smith Rentals LLC" />
+        <Field label={t("auth.orgName")} hint={t("auth.orgName_hint")}>
+          <Input value={form.organization_name} onChange={set("organization_name")} placeholder={t("auth.orgName_placeholder")} />
         </Field>
         <button className="btn btn-primary btn-block" disabled={register.isPending}>
           {register.isPending ? t("auth.creating") : t("auth.createAccount")}
         </button>
         <p className="small muted">
-          By creating an account you agree to the <Link to="/terms">Terms</Link> and <Link to="/privacy">Privacy policy</Link>.
+          <Trans i18nKey="auth.agree" components={{ terms: <Link to="/terms" />, privacy: <Link to="/privacy" /> }} />
         </p>
         <p className="small">
           {t("auth.haveAccount")} <Link to="/login">{t("auth.signIn")}</Link>
@@ -147,7 +148,7 @@ export function ForgotPasswordPage() {
   const [email, setEmail] = useState("");
   const send = useMutation({ mutationFn: () => api.post("/auth/forgot-password", { email }) });
   return (
-    <AuthShell title={t("auth.resetTitle")} subtitle="We'll email you a link to choose a new password.">
+    <AuthShell title={t("auth.resetTitle")} subtitle={t("auth.forgot_subtitle")}>
       {send.isSuccess ? (
         <div className="stack">
           <div className="success-box">{t("auth.resetSent")}</div>
@@ -186,7 +187,7 @@ export function ResetPasswordPage() {
     <AuthShell title={t("auth.setPassword")}>
       {reset.isSuccess ? (
         <div className="stack">
-          <div className="success-box">Your password has been updated.</div>
+          <div className="success-box">{t("auth.password_updated")}</div>
           <Link className="btn btn-primary" to="/login">
             {t("auth.signIn")}
           </Link>
@@ -213,6 +214,7 @@ export function ResetPasswordPage() {
 }
 
 export function VerifyEmailPage() {
+  const { t } = useTranslation();
   const [params] = useSearchParams();
   const verify = useMutation({ mutationFn: () => api.post("/auth/verify-email", { token: params.get("token") }) });
   const { mutate } = verify;
@@ -223,14 +225,14 @@ export function VerifyEmailPage() {
     mutate();
   }, [mutate]);
   return (
-    <AuthShell title="Verify email">
+    <AuthShell title={t("auth.verify_title")}>
       {verify.isPending && <Spinner />}
       <ErrorBox error={verify.error} />
       {verify.isSuccess && (
         <div className="stack">
-          <div className="success-box">Your email is verified.</div>
+          <div className="success-box">{t("auth.verified")}</div>
           <a className="btn btn-primary" href="/">
-            Continue
+            {t("auth.continue")}
           </a>
         </div>
       )}
@@ -246,6 +248,7 @@ interface InvitePreview {
 }
 
 export function AcceptInvitePage() {
+  const { t } = useTranslation();
   const [params] = useSearchParams();
   const token = params.get("token") ?? "";
   const { setMe } = useAuth();
@@ -269,10 +272,10 @@ export function AcceptInvitePage() {
   if (preview.isLoading) return <Spinner />;
   if (preview.error || !preview.data)
     return (
-      <AuthShell title="Invitation">
-        <ErrorBox error={preview.error ?? new Error("Invitation not found")} />
+      <AuthShell title={t("auth.invitation")}>
+        <ErrorBox error={preview.error ?? new Error(t("auth.invitation_not_found"))} />
         <p style={{ marginTop: 16 }}>
-          <Link to="/login">Go to sign in</Link>
+          <Link to="/login">{t("auth.go_to_sign_in")}</Link>
         </p>
       </AuthShell>
     );
@@ -280,16 +283,12 @@ export function AcceptInvitePage() {
   const isTenant = inv.role === "tenant";
   return (
     <AuthShell
-      title={isTenant ? "Set up your tenant portal" : `Join ${inv.organization}`}
+      title={isTenant ? t("auth.invite_tenant_title") : t("auth.invite_team_title", { org: inv.organization })}
       subtitle={
         isTenant ? (
-          <>
-            {inv.organization} invited <strong>{inv.email}</strong> to view your lease, payments and maintenance requests.
-          </>
+          <Trans i18nKey="auth.invite_tenant_subtitle" values={{ org: inv.organization, email: inv.email }} components={{ strong: <strong /> }} />
         ) : (
-          <>
-            You've been invited as <strong>{inv.role}</strong> ({inv.email}).
-          </>
+          <Trans i18nKey="auth.invite_team_subtitle" values={{ role: label(inv.role), email: inv.email }} components={{ strong: <strong /> }} />
         )
       }
     >
@@ -302,15 +301,15 @@ export function AcceptInvitePage() {
       >
         <ErrorBox error={accept.error} />
         {!inv.has_account && (
-          <Field label="Your name">
+          <Field label={t("auth.name")}>
             <Input required value={name} onChange={(e) => setName(e.target.value)} autoComplete="name" />
           </Field>
         )}
-        <Field label={inv.has_account ? "Your existing password" : "Choose a password"} hint={inv.has_account ? undefined : "At least 10 characters, including a number or symbol."}>
+        <Field label={inv.has_account ? t("auth.existing_password") : t("auth.choose_password")} hint={inv.has_account ? undefined : t("auth.passwordHint")}>
           <Input type="password" required value={password} onChange={(e) => setPassword(e.target.value)} autoComplete={inv.has_account ? "current-password" : "new-password"} />
         </Field>
         <button className="btn btn-primary btn-block" disabled={accept.isPending}>
-          {accept.isPending ? "Joining…" : "Accept invitation"}
+          {accept.isPending ? t("auth.joining") : t("auth.accept_invitation")}
         </button>
       </form>
     </AuthShell>

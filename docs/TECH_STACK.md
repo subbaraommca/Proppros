@@ -142,6 +142,10 @@ All tenant-scoped tables carry `organization_id`, and every query filters by it.
 | Local DB | Neon dev branch | **SQLite file** by default (`DATABASE_URL` unset); Postgres via `docker compose up` or a Neon branch | Zero-setup local dev |
 | Emails in dev | — | Logged (with links) instead of sent when `RESEND_API_KEY` is blank | Lets you click invite/reset links locally |
 
+### Translations (i18n)
+
+All UI text lives in `frontend/src/locales/en.json`, grouped by area (`nav`, `leases`, `portal`, …); API enum values (statuses, categories, roles) are labelled in the `enums` section and rendered through `label()`. Use `t("section.key")` in components, i18next plural keys (`_one` / `_other`) for counts, and `<Trans>` for sentences with links or bold text. To add a language: copy `en.json` to `<code>.json`, translate the values, register it in `LANGUAGES` in `src/i18n.ts`. `src/locales/locales.test.ts` fails if code uses a missing key or a locale is missing keys. Server-generated text (API error details, emails, PDF receipts) is still English.
+
 ### Ledger model
 
 Balance-forward: each lease has one running balance. Charges are positive, payments and credits negative. A late fee applies when the lease balance is still above zero after `due date + grace days`. Deleting an automatic charge creates a reversal entry instead, so the idempotency key stays and the cron never re-posts it. Voiding a payment removes its ledger entry and marks the payment voided.

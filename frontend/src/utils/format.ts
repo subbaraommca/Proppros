@@ -1,6 +1,13 @@
+import i18n from "../i18n";
+
+/** BCP-47 locale for Intl formatting, following the active UI language. */
+function locale(): string {
+  return i18n.language === "en" ? "en-US" : i18n.language;
+}
+
 export function money(cents: number | null | undefined, currency = "USD"): string {
   if (cents === null || cents === undefined) return "—";
-  return new Intl.NumberFormat("en-US", { style: "currency", currency }).format(cents / 100);
+  return new Intl.NumberFormat(locale(), { style: "currency", currency }).format(cents / 100);
 }
 
 /** "1,250.50" or "1250.5" → 125050. Returns null for blank/invalid input. */
@@ -21,12 +28,12 @@ export function fromCents(cents: number | null | undefined): string {
 export function date(value: string | null | undefined): string {
   if (!value) return "—";
   const [y, m, d] = value.slice(0, 10).split("-").map(Number);
-  return new Date(y, m - 1, d).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
+  return new Date(y, m - 1, d).toLocaleDateString(locale(), { month: "short", day: "numeric", year: "numeric" });
 }
 
 export function dateTime(value: string | null | undefined): string {
   if (!value) return "—";
-  return new Date(value).toLocaleString("en-US", { month: "short", day: "numeric", year: "numeric", hour: "numeric", minute: "2-digit" });
+  return new Date(value).toLocaleString(locale(), { month: "short", day: "numeric", year: "numeric", hour: "numeric", minute: "2-digit" });
 }
 
 export function todayISO(): string {
@@ -34,9 +41,11 @@ export function todayISO(): string {
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
 }
 
+/** Human label for an API enum value (status, category, role…) via the `enums` locale section. */
 export function label(value: string | null | undefined): string {
   if (!value) return "";
-  return value.replace(/_/g, " ").replace(/^\w/, (c) => c.toUpperCase());
+  const fallback = value.replace(/_/g, " ").replace(/^\w/, (c) => c.toUpperCase());
+  return i18n.t(`enums.${value}`, { defaultValue: fallback });
 }
 
 export function fileSize(bytes: number): string {
@@ -47,11 +56,10 @@ export function fileSize(bytes: number): string {
 
 export function monthLabel(period: string): string {
   const [y, m] = period.split("-").map(Number);
-  return new Date(y, m - 1, 1).toLocaleDateString("en-US", { month: "short" });
+  return new Date(y, m - 1, 1).toLocaleDateString(locale(), { month: "short" });
 }
 
+/** 1 → "1st", 22 → "22nd" (language-aware ordinal rules via i18next). */
 export function ordinal(n: number): string {
-  const s = ["th", "st", "nd", "rd"];
-  const v = n % 100;
-  return n + (s[(v - 20) % 10] || s[v] || s[0]);
+  return i18n.t("format.ordinal", { count: n, ordinal: true });
 }

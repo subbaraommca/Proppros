@@ -1,13 +1,14 @@
 import { useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useTranslation } from "react-i18next";
 import { CheckCircle2, DoorOpen, Lock, Plus, Wrench } from "lucide-react";
 import { api } from "../services/api";
 import { useAuth } from "../hooks/useAuth";
 import type { Property, Unit, WorkOrder } from "../types";
 import { PhotoGrid, DocumentsPanel } from "../components/Documents";
 import { Badge, Card, Empty, ErrorBox, Field, Input, Modal, MoneyInput, PageHeader, Select, Spinner, Textarea } from "../components/ui";
-import { dateTime, label, money, toCents, todayISO } from "../utils/format";
+import { date, dateTime, label, money, toCents, todayISO } from "../utils/format";
 import { EXPENSE_CATEGORIES } from "./FinancePages";
 
 export const WO_STATUSES = ["new", "assigned", "scheduled", "in_progress", "completed", "closed"] as const;
@@ -21,13 +22,15 @@ interface Assignee {
 }
 
 function NewWorkOrderModal({ onClose }: { onClose: () => void }) {
+  const { t } = useTranslation();
   const qc = useQueryClient();
   const { data: properties } = useQuery({ queryKey: ["properties", false], queryFn: () => api.get<Property[]>("/properties") });
   const { data: units } = useQuery({ queryKey: ["units"], queryFn: () => api.get<Unit[]>("/units") });
   const { data: assignees } = useQuery({ queryKey: ["assignees"], queryFn: () => api.get<Assignee[]>("/org/assignees") });
   const [f, setF] = useState({ property_id: "", unit_id: "", title: "", description: "", category: "general", priority: "medium", assigned_to_user_id: "" });
   const save = useMutation({
-    mutationFn: () => api.post<WorkOrder>("/work-orders", { ...f, unit_id: f.unit_id || null, assigned_to_user_id: f.assigned_to_user_id || null, description: f.description || null }),
+    mutationFn: () =>
+      api.post<WorkOrder>("/work-orders", { ...f, unit_id: f.unit_id || null, assigned_to_user_id: f.assigned_to_user_id || null, description: f.description || null }),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["work-orders"] });
       onClose();
@@ -36,15 +39,15 @@ function NewWorkOrderModal({ onClose }: { onClose: () => void }) {
   const propUnits = (units ?? []).filter((u) => u.property_id === f.property_id);
   return (
     <Modal
-      title="New work order"
+      title={t("maintenance.new")}
       onClose={onClose}
       footer={
         <>
           <button className="btn" onClick={onClose}>
-            Cancel
+            {t("common.cancel")}
           </button>
           <button className="btn btn-primary" disabled={!f.property_id || !f.title || save.isPending} onClick={() => save.mutate()}>
-            Create
+            {t("maintenance.create")}
           </button>
         </>
       }
@@ -52,28 +55,40 @@ function NewWorkOrderModal({ onClose }: { onClose: () => void }) {
       <div className="form">
         <ErrorBox error={save.error} />
         <div className="form-row">
-          <Field label="Property">
-            <Select value={f.property_id} onChange={(e) => setF({ ...f, property_id: e.target.value, unit_id: "" })} options={[{ value: "", label: "Select…" }, ...(properties ?? []).map((p) => ({ value: p.id, label: p.name }))]} />
+          <Field label={t("common.property")}>
+            <Select
+              value={f.property_id}
+              onChange={(e) => setF({ ...f, property_id: e.target.value, unit_id: "" })}
+              options={[{ value: "", label: t("common.select") }, ...(properties ?? []).map((p) => ({ value: p.id, label: p.name }))]}
+            />
           </Field>
-          <Field label="Unit">
-            <Select value={f.unit_id} onChange={(e) => setF({ ...f, unit_id: e.target.value })} options={[{ value: "", label: "Whole property / common area" }, ...propUnits.map((u) => ({ value: u.id, label: u.name }))]} />
+          <Field label={t("common.unit")}>
+            <Select
+              value={f.unit_id}
+              onChange={(e) => setF({ ...f, unit_id: e.target.value })}
+              options={[{ value: "", label: t("maintenance.whole_property") }, ...propUnits.map((u) => ({ value: u.id, label: u.name }))]}
+            />
           </Field>
         </div>
-        <Field label="Title">
-          <Input value={f.title} onChange={(e) => setF({ ...f, title: e.target.value })} placeholder="Kitchen sink leaking" />
+        <Field label={t("maintenance.title_label")}>
+          <Input value={f.title} onChange={(e) => setF({ ...f, title: e.target.value })} placeholder={t("maintenance.title_placeholder")} />
         </Field>
-        <Field label="Details">
+        <Field label={t("maintenance.details")}>
           <Textarea value={f.description} onChange={(e) => setF({ ...f, description: e.target.value })} />
         </Field>
         <div className="form-row-3">
-          <Field label="Category">
+          <Field label={t("common.category")}>
             <Select value={f.category} onChange={(e) => setF({ ...f, category: e.target.value })} options={WO_CATEGORIES} />
           </Field>
-          <Field label="Priority">
+          <Field label={t("maintenance.priority")}>
             <Select value={f.priority} onChange={(e) => setF({ ...f, priority: e.target.value })} options={WO_PRIORITIES} />
           </Field>
-          <Field label="Assign to">
-            <Select value={f.assigned_to_user_id} onChange={(e) => setF({ ...f, assigned_to_user_id: e.target.value })} options={[{ value: "", label: "Unassigned" }, ...(assignees ?? []).map((a) => ({ value: a.user_id, label: a.name }))]} />
+          <Field label={t("maintenance.assign_to")}>
+            <Select
+              value={f.assigned_to_user_id}
+              onChange={(e) => setF({ ...f, assigned_to_user_id: e.target.value })}
+              options={[{ value: "", label: t("maintenance.unassigned") }, ...(assignees ?? []).map((a) => ({ value: a.user_id, label: a.name }))]}
+            />
           </Field>
         </div>
       </div>
@@ -82,6 +97,7 @@ function NewWorkOrderModal({ onClose }: { onClose: () => void }) {
 }
 
 export function WorkOrdersPage() {
+  const { t } = useTranslation();
   const { can } = useAuth();
   const [creating, setCreating] = useState(false);
   const [showClosed, setShowClosed] = useState(false);
@@ -96,18 +112,18 @@ export function WorkOrdersPage() {
   return (
     <>
       <PageHeader
-        title="Maintenance"
+        title={t("nav.maintenance")}
         actions={
           <>
             <label className="check small">
-              <input type="checkbox" checked={mine} onChange={(e) => setMine(e.target.checked)} /> Assigned to me
+              <input type="checkbox" checked={mine} onChange={(e) => setMine(e.target.checked)} /> {t("maintenance.assigned_to_me")}
             </label>
             <label className="check small">
-              <input type="checkbox" checked={showClosed} onChange={(e) => setShowClosed(e.target.checked)} /> Show closed
+              <input type="checkbox" checked={showClosed} onChange={(e) => setShowClosed(e.target.checked)} /> {t("maintenance.show_closed")}
             </label>
             {canCreate && (
               <button className="btn btn-primary" onClick={() => setCreating(true)}>
-                <Plus size={16} /> New work order
+                <Plus size={16} /> {t("maintenance.new")}
               </button>
             )}
           </>
@@ -118,8 +134,8 @@ export function WorkOrdersPage() {
         <Spinner />
       ) : data?.length === 0 ? (
         <Card>
-          <Empty icon={<Wrench size={40} />} title="No work orders">
-            Tenant requests from the portal show up here, or create one yourself.
+          <Empty icon={<Wrench size={40} />} title={t("maintenance.empty_title")}>
+            {t("maintenance.empty_body")}
           </Empty>
         </Card>
       ) : (
@@ -156,6 +172,7 @@ export function WorkOrdersPage() {
 }
 
 function CompleteModal({ wo, onClose }: { wo: WorkOrder; onClose: () => void }) {
+  const { t } = useTranslation();
   const qc = useQueryClient();
   const [f, setF] = useState({ amount: "", category: "repairs", vendor: "", expense_date: todayISO() });
   const save = useMutation({
@@ -169,35 +186,35 @@ function CompleteModal({ wo, onClose }: { wo: WorkOrder; onClose: () => void }) 
   });
   return (
     <Modal
-      title="Complete & record cost"
+      title={t("maintenance.complete_title")}
       onClose={onClose}
       footer={
         <>
           <button className="btn" onClick={onClose}>
-            Cancel
+            {t("common.cancel")}
           </button>
           <button className="btn btn-primary" disabled={!toCents(f.amount) || save.isPending} onClick={() => save.mutate()}>
-            Complete
+            {t("maintenance.complete")}
           </button>
         </>
       }
     >
       <div className="form">
         <ErrorBox error={save.error} />
-        <p className="small muted">Marks the work order completed and adds the cost to Expenses for this property.</p>
+        <p className="small muted">{t("maintenance.complete_note")}</p>
         <div className="form-row">
-          <Field label="Cost">
+          <Field label={t("maintenance.cost")}>
             <MoneyInput value={f.amount} onChange={(v) => setF({ ...f, amount: v })} autoFocus />
           </Field>
-          <Field label="Date">
+          <Field label={t("common.date")}>
             <Input type="date" value={f.expense_date} onChange={(e) => setF({ ...f, expense_date: e.target.value })} />
           </Field>
         </div>
         <div className="form-row">
-          <Field label="Vendor">
+          <Field label={t("common.vendor")}>
             <Input value={f.vendor} onChange={(e) => setF({ ...f, vendor: e.target.value })} />
           </Field>
-          <Field label="Category">
+          <Field label={t("common.category")}>
             <Select value={f.category} onChange={(e) => setF({ ...f, category: e.target.value })} options={EXPENSE_CATEGORIES} />
           </Field>
         </div>
@@ -207,6 +224,7 @@ function CompleteModal({ wo, onClose }: { wo: WorkOrder; onClose: () => void }) 
 }
 
 export function WorkOrderDetailPage() {
+  const { t } = useTranslation();
   const { id = "" } = useParams();
   const { can } = useAuth();
   const qc = useQueryClient();
@@ -244,24 +262,24 @@ export function WorkOrderDetailPage() {
   return (
     <>
       <PageHeader
-        breadcrumb={<Link to="/maintenance">Maintenance</Link>}
+        breadcrumb={<Link to="/maintenance">{t("nav.maintenance")}</Link>}
         title={
           <>
             #{wo.number} {wo.title}
           </>
         }
-        subtitle={`${wo.property_name}${wo.unit_name ? ` · ${wo.unit_name}` : ""} · opened ${dateTime(wo.created_at)}`}
+        subtitle={`${wo.property_name}${wo.unit_name ? ` · ${wo.unit_name}` : ""} · ${t("maintenance.opened", { date: dateTime(wo.created_at) })}`}
         actions={
           canEdit && (
             <>
               {next[wo.status].map((s) => (
                 <button key={s} className={`btn${s === "completed" ? " btn-primary" : ""}`} onClick={() => update.mutate({ status: s })} disabled={update.isPending}>
-                  {s === "in_progress" && wo.status === "closed" ? "Reopen" : `Mark ${label(s).toLowerCase()}`}
+                  {s === "in_progress" && wo.status === "closed" ? t("maintenance.reopen") : t("maintenance.mark_as", { status: label(s) })}
                 </button>
               ))}
               {can("owner", "manager") && !["completed", "closed"].includes(wo.status) && (
                 <button className="btn" onClick={() => setCompleting(true)}>
-                  <CheckCircle2 size={15} /> Complete with cost
+                  <CheckCircle2 size={15} /> {t("maintenance.complete_with_cost")}
                 </button>
               )}
             </>
@@ -271,10 +289,10 @@ export function WorkOrderDetailPage() {
       <div className="two-col">
         <div className="stack">
           <ErrorBox error={update.error || addComment.error} />
-          <Card title="Description">
-            <p style={{ whiteSpace: "pre-wrap" }}>{wo.description || <span className="muted">No details provided.</span>}</p>
+          <Card title={t("common.description")}>
+            <p style={{ whiteSpace: "pre-wrap" }}>{wo.description || <span className="muted">{t("maintenance.no_details")}</span>}</p>
           </Card>
-          <Card title="Activity">
+          <Card title={t("maintenance.activity")}>
             <div className="timeline">
               {wo.comments?.map((c) => (
                 <div key={c.id} className={`comment${c.is_system ? " system" : c.is_internal ? " internal" : ""}`}>
@@ -289,7 +307,7 @@ export function WorkOrderDetailPage() {
                         <span>{dateTime(c.created_at)}</span>
                         {c.is_internal && (
                           <span>
-                            <Lock size={11} /> Internal
+                            <Lock size={11} /> {t("maintenance.internal")}
                           </span>
                         )}
                       </div>
@@ -301,73 +319,73 @@ export function WorkOrderDetailPage() {
             </div>
             {canComment && (
               <div className="form" style={{ marginTop: 16 }}>
-                <Textarea value={comment} onChange={(e) => setComment(e.target.value)} placeholder="Add a comment…" aria-label="Comment" />
+                <Textarea value={comment} onChange={(e) => setComment(e.target.value)} placeholder={t("maintenance.comment_placeholder")} aria-label={t("maintenance.comment")} />
                 <div style={{ display: "flex", justifyContent: "space-between", gap: 8, flexWrap: "wrap" }}>
                   <label className="check small">
-                    <input type="checkbox" checked={internal} onChange={(e) => setInternal(e.target.checked)} /> Internal note (hidden from tenant)
+                    <input type="checkbox" checked={internal} onChange={(e) => setInternal(e.target.checked)} /> {t("maintenance.internal_note")}
                   </label>
                   <button className="btn btn-primary btn-sm" disabled={!comment.trim() || addComment.isPending} onClick={() => addComment.mutate()}>
-                    Post comment
+                    {t("maintenance.post_comment")}
                   </button>
                 </div>
               </div>
             )}
           </Card>
-          <Card title="Photos">
+          <Card title={t("properties.photos")}>
             <PhotoGrid ownerType="work_order" ownerId={wo.id} canUpload={canComment} />
           </Card>
           <DocumentsPanel ownerType="work_order" ownerId={wo.id} allowTenantShare />
         </div>
         <div className="stack">
-          <Card title="Details">
+          <Card title={t("leases.details")}>
             <dl className="dl">
-              <dt>Status</dt>
+              <dt>{t("common.status")}</dt>
               <dd>
                 <Badge value={wo.status} />
               </dd>
-              <dt>Priority</dt>
+              <dt>{t("maintenance.priority")}</dt>
               <dd>
                 {canEdit ? (
-                  <Select value={wo.priority} onChange={(e) => update.mutate({ priority: e.target.value })} options={WO_PRIORITIES} aria-label="Priority" />
+                  <Select value={wo.priority} onChange={(e) => update.mutate({ priority: e.target.value })} options={WO_PRIORITIES} aria-label={t("maintenance.priority")} />
                 ) : (
                   <Badge value={wo.priority} />
                 )}
               </dd>
-              <dt>Category</dt>
+              <dt>{t("common.category")}</dt>
               <dd>{label(wo.category)}</dd>
-              <dt>Requested by</dt>
-              <dd>{wo.tenant_name ?? "Staff"}</dd>
-              <dt>Entry</dt>
+              <dt>{t("maintenance.requested_by")}</dt>
+              <dd>{wo.tenant_name ?? t("maintenance.staff")}</dd>
+              <dt>{t("maintenance.entry")}</dt>
               <dd>
                 {wo.permission_to_enter ? (
                   <span>
-                    <DoorOpen size={14} /> Permission to enter
+                    <DoorOpen size={14} /> {t("maintenance.permission_to_enter")}
                   </span>
                 ) : (
-                  <span className="muted">Contact tenant first</span>
+                  <span className="muted">{t("maintenance.contact_first")}</span>
                 )}
               </dd>
-              <dt>Assigned</dt>
+              <dt>{t("maintenance.assigned")}</dt>
               <dd>
                 {can("owner", "manager") ? (
                   <Select
                     value={wo.assigned_to_user_id ?? ""}
                     onChange={(e) => update.mutate(e.target.value ? { assigned_to_user_id: e.target.value } : { unassign: true })}
-                    options={[{ value: "", label: "Unassigned" }, ...(assignees ?? []).map((a) => ({ value: a.user_id, label: a.name }))]}
-                    aria-label="Assignee"
+                    options={[{ value: "", label: t("maintenance.unassigned") }, ...(assignees ?? []).map((a) => ({ value: a.user_id, label: a.name }))]}
+                    aria-label={t("maintenance.assignee")}
                   />
                 ) : (
                   wo.assignee_name ?? "—"
                 )}
               </dd>
-              <dt>Scheduled</dt>
+              <dt>{t("enums.scheduled")}</dt>
               <dd>
                 {canEdit ? (
                   <Input
                     type="datetime-local"
                     defaultValue={wo.scheduled_for ? toLocalInput(wo.scheduled_for) : ""}
                     onBlur={(e) => e.target.value && update.mutate({ scheduled_for: new Date(e.target.value).toISOString() })}
-                    aria-label="Scheduled for"
+                    aria-label={t("maintenance.scheduled_for")}
                   />
                 ) : (
                   dateTime(wo.scheduled_for)
@@ -376,12 +394,12 @@ export function WorkOrderDetailPage() {
             </dl>
           </Card>
           {wo.expenses && wo.expenses.length > 0 && (
-            <Card title="Costs">
+            <Card title={t("maintenance.costs")}>
               <ul className="list-plain">
                 {wo.expenses.map((e) => (
                   <li key={e.id}>
                     <span>
-                      {e.vendor ?? label(e.category)} <span className="small muted">· {e.expense_date}</span>
+                      {e.vendor ?? label(e.category)} <span className="small muted">· {date(e.expense_date)}</span>
                     </span>
                     <span className="mono">{money(e.amount_cents)}</span>
                   </li>

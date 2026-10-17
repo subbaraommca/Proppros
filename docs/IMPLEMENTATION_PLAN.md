@@ -30,7 +30,7 @@ This is the step-by-step execution plan. Work is split into **iterations**. Each
 | 5 | Expenses, reports & dashboard | MVP | 🟦 Code done — enter this year's expenses |
 | 6 | Maintenance & work orders | MVP | ✅ |
 | 7 | Tenant portal | MVP | 🟦 Code done — invite a real tenant |
-| 8 | Notifications, documents & audit | MVP | 🟨 i18n partial; needs Resend for real emails |
+| 8 | Notifications, documents & audit | MVP | 🟦 Code done — real email needs a verified sending domain |
 | 9 | Hardening & go-live with own 3 properties | MVP | 🟨 Code hardening done — custom domain, backups check, 1-month trial left |
 | 10 | Online payments (Stripe Connect) | v2 | ⬜ |
 | 11 | SaaS: subscriptions, onboarding, admin | v2 | ⬜ |
@@ -228,7 +228,7 @@ Legend: ⬜ Not started · 🟨 In progress · 🟦 Code complete, waiting on a 
 - [x] Model: `documents` (polymorphic owner, kind, expires_at) + document vault UI
 - [x] Cron: document-expiry alerts (run daily, deduplicated — one email per document per expiry date)
 - [x] Audit log service called from every create/update/delete + audit viewer (Settings → Audit log)
-- [ ] i18n pass: extract all UI strings to `locales/` — *partial: i18next is set up; navigation, auth and portal strings are extracted, page bodies are still English literals*
+- [x] i18n pass: extract all UI strings to `locales/` — *done: ~665 keys in `frontend/src/locales/en.json` (plurals, enum labels, locale-aware money/dates); a test fails if code uses a missing key. Still English: server-generated messages (API errors, emails, PDF receipts, work-order system notes) and the legal pages*
 - [x] Notification preferences per user
 
 **Done when:**
@@ -366,3 +366,4 @@ Record notes when each iteration closes.
 | 2026-10-17 | 0 | Switched hosting config to **Vercel Services** after the first import built only the frontend (Root Directory was `frontend`). `vercel.json` now defines `frontend` (Vite) and `backend` (FastAPI) services; runtime deps moved to `backend/requirements.txt`; `api/index.py` removed (services pass the original path). Cron with services to be confirmed after the first deploy. |
 | 2026-10-17 | 0 | **Deployed** to https://proppros.vercel.app (Vercel Services: Vite frontend + FastAPI backend), Neon Postgres (migration 0001 applied, `alembic check` clean on Postgres), private Vercel Blob. Fixes made during setup: no crash on startup without a DB, private-Blob support, `POSTGRES_URL` fallback, setup diagnostics in `/api/health`. Neon password rotated after it was shared in chat. |
 | 2026-10-17 | 7, 9 | Shareable invite links (copy button) so tenants/team can join without email. Iteration 9 hardening: CSV formula-injection fix, RFC 6266 filenames, CSP + security headers, ErrorBoundary/offline handling, route code-splitting, modal focus management + skip link, draft Privacy/Terms. Verified on production: headers present, no CSP violations on public pages. |
+| 2026-10-17 | 8 | Full UI string extraction to `en.json` (~665 keys across 23 sections), i18next plurals (fixes “1 properties”-style grammar), language-aware ordinals/money/dates, central enum labels, language picker (shown once a 2nd locale exists), and a Vitest guard for missing keys. Checked 23 screens + modals in a browser for raw keys. |

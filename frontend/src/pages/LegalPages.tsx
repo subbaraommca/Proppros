@@ -1,4 +1,5 @@
 import { Link } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { Brand } from "../components/Layout";
 
 /**
@@ -113,6 +114,7 @@ function Terms() {
 }
 
 export function LegalPage({ doc }: { doc: "privacy" | "terms" }) {
+  const { t } = useTranslation();
   return (
     <div className="legal">
       <header className="portal-top">
@@ -120,12 +122,12 @@ export function LegalPage({ doc }: { doc: "privacy" | "terms" }) {
           <Link to="/" style={{ textDecoration: "none" }}>
             <Brand />
           </Link>
-          <nav className="portal-nav" aria-label="Legal">
+          <nav className="portal-nav" aria-label={t("nav.legal_nav")}>
             <Link to="/privacy" className={doc === "privacy" ? "active" : ""}>
-              Privacy
+              {t("nav.privacy")}
             </Link>
             <Link to="/terms" className={doc === "terms" ? "active" : ""}>
-              Terms
+              {t("nav.terms")}
             </Link>
           </nav>
         </div>

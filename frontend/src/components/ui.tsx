@@ -1,6 +1,7 @@
 import { useEffect, useId, useRef, useState, type ReactNode, type InputHTMLAttributes, type SelectHTMLAttributes, type TextareaHTMLAttributes } from "react";
+import { useTranslation } from "react-i18next";
 import { Check, Copy, X } from "lucide-react";
-import { label as fmtLabel } from "../utils/format";
+import { label as fmtLabel, money } from "../utils/format";
 
 export function PageHeader({
   title,
@@ -53,8 +54,9 @@ export function Stat({ label, value, sub, icon }: { label: string; value: ReactN
 }
 
 export function Spinner() {
+  const { t } = useTranslation();
   return (
-    <div className="center-pad" role="status" aria-label="Loading">
+    <div className="center-pad" role="status" aria-label={t("common.loading")}>
       <div className="spinner" />
     </div>
   );
@@ -93,6 +95,7 @@ export function Modal({
   footer?: ReactNode;
   wide?: boolean;
 }) {
+  const { t } = useTranslation();
   const id = useId();
   const ref = useRef<HTMLDivElement>(null);
   const closeRef = useRef(onClose);
@@ -137,7 +140,7 @@ export function Modal({
       <div ref={ref} className={`modal${wide ? " modal-wide" : ""}`} role="dialog" aria-modal="true" aria-labelledby={id}>
         <div className="modal-header">
           <h2 id={id}>{title}</h2>
-          <button className="icon-btn" onClick={onClose} aria-label="Close">
+          <button className="icon-btn" onClick={onClose} aria-label={t("common.close")}>
             <X size={18} />
           </button>
         </div>
@@ -234,17 +237,15 @@ export function Tabs<T extends string>({ tabs, value, onChange }: { tabs: { id: 
 }
 
 export function BalanceText({ cents, currency }: { cents: number; currency?: string }) {
+  const { t } = useTranslation();
   const cls = cents > 0 ? "danger-text" : cents < 0 ? "success-text" : "";
-  const text = new Intl.NumberFormat("en-US", { style: "currency", currency: currency ?? "USD" }).format(Math.abs(cents) / 100);
-  return (
-    <span className={`mono ${cls}`}>
-      {cents < 0 ? `${text} credit` : text}
-    </span>
-  );
+  const text = money(Math.abs(cents), currency ?? "USD");
+  return <span className={`mono ${cls}`}>{cents < 0 ? t("format.credit", { amount: text }) : text}</span>;
 }
 
 /** Invitation link with copy button — shareable by text/WhatsApp when email isn't set up. */
 export function InviteLink({ url, emailSent, email }: { url: string; emailSent: boolean; email?: string | null }) {
+  const { t } = useTranslation();
   const [copied, setCopied] = useState(false);
   const copy = async () => {
     try {
@@ -258,15 +259,15 @@ export function InviteLink({ url, emailSent, email }: { url: string; emailSent: 
   return (
     <div className="stack" style={{ gap: 8 }}>
       <div className={emailSent ? "success-box" : "info-box"}>
-        {emailSent ? `Invitation emailed to ${email}. You can also share this link:` : "The invitation email wasn't sent (email isn't set up yet). Share this link yourself — by text, WhatsApp, or open it in a private window:"}
+        {emailSent ? t("invite.emailed", { email }) : t("invite.not_emailed")}
       </div>
       <div style={{ display: "flex", gap: 6 }}>
-        <input className="input mono" readOnly value={url} onFocus={(e) => e.target.select()} aria-label="Invitation link" />
+        <input className="input mono" readOnly value={url} onFocus={(e) => e.target.select()} aria-label={t("invite.link_label")} />
         <button className="btn" onClick={copy} type="button">
-          {copied ? <Check size={14} /> : <Copy size={14} />} {copied ? "Copied" : "Copy"}
+          {copied ? <Check size={14} /> : <Copy size={14} />} {copied ? t("common.copied") : t("common.copy")}
         </button>
       </div>
-      <p className="small muted">Works once, for 7 days. Anyone with this link can claim the invitation — share it only with the invitee.</p>
+      <p className="small muted">{t("invite.warning")}</p>
     </div>
   );
 }

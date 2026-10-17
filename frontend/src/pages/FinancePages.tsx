@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useTranslation } from "react-i18next";
 import { CreditCard, Download, FileDown, Paperclip, Pencil, Plus, Receipt, Trash2 } from "lucide-react";
 import { api, fileUrl } from "../services/api";
 import { useAuth } from "../hooks/useAuth";
@@ -30,32 +31,33 @@ export const EXPENSE_CATEGORIES = [
 // ── Payments ─────────────────────────────────────────────────────────────────
 
 export function PaymentsPage() {
+  const { t } = useTranslation();
   const { data, error, isLoading } = useQuery({ queryKey: ["payments", "all"], queryFn: () => api.get<Payment[]>("/payments") });
   const total = (data ?? []).filter((p) => !p.voided_at).reduce((s, p) => s + p.amount_cents, 0);
   return (
     <>
-      <PageHeader title="Payments" subtitle="Record payments from a lease page. Online payments arrive in a later release." />
+      <PageHeader title={t("nav.payments")} subtitle={t("payments.page_subtitle")} />
       <ErrorBox error={error} />
       {isLoading ? (
         <Spinner />
       ) : data?.length === 0 ? (
         <Card>
-          <Empty icon={<CreditCard size={40} />} title="No payments yet">
-            Open a lease and click “Record payment” when rent comes in.
+          <Empty icon={<CreditCard size={40} />} title={t("payments.empty_title")}>
+            {t("payments.empty_body")}
           </Empty>
         </Card>
       ) : (
-        <Card pad={false} title={<span className="muted small">{data?.length} payments · {money(total)} total</span>}>
+        <Card pad={false} title={<span className="muted small">{t("payments.summary", { count: data?.length ?? 0, total: money(total) })}</span>}>
           <div className="table-wrap">
             <table className="table">
               <thead>
                 <tr>
-                  <th>Date</th>
-                  <th>Tenant</th>
-                  <th>Property · Unit</th>
-                  <th>Method</th>
-                  <th>Receipt</th>
-                  <th className="num">Amount</th>
+                  <th>{t("common.date")}</th>
+                  <th>{t("enums.tenant")}</th>
+                  <th>{t("leases.property_unit")}</th>
+                  <th>{t("common.method")}</th>
+                  <th>{t("payments.receipt")}</th>
+                  <th className="num">{t("common.amount")}</th>
                   <th />
                 </tr>
               </thead>
@@ -77,7 +79,7 @@ export function PaymentsPage() {
                     <td className="num">{money(p.amount_cents)}</td>
                     <td className="right">
                       {!p.voided_at && (
-                        <a className="icon-btn" href={fileUrl(`/payments/${p.id}/receipt.pdf`)} target="_blank" rel="noreferrer" aria-label="Receipt PDF">
+                        <a className="icon-btn" href={fileUrl(`/payments/${p.id}/receipt.pdf`)} target="_blank" rel="noreferrer" aria-label={t("payments.receipt_pdf")}>
                           <FileDown size={15} />
                         </a>
                       )}
@@ -96,6 +98,7 @@ export function PaymentsPage() {
 // ── Expenses ─────────────────────────────────────────────────────────────────
 
 export function ExpenseModal({ expense, onClose, defaults }: { expense?: Expense; onClose: () => void; defaults?: Partial<Expense> }) {
+  const { t } = useTranslation();
   const qc = useQueryClient();
   const { data: properties } = useQuery({ queryKey: ["properties", false], queryFn: () => api.get<Property[]>("/properties") });
   const { data: units } = useQuery({ queryKey: ["units"], queryFn: () => api.get<Unit[]>("/units") });
@@ -139,15 +142,15 @@ export function ExpenseModal({ expense, onClose, defaults }: { expense?: Expense
   const propUnits = (units ?? []).filter((u) => u.property_id === f.property_id);
   return (
     <Modal
-      title={expense ? "Edit expense" : "Add expense"}
+      title={expense ? t("expenses.edit_title") : t("expenses.add")}
       onClose={onClose}
       footer={
         <>
           <button className="btn" onClick={onClose}>
-            Cancel
+            {t("common.cancel")}
           </button>
           <button className="btn btn-primary" disabled={!f.property_id || !toCents(f.amount) || save.isPending} onClick={() => save.mutate()}>
-            {save.isPending ? "Saving…" : "Save expense"}
+            {save.isPending ? t("common.saving") : t("expenses.save")}
           </button>
         </>
       }
@@ -155,35 +158,39 @@ export function ExpenseModal({ expense, onClose, defaults }: { expense?: Expense
       <div className="form">
         <ErrorBox error={save.error} />
         <div className="form-row">
-          <Field label="Property">
+          <Field label={t("common.property")}>
             <Select
               value={f.property_id}
               onChange={(e) => setF({ ...f, property_id: e.target.value, unit_id: "" })}
-              options={[{ value: "", label: "Select…" }, ...(properties ?? []).map((p) => ({ value: p.id, label: p.name }))]}
+              options={[{ value: "", label: t("common.select") }, ...(properties ?? []).map((p) => ({ value: p.id, label: p.name }))]}
             />
           </Field>
-          <Field label="Unit" hint="(optional)">
-            <Select value={f.unit_id} onChange={(e) => setF({ ...f, unit_id: e.target.value })} options={[{ value: "", label: "Whole property" }, ...propUnits.map((u) => ({ value: u.id, label: u.name }))]} />
+          <Field label={t("common.unit")} hint={t("common.optional_hint")}>
+            <Select
+              value={f.unit_id}
+              onChange={(e) => setF({ ...f, unit_id: e.target.value })}
+              options={[{ value: "", label: t("common.whole_property") }, ...propUnits.map((u) => ({ value: u.id, label: u.name }))]}
+            />
           </Field>
         </div>
         <div className="form-row-3">
-          <Field label="Amount">
+          <Field label={t("common.amount")}>
             <MoneyInput value={f.amount} onChange={(v) => setF({ ...f, amount: v })} />
           </Field>
-          <Field label="Date">
+          <Field label={t("common.date")}>
             <Input type="date" value={f.expense_date} onChange={(e) => setF({ ...f, expense_date: e.target.value })} />
           </Field>
-          <Field label="Category">
+          <Field label={t("common.category")}>
             <Select value={f.category} onChange={(e) => setF({ ...f, category: e.target.value })} options={EXPENSE_CATEGORIES} />
           </Field>
         </div>
-        <Field label="Vendor / payee">
-          <Input value={f.vendor} onChange={(e) => setF({ ...f, vendor: e.target.value })} placeholder="Home Depot, City Water…" />
+        <Field label={t("expenses.vendor_payee")}>
+          <Input value={f.vendor} onChange={(e) => setF({ ...f, vendor: e.target.value })} placeholder={t("expenses.vendor_placeholder")} />
         </Field>
-        <Field label="Description">
+        <Field label={t("common.description")}>
           <Textarea value={f.description} onChange={(e) => setF({ ...f, description: e.target.value })} />
         </Field>
-        <Field label="Receipt" hint={expense?.receipt_document_id ? "(replaces the current receipt)" : "(photo or PDF)"}>
+        <Field label={t("enums.receipt")} hint={expense?.receipt_document_id ? t("expenses.receipt_replace") : t("expenses.receipt_hint")}>
           <input className="input" type="file" accept="image/*,application/pdf" onChange={(e) => setReceipt(e.target.files?.[0] ?? null)} />
         </Field>
       </div>
@@ -192,6 +199,7 @@ export function ExpenseModal({ expense, onClose, defaults }: { expense?: Expense
 }
 
 export function ExpensesPage() {
+  const { t } = useTranslation();
   const { can } = useAuth();
   const qc = useQueryClient();
   const year = new Date().getFullYear();
@@ -207,15 +215,15 @@ export function ExpensesPage() {
   return (
     <>
       <PageHeader
-        title="Expenses"
+        title={t("nav.expenses")}
         actions={
           <>
             <a className="btn" href={fileUrl(`/reports/expenses.csv?start=${filters.start}&end=${filters.end}`)}>
-              <Download size={15} /> CSV
+              <Download size={15} /> {t("common.export_csv")}
             </a>
             {canEdit && (
               <button className="btn btn-primary" onClick={() => setModal({})}>
-                <Plus size={16} /> Add expense
+                <Plus size={16} /> {t("expenses.add")}
               </button>
             )}
           </>
@@ -225,38 +233,48 @@ export function ExpensesPage() {
         <Select
           value={filters.property_id}
           onChange={(e) => setFilters({ ...filters, property_id: e.target.value })}
-          aria-label="Property"
-          options={[{ value: "", label: "All properties" }, ...(properties ?? []).map((p) => ({ value: p.id, label: p.name }))]}
+          aria-label={t("common.property")}
+          options={[{ value: "", label: t("common.all_properties") }, ...(properties ?? []).map((p) => ({ value: p.id, label: p.name }))]}
         />
         <Select
           value={filters.category}
           onChange={(e) => setFilters({ ...filters, category: e.target.value })}
-          aria-label="Category"
-          options={[{ value: "", label: "All categories" }, ...EXPENSE_CATEGORIES.map((c) => ({ value: c, label: label(c) }))]}
+          aria-label={t("common.category")}
+          options={[{ value: "", label: t("common.all_categories") }, ...EXPENSE_CATEGORIES.map((c) => ({ value: c, label: label(c) }))]}
         />
-        <input className="input" type="date" value={filters.start} onChange={(e) => setFilters({ ...filters, start: e.target.value })} aria-label="From" />
-        <input className="input" type="date" value={filters.end} onChange={(e) => setFilters({ ...filters, end: e.target.value })} aria-label="To" />
+        <input className="input" type="date" value={filters.start} onChange={(e) => setFilters({ ...filters, start: e.target.value })} aria-label={t("common.from")} />
+        <input className="input" type="date" value={filters.end} onChange={(e) => setFilters({ ...filters, end: e.target.value })} aria-label={t("common.to")} />
       </div>
       <ErrorBox error={error || remove.error} />
       {isLoading ? (
         <Spinner />
       ) : data?.length === 0 ? (
         <Card>
-          <Empty icon={<Receipt size={40} />} title="No expenses in this range" action={canEdit && <button className="btn btn-primary" onClick={() => setModal({})}>Add expense</button>}>
-            Track repairs, utilities, insurance, taxes and more — with receipt photos.
+          <Empty
+            icon={<Receipt size={40} />}
+            title={t("expenses.empty_title")}
+            action={
+              canEdit && (
+                <button className="btn btn-primary" onClick={() => setModal({})}>
+                  {t("expenses.add")}
+                </button>
+              )
+            }
+          >
+            {t("expenses.empty_body")}
           </Empty>
         </Card>
       ) : (
-        <Card pad={false} title={<span className="muted small">{data?.length} expenses · {money(total)}</span>}>
+        <Card pad={false} title={<span className="muted small">{t("expenses.summary", { count: data?.length ?? 0, total: money(total) })}</span>}>
           <div className="table-wrap">
             <table className="table">
               <thead>
                 <tr>
-                  <th>Date</th>
-                  <th>Property</th>
-                  <th>Category</th>
-                  <th>Vendor / description</th>
-                  <th className="num">Amount</th>
+                  <th>{t("common.date")}</th>
+                  <th>{t("common.property")}</th>
+                  <th>{t("common.category")}</th>
+                  <th>{t("expenses.vendor_description")}</th>
+                  <th className="num">{t("common.amount")}</th>
                   <th />
                 </tr>
               </thead>
@@ -276,16 +294,16 @@ export function ExpensesPage() {
                     <td className="num">{money(e.amount_cents)}</td>
                     <td className="right nowrap">
                       {e.receipt_document_id && (
-                        <a className="icon-btn" href={fileUrl(`/documents/${e.receipt_document_id}/file`)} target="_blank" rel="noreferrer" aria-label="View receipt">
+                        <a className="icon-btn" href={fileUrl(`/documents/${e.receipt_document_id}/file`)} target="_blank" rel="noreferrer" aria-label={t("expenses.view_receipt")}>
                           <Paperclip size={15} />
                         </a>
                       )}
                       {canEdit && (
                         <>
-                          <button className="icon-btn" aria-label="Edit expense" onClick={() => setModal({ expense: e })}>
+                          <button className="icon-btn" aria-label={t("expenses.edit_title")} onClick={() => setModal({ expense: e })}>
                             <Pencil size={15} />
                           </button>
-                          <button className="icon-btn" aria-label="Delete expense" onClick={() => window.confirm("Delete this expense?") && remove.mutate(e.id)}>
+                          <button className="icon-btn" aria-label={t("expenses.delete")} onClick={() => window.confirm(t("expenses.delete_confirm")) && remove.mutate(e.id)}>
                             <Trash2 size={15} />
                           </button>
                         </>
@@ -332,6 +350,7 @@ interface OutstandingRow {
 }
 
 export function ReportsPage() {
+  const { t } = useTranslation();
   const [params, setParams] = useSearchParams();
   const tab = (params.get("tab") as "pnl" | "rentroll" | "outstanding") ?? "pnl";
   const year = new Date().getFullYear();
@@ -343,33 +362,33 @@ export function ReportsPage() {
 
   return (
     <>
-      <PageHeader title="Reports" subtitle="Cash basis: income is payments received; expenses by expense date." />
+      <PageHeader title={t("nav.reports")} subtitle={t("reports.subtitle")} />
       <Tabs
         value={tab}
-        onChange={(t) => setParams({ tab: t })}
+        onChange={(next) => setParams({ tab: next })}
         tabs={[
-          { id: "pnl", label: "Profit & loss" },
-          { id: "rentroll", label: "Rent roll" },
-          { id: "outstanding", label: "Outstanding balances" },
+          { id: "pnl", label: t("reports.pnl") },
+          { id: "rentroll", label: t("reports.rent_roll") },
+          { id: "outstanding", label: t("reports.outstanding") },
         ]}
       />
       {tab === "pnl" && (
         <div className="stack">
           <div className="toolbar">
-            <input className="input" type="date" value={range.start} onChange={(e) => setRange({ ...range, start: e.target.value })} aria-label="From" />
-            <input className="input" type="date" value={range.end} onChange={(e) => setRange({ ...range, end: e.target.value })} aria-label="To" />
+            <input className="input" type="date" value={range.start} onChange={(e) => setRange({ ...range, start: e.target.value })} aria-label={t("common.from")} />
+            <input className="input" type="date" value={range.end} onChange={(e) => setRange({ ...range, end: e.target.value })} aria-label={t("common.to")} />
             <Select
               value={range.group_by}
               onChange={(e) => setRange({ ...range, group_by: e.target.value })}
-              aria-label="Group by"
+              aria-label={t("reports.group_by")}
               options={[
-                { value: "property", label: "By property" },
-                { value: "unit", label: "By unit" },
-                { value: "month", label: "By month" },
+                { value: "property", label: t("reports.by_property") },
+                { value: "unit", label: t("reports.by_unit") },
+                { value: "month", label: t("reports.by_month") },
               ]}
             />
             <a className="btn" href={fileUrl(`/reports/pnl?${pnlQs}&format=csv`)}>
-              <Download size={15} /> CSV
+              <Download size={15} /> {t("common.export_csv")}
             </a>
           </div>
           <ErrorBox error={pnl.error} />
@@ -381,9 +400,9 @@ export function ReportsPage() {
                     <thead>
                       <tr>
                         <th>{label(range.group_by)}</th>
-                        <th className="num">Income</th>
-                        <th className="num">Expenses</th>
-                        <th className="num">Net</th>
+                        <th className="num">{t("chart.income")}</th>
+                        <th className="num">{t("chart.expenses")}</th>
+                        <th className="num">{t("reports.net")}</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -398,14 +417,14 @@ export function ReportsPage() {
                       {pnl.data.rows.length === 0 && (
                         <tr>
                           <td colSpan={4} className="muted">
-                            No income or expenses in this range.
+                            {t("reports.pnl_empty")}
                           </td>
                         </tr>
                       )}
                     </tbody>
                     <tfoot>
                       <tr>
-                        <td>Total</td>
+                        <td>{t("reports.total")}</td>
                         <td className="num">{money(pnl.data.totals.income_cents)}</td>
                         <td className="num">{money(pnl.data.totals.expense_cents)}</td>
                         <td className="num">{money(pnl.data.totals.net_cents)}</td>
@@ -414,9 +433,9 @@ export function ReportsPage() {
                   </table>
                 </div>
               </Card>
-              <Card title="Expenses by category">
+              <Card title={t("reports.by_category")}>
                 {Object.keys(pnl.data.expenses_by_category).length === 0 ? (
-                  <p className="muted">No expenses.</p>
+                  <p className="muted">{t("reports.no_expenses")}</p>
                 ) : (
                   <ul className="list-plain">
                     {Object.entries(pnl.data.expenses_by_category).map(([cat, cents]) => (
@@ -437,34 +456,40 @@ export function ReportsPage() {
           pad={false}
           actions={
             <a className="btn btn-sm" href={fileUrl("/reports/rent-roll?format=csv")}>
-              <Download size={14} /> CSV
+              <Download size={14} /> {t("common.export_csv")}
             </a>
           }
-          title="Rent roll"
+          title={t("reports.rent_roll")}
         >
           <ErrorBox error={roll.error} />
           <div className="table-wrap">
             <table className="table">
               <thead>
                 <tr>
-                  <th>Property · Unit</th>
-                  <th>Status</th>
-                  <th>Tenants</th>
-                  <th>Lease ends</th>
-                  <th className="num">Rent</th>
-                  <th className="num">Market</th>
-                  <th className="num">Balance</th>
+                  <th>{t("leases.property_unit")}</th>
+                  <th>{t("common.status")}</th>
+                  <th>{t("common.tenants")}</th>
+                  <th>{t("reports.lease_ends")}</th>
+                  <th className="num">{t("common.rent")}</th>
+                  <th className="num">{t("reports.market")}</th>
+                  <th className="num">{t("common.balance")}</th>
                 </tr>
               </thead>
               <tbody>
                 {roll.data?.map((r) => (
                   <tr key={r.unit_id}>
                     <td>
-                      {r.lease_id ? <Link to={`/leases/${r.lease_id}`}>{r.property_name} · {r.unit_name}</Link> : `${r.property_name} · ${r.unit_name}`}
+                      {r.lease_id ? (
+                        <Link to={`/leases/${r.lease_id}`}>
+                          {r.property_name} · {r.unit_name}
+                        </Link>
+                      ) : (
+                        `${r.property_name} · ${r.unit_name}`
+                      )}
                     </td>
                     <td>{label(r.status)}</td>
                     <td>{r.tenants || "—"}</td>
-                    <td>{r.lease_id ? (r.lease_end ? date(r.lease_end) : "M-to-M") : "—"}</td>
+                    <td>{r.lease_id ? (r.lease_end ? date(r.lease_end) : t("common.mtm_short")) : "—"}</td>
                     <td className="num">{r.lease_id ? money(r.rent_cents) : "—"}</td>
                     <td className="num muted">{money(r.market_rent_cents)}</td>
                     <td className="num">{r.lease_id ? <BalanceText cents={r.balance_cents} /> : "—"}</td>
@@ -478,10 +503,10 @@ export function ReportsPage() {
       {tab === "outstanding" && (
         <Card
           pad={false}
-          title="Outstanding balances"
+          title={t("reports.outstanding")}
           actions={
             <a className="btn btn-sm" href={fileUrl("/reports/outstanding?format=csv")}>
-              <Download size={14} /> CSV
+              <Download size={14} /> {t("common.export_csv")}
             </a>
           }
         >
@@ -490,10 +515,10 @@ export function ReportsPage() {
             <table className="table">
               <thead>
                 <tr>
-                  <th>Tenants</th>
-                  <th>Property · Unit</th>
-                  <th>Lease</th>
-                  <th className="num">Balance</th>
+                  <th>{t("common.tenants")}</th>
+                  <th>{t("leases.property_unit")}</th>
+                  <th>{t("enums.lease")}</th>
+                  <th className="num">{t("common.balance")}</th>
                 </tr>
               </thead>
               <tbody>
@@ -516,7 +541,7 @@ export function ReportsPage() {
                 {owed.data?.length === 0 && (
                   <tr>
                     <td colSpan={4} className="muted">
-                      Nothing outstanding.
+                      {t("reports.nothing_outstanding")}
                     </td>
                   </tr>
                 )}

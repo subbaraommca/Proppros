@@ -1,5 +1,6 @@
 import { useRef, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useTranslation } from "react-i18next";
 import { Eye, EyeOff, FileText, Image as ImageIcon, Trash2, Upload } from "lucide-react";
 import { api, fileUrl } from "../services/api";
 import type { DocumentRow } from "../types";
@@ -19,7 +20,7 @@ export function UploadButton({
   defaultKind = "other",
   allowTenantShare = false,
   onUploaded,
-  label: btnLabel = "Upload",
+  label: btnLabel,
 }: {
   ownerType: string;
   ownerId: string;
@@ -28,6 +29,7 @@ export function UploadButton({
   onUploaded?: (doc: DocumentRow) => void;
   label?: string;
 }) {
+  const { t } = useTranslation();
   const [open, setOpen] = useState(false);
   const [file, setFile] = useState<File | null>(null);
   const [kind, setKind] = useState(defaultKind);
@@ -57,39 +59,39 @@ export function UploadButton({
   return (
     <>
       <button className="btn btn-sm" onClick={() => setOpen(true)}>
-        <Upload size={14} /> {btnLabel}
+        <Upload size={14} /> {btnLabel ?? t("common.upload")}
       </button>
       {open && (
         <Modal
-          title="Upload document"
+          title={t("documents.upload_title")}
           onClose={() => setOpen(false)}
           footer={
             <>
               <button className="btn" onClick={() => setOpen(false)}>
-                Cancel
+                {t("common.cancel")}
               </button>
               <button className="btn btn-primary" disabled={!file || upload.isPending} onClick={() => upload.mutate()}>
-                {upload.isPending ? "Uploading…" : "Upload"}
+                {upload.isPending ? t("common.uploading") : t("common.upload")}
               </button>
             </>
           }
         >
           <div className="form">
             <ErrorBox error={upload.error} />
-            <Field label="File" hint="PDF, image, video or Office document · max 4 MB">
+            <Field label={t("documents.file")} hint={t("documents.file_hint")}>
               <input className="input" type="file" onChange={(e) => setFile(e.target.files?.[0] ?? null)} />
             </Field>
             <div className="form-row">
-              <Field label="Type">
+              <Field label={t("common.type")}>
                 <Select value={kind} onChange={(e) => setKind(e.target.value)} options={DOC_KINDS} />
               </Field>
-              <Field label="Expires on" hint="(optional)">
+              <Field label={t("documents.expires_on")} hint={t("common.optional_hint")}>
                 <Input type="date" value={expires} onChange={(e) => setExpires(e.target.value)} />
               </Field>
             </div>
             {allowTenantShare && (
               <label className="check">
-                <input type="checkbox" checked={share} onChange={(e) => setShare(e.target.checked)} /> Share with tenant in their portal
+                <input type="checkbox" checked={share} onChange={(e) => setShare(e.target.checked)} /> {t("documents.share_with_tenant")}
               </label>
             )}
           </div>
@@ -100,6 +102,7 @@ export function UploadButton({
 }
 
 export function DocumentList({ docs, showOwner = false, canEdit = true }: { docs: DocumentRow[]; showOwner?: boolean; canEdit?: boolean }) {
+  const { t } = useTranslation();
   const qc = useQueryClient();
   const remove = useMutation({
     mutationFn: (id: string) => api.del(`/documents/${id}`),
@@ -109,7 +112,7 @@ export function DocumentList({ docs, showOwner = false, canEdit = true }: { docs
     mutationFn: (d: DocumentRow) => api.patch(`/documents/${d.id}`, { visible_to_tenant: !d.visible_to_tenant }),
     onSuccess: () => qc.invalidateQueries({ queryKey: ["documents"] }),
   });
-  if (docs.length === 0) return <p className="muted">No documents yet.</p>;
+  if (docs.length === 0) return <p className="muted">{t("documents.none_yet")}</p>;
   return (
     <div className="doc-list">
       <ErrorBox error={remove.error} />
@@ -123,13 +126,13 @@ export function DocumentList({ docs, showOwner = false, canEdit = true }: { docs
             </a>
             <Badge>{label(d.kind)}</Badge>
             {showOwner && d.owner_label && <span className="small muted nowrap">{d.owner_label}</span>}
-            {d.expires_on && <Badge tone={expiringSoon ? "citrine" : ""}>Expires {date(d.expires_on)}</Badge>}
+            {d.expires_on && <Badge tone={expiringSoon ? "citrine" : ""}>{t("documents.expires", { date: date(d.expires_on) })}</Badge>}
             <span className="small muted nowrap">{fileSize(d.size_bytes)}</span>
             {canEdit && ["lease", "unit", "tenant", "work_order"].includes(d.owner_type) && (
               <button
                 className="icon-btn"
-                title={d.visible_to_tenant ? "Shared with tenant — click to hide" : "Not shared — click to share with tenant"}
-                aria-label="Toggle tenant visibility"
+                title={d.visible_to_tenant ? t("documents.shared_title") : t("documents.not_shared_title")}
+                aria-label={t("documents.toggle_share")}
                 onClick={() => toggleShare.mutate(d)}
               >
                 {d.visible_to_tenant ? <Eye size={15} /> : <EyeOff size={15} />}
@@ -138,8 +141,8 @@ export function DocumentList({ docs, showOwner = false, canEdit = true }: { docs
             {canEdit && (
               <button
                 className="icon-btn"
-                aria-label={`Delete ${d.name}`}
-                onClick={() => window.confirm(`Delete ${d.name}?`) && remove.mutate(d.id)}
+                aria-label={t("documents.delete_label", { name: d.name })}
+                onClick={() => window.confirm(t("common.delete_confirm", { name: d.name })) && remove.mutate(d.id)}
               >
                 <Trash2 size={15} />
               </button>
@@ -153,6 +156,7 @@ export function DocumentList({ docs, showOwner = false, canEdit = true }: { docs
 
 /** Documents attached to one record, with upload. */
 export function DocumentsPanel({ ownerType, ownerId, allowTenantShare = false }: { ownerType: string; ownerId: string; allowTenantShare?: boolean }) {
+  const { t } = useTranslation();
   const { can } = useAuth();
   const { data, error } = useQuery({
     queryKey: ["documents", ownerType, ownerId],
@@ -162,7 +166,7 @@ export function DocumentsPanel({ ownerType, ownerId, allowTenantShare = false }:
   return (
     <section className="card">
       <div className="card-header">
-        <h2>Documents</h2>
+        <h2>{t("documents.title")}</h2>
         {canEdit && <UploadButton ownerType={ownerType} ownerId={ownerId} allowTenantShare={allowTenantShare} />}
       </div>
       <div className="card-body">
@@ -175,6 +179,7 @@ export function DocumentsPanel({ ownerType, ownerId, allowTenantShare = false }:
 
 /** Photo grid for properties / work orders. */
 export function PhotoGrid({ ownerType, ownerId, canUpload }: { ownerType: string; ownerId: string; canUpload: boolean }) {
+  const { t } = useTranslation();
   const inputRef = useRef<HTMLInputElement>(null);
   const qc = useQueryClient();
   const { data } = useQuery({
@@ -207,13 +212,13 @@ export function PhotoGrid({ ownerType, ownerId, canUpload }: { ownerType: string
           ))}
         </div>
       ) : (
-        <p className="muted">No photos yet.</p>
+        <p className="muted">{t("documents.no_photos")}</p>
       )}
       {canUpload && (
         <div>
           <input ref={inputRef} type="file" accept="image/*" multiple hidden onChange={(e) => e.target.files && upload.mutate(e.target.files)} />
           <button className="btn btn-sm" onClick={() => inputRef.current?.click()} disabled={upload.isPending}>
-            <Upload size={14} /> {upload.isPending ? "Uploading…" : "Add photos"}
+            <Upload size={14} /> {upload.isPending ? t("common.uploading") : t("documents.add_photos")}
           </button>
         </div>
       )}

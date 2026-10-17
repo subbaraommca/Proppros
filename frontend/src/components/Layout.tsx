@@ -20,10 +20,11 @@ import {
 } from "lucide-react";
 import { useAuth } from "../hooks/useAuth";
 import { api } from "../services/api";
+import { label } from "../utils/format";
 import type { Role } from "../types";
 
 type NavItem = { to: string; key: string; icon: typeof Home; roles?: Role[]; group: keyof typeof GROUP_LABELS };
-const GROUP_LABELS = { portfolio: "Portfolio", money: "Money", operations: "Operations", account: "Account" } as const;
+const GROUP_LABELS = { portfolio: "nav.group_portfolio", money: "nav.group_money", operations: "nav.group_operations", account: "nav.group_account" } as const;
 
 const FINANCE: Role[] = ["owner", "manager", "accountant"];
 const NAV: NavItem[] = [
@@ -69,13 +70,14 @@ export function Brand() {
 }
 
 function VerifyBanner() {
+  const { t } = useTranslation();
   const { me } = useAuth();
   const [sent, setSent] = useState(false);
   if (!me || me.email_verified) return null;
   return (
     <div className="banner">
-      Please verify your email address ({me.email}).
-      {sent ? <span>Sent — check your inbox.</span> : <button onClick={() => api.post("/auth/resend-verification").then(() => setSent(true))}>Resend email</button>}
+      {t("verify.banner", { email: me.email })}
+      {sent ? <span>{t("verify.sent")}</span> : <button onClick={() => api.post("/auth/resend-verification").then(() => setSent(true))}>{t("verify.resend")}</button>}
     </div>
   );
 }
@@ -93,16 +95,16 @@ export function Layout() {
   return (
     <div className="shell">
       <a className="skip-link" href="#main">
-        Skip to content
+        {t("nav.skip")}
       </a>
-      <aside className={`sidebar${open ? " open" : ""}`} aria-label="Main navigation">
+      <aside className={`sidebar${open ? " open" : ""}`} aria-label={t("nav.main_nav")}>
         <Brand />
         {(me?.organizations.length ?? 0) > 1 && (
-          <select className="org-select" value={org?.id} onChange={(e) => switchOrg(e.target.value)} aria-label="Switch portfolio">
+          <select className="org-select" value={org?.id} onChange={(e) => switchOrg(e.target.value)} aria-label={t("nav.switch_portfolio")}>
             {me!.organizations.map((o) => (
               <option key={o.id} value={o.id}>
                 {o.name}
-                {o.role === "tenant" ? " (tenant)" : ""}
+                {o.role === "tenant" ? t("nav.tenant_suffix") : ""}
               </option>
             ))}
           </select>
@@ -113,7 +115,7 @@ export function Layout() {
             if (groupItems.length === 0) return null;
             return (
               <div key={group}>
-                <div className="nav-label eyebrow">{GROUP_LABELS[group]}</div>
+                <div className="nav-label eyebrow">{t(GROUP_LABELS[group])}</div>
                 {groupItems.map(({ to, key, icon: Icon }) => (
                   <NavLink key={to} to={to} end={to === "/"}>
                     <Icon size={17} /> {t(`nav.${key}`)}
@@ -127,11 +129,11 @@ export function Layout() {
           <div className="sidebar-user" title={me?.email}>
             <strong>{me?.name}</strong>
             <span>
-              {org?.role} · {org?.name}
+              {label(org?.role)} · {org?.name}
             </span>
           </div>
           <button className="sidebar-btn" onClick={toggle}>
-            {theme === "dark" ? <Sun size={16} /> : <Moon size={16} />} {theme === "dark" ? "Light mode" : "Dark mode"}
+            {theme === "dark" ? <Sun size={16} /> : <Moon size={16} />} {theme === "dark" ? t("nav.light_mode") : t("nav.dark_mode")}
           </button>
           <button className="sidebar-btn" onClick={() => void logout()}>
             <LogOut size={16} /> {t("nav.signOut")}

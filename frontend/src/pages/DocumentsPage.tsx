@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
+import { useTranslation } from "react-i18next";
 import { FolderOpen } from "lucide-react";
 import { api } from "../services/api";
 import { useAuth } from "../hooks/useAuth";
@@ -9,6 +10,7 @@ import { Card, Empty, ErrorBox, PageHeader, Select, Spinner } from "../component
 import { label } from "../utils/format";
 
 export function DocumentsPage() {
+  const { t } = useTranslation();
   const { org, can } = useAuth();
   const [kind, setKind] = useState("");
   const [owner, setOwner] = useState("");
@@ -23,20 +25,23 @@ export function DocumentsPage() {
   return (
     <>
       <PageHeader
-        title="Documents"
-        subtitle="Every lease, policy, receipt and photo across your portfolio. Add expiry dates to get reminders."
-        actions={org && can("owner", "manager") && <UploadButton ownerType="organization" ownerId={org.id} label="Upload general document" />}
+        title={t("documents.title")}
+        subtitle={t("documents.vault_subtitle")}
+        actions={org && can("owner", "manager") && <UploadButton ownerType="organization" ownerId={org.id} label={t("documents.upload_general")} />}
       />
       <div className="toolbar">
-        <Select value={kind} onChange={(e) => setKind(e.target.value)} aria-label="Type" options={[{ value: "", label: "All types" }, ...DOC_KINDS.map((k) => ({ value: k, label: label(k) }))]} />
+        <Select value={kind} onChange={(e) => setKind(e.target.value)} aria-label={t("common.type")} options={[{ value: "", label: t("documents.all_types") }, ...DOC_KINDS.map((k) => ({ value: k, label: label(k) }))]} />
         <Select
           value={owner}
           onChange={(e) => setOwner(e.target.value)}
-          aria-label="Attached to"
-          options={[{ value: "", label: "Attached to anything" }, ...["organization", "property", "unit", "tenant", "lease", "expense", "work_order"].map((o) => ({ value: o, label: label(o) }))]}
+          aria-label={t("documents.attached_to")}
+          options={[
+            { value: "", label: t("documents.attached_to_anything") },
+            ...["organization", "property", "unit", "tenant", "lease", "expense", "work_order"].map((o) => ({ value: o, label: label(o) })),
+          ]}
         />
         <label className="check small">
-          <input type="checkbox" checked={expiring} onChange={(e) => setExpiring(e.target.checked)} /> Expiring within 60 days
+          <input type="checkbox" checked={expiring} onChange={(e) => setExpiring(e.target.checked)} /> {t("documents.expiring_60")}
         </label>
       </div>
       <ErrorBox error={error} />
@@ -44,8 +49,8 @@ export function DocumentsPage() {
         <Spinner />
       ) : data?.length === 0 ? (
         <Card>
-          <Empty icon={<FolderOpen size={40} />} title="No documents found">
-            Upload documents from a property, tenant, lease or work order page — or add general documents here.
+          <Empty icon={<FolderOpen size={40} />} title={t("documents.none_found")}>
+            {t("documents.none_found_hint")}
           </Empty>
         </Card>
       ) : (

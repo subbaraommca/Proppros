@@ -34,7 +34,7 @@ export function PortalHomePage() {
       <div className="stack">
         {data.leases.length === 0 && (
           <Card>
-            <Empty title="No lease on file yet">Your landlord hasn't linked a lease to your account.</Empty>
+            <Empty title={t("portal.no_lease_title")}>{t("portal.no_lease_body")}</Empty>
           </Card>
         )}
         {active.map((l) => (
@@ -49,27 +49,34 @@ export function PortalHomePage() {
               <div className="muted">
                 {l.next_due_date ? (
                   <>
-                    <CalendarDays size={13} /> {t("portal.nextDue")}: {money(l.monthly_total_cents)} on {date(l.next_due_date)}
+                    <CalendarDays size={13} /> {t("portal.next_due_line", { amount: money(l.monthly_total_cents), date: date(l.next_due_date) })}
                   </>
                 ) : (
-                  "No upcoming rent scheduled"
+                  t("portal.no_upcoming")
                 )}
               </div>
             </div>
             <div className="actions">
               <Link className="btn" to={`/portal/leases/${l.id}`}>
-                View statement
+                {t("portal.view_statement")}
               </Link>
               <Link className="btn btn-primary" to="/portal/maintenance?new=1">
-                <Wrench size={15} /> Request maintenance
+                <Wrench size={15} /> {t("portal.request_maintenance")}
               </Link>
             </div>
           </div>
         ))}
         <div className="grid grid-2">
-          <Card title="Recent payments" actions={<Link to="/portal/payments" className="small">All →</Link>}>
+          <Card
+            title={t("portal.recent_payments")}
+            actions={
+              <Link to="/portal/payments" className="small">
+                {t("common.all_link")}
+              </Link>
+            }
+          >
             {data.recent_payments.length === 0 ? (
-              <p className="muted">No payments yet.</p>
+              <p className="muted">{t("payments.empty_title")}.</p>
             ) : (
               <ul className="list-plain">
                 {data.recent_payments.map((p) => (
@@ -83,22 +90,27 @@ export function PortalHomePage() {
               </ul>
             )}
             <p className="small muted" style={{ marginTop: 12 }}>
-              Pay your landlord as usual (Zelle, check, etc.). Payments appear here once recorded.
+              {t("portal.pay_as_usual")}
             </p>
           </Card>
-          <Card title={t("portal.requests")} actions={<Link to="/portal/maintenance" className="small">All →</Link>}>
-            <p>
-              <strong>{data.open_requests}</strong> open request{data.open_requests === 1 ? "" : "s"}
-            </p>
+          <Card
+            title={t("portal.requests")}
+            actions={
+              <Link to="/portal/maintenance" className="small">
+                {t("common.all_link")}
+              </Link>
+            }
+          >
+            <p>{t("portal.open_requests", { count: data.open_requests })}</p>
           </Card>
         </div>
         {data.leases
           .filter((l) => l.status !== "active")
           .map((l) => (
-            <Card key={l.id} title={`Past lease · ${l.property?.name}`}>
+            <Card key={l.id} title={t("portal.past_lease", { property: l.property?.name })}>
               <p className="muted">
-                {date(l.start_date)} – {date(l.ended_on ?? l.end_date)} · balance <BalanceText cents={l.balance_cents} /> ·{" "}
-                <Link to={`/portal/leases/${l.id}`}>statement</Link>
+                {date(l.start_date)} – {date(l.ended_on ?? l.end_date)} · {t("common.balance")} <BalanceText cents={l.balance_cents} /> ·{" "}
+                <Link to={`/portal/leases/${l.id}`}>{t("portal.statement")}</Link>
               </p>
             </Card>
           ))}
@@ -108,6 +120,7 @@ export function PortalHomePage() {
 }
 
 export function PortalLeasePage() {
+  const { t } = useTranslation();
   const { id = "" } = useParams();
   const lease = useQuery({ queryKey: ["portal-lease", id], queryFn: () => api.get<PortalLease>(`/portal/leases/${id}`) });
   const ledger = useQuery({ queryKey: ["portal-ledger", id], queryFn: () => api.get<LedgerRow[]>(`/portal/leases/${id}/ledger`) });
@@ -116,37 +129,37 @@ export function PortalLeasePage() {
   const l = lease.data;
   return (
     <>
-      <PageHeader breadcrumb={<Link to="/portal">Home</Link>} title={`${l.property?.name} · ${l.unit?.name}`} subtitle={l.property?.address} />
+      <PageHeader breadcrumb={<Link to="/portal">{t("nav.home")}</Link>} title={`${l.property?.name} · ${l.unit?.name}`} subtitle={l.property?.address} />
       <div className="stack">
         <div className="grid grid-3">
           <div className="card stat">
-            <div className="stat-label">Balance</div>
+            <div className="stat-label">{t("common.balance")}</div>
             <div className="stat-value">
               <BalanceText cents={l.balance_cents} />
             </div>
           </div>
           <div className="card stat">
-            <div className="stat-label">Monthly</div>
+            <div className="stat-label">{t("leases.monthly")}</div>
             <div className="stat-value">{money(l.monthly_total_cents)}</div>
-            <div className="stat-sub">due on the {ordinal(l.due_day)}</div>
+            <div className="stat-sub">{t("portal.due_on_the", { day: ordinal(l.due_day) })}</div>
           </div>
           <div className="card stat">
-            <div className="stat-label">Lease term</div>
+            <div className="stat-label">{t("portal.lease_term")}</div>
             <div className="stat-value" style={{ fontSize: 16 }}>
-              {date(l.start_date)} – {l.end_date ? date(l.end_date) : "Month-to-month"}
+              {date(l.start_date)} – {l.end_date ? date(l.end_date) : t("common.month_to_month")}
             </div>
           </div>
         </div>
-        <Card title="Statement" pad={false}>
+        <Card title={t("portal.statement_title")} pad={false}>
           <div className="table-wrap">
             <table className="table">
               <thead>
                 <tr>
-                  <th>Date</th>
-                  <th>Description</th>
-                  <th className="num">Charges</th>
-                  <th className="num">Payments</th>
-                  <th className="num">Balance</th>
+                  <th>{t("common.date")}</th>
+                  <th>{t("common.description")}</th>
+                  <th className="num">{t("ledger.charges")}</th>
+                  <th className="num">{t("ledger.payments")}</th>
+                  <th className="num">{t("common.balance")}</th>
                 </tr>
               </thead>
               <tbody>
@@ -164,7 +177,7 @@ export function PortalLeasePage() {
           </div>
         </Card>
         {l.documents && l.documents.length > 0 && (
-          <Card title="Lease documents">
+          <Card title={t("portal.lease_documents")}>
             <PortalDocList docs={l.documents} />
           </Card>
         )}
@@ -191,16 +204,17 @@ function PortalDocList({ docs }: { docs: DocumentRow[] }) {
 }
 
 export function PortalPaymentsPage() {
+  const { t } = useTranslation();
   const { data, error, isLoading } = useQuery({ queryKey: ["portal-payments"], queryFn: () => api.get<Payment[]>("/portal/payments") });
   return (
     <>
-      <PageHeader title="Payments" subtitle="Download a receipt for any payment." />
+      <PageHeader title={t("nav.payments")} subtitle={t("portal.payments_subtitle")} />
       <ErrorBox error={error} />
       {isLoading ? (
         <Spinner />
       ) : data?.length === 0 ? (
         <Card>
-          <Empty title="No payments yet">Payments appear here once your landlord records them.</Empty>
+          <Empty title={t("payments.empty_title")}>{t("portal.payments_empty_body")}</Empty>
         </Card>
       ) : (
         <Card pad={false}>
@@ -208,10 +222,10 @@ export function PortalPaymentsPage() {
             <table className="table">
               <thead>
                 <tr>
-                  <th>Date</th>
-                  <th>Method</th>
-                  <th>Receipt #</th>
-                  <th className="num">Amount</th>
+                  <th>{t("common.date")}</th>
+                  <th>{t("common.method")}</th>
+                  <th>{t("portal.receipt_number")}</th>
+                  <th className="num">{t("common.amount")}</th>
                   <th />
                 </tr>
               </thead>
@@ -224,7 +238,7 @@ export function PortalPaymentsPage() {
                     <td className="num">{money(p.amount_cents)}</td>
                     <td className="right">
                       <a className="btn btn-sm" href={fileUrl(`/portal/payments/${p.id}/receipt.pdf`)} target="_blank" rel="noreferrer">
-                        <FileDown size={14} /> Receipt
+                        <FileDown size={14} /> {t("payments.receipt")}
                       </a>
                     </td>
                   </tr>
@@ -239,6 +253,7 @@ export function PortalPaymentsPage() {
 }
 
 function NewRequestModal({ onClose }: { onClose: () => void }) {
+  const { t } = useTranslation();
   const qc = useQueryClient();
   const navigate = useNavigate();
   const [f, setF] = useState({ title: "", description: "", category: "general", priority: "medium", permission_to_enter: false });
@@ -261,51 +276,51 @@ function NewRequestModal({ onClose }: { onClose: () => void }) {
   });
   return (
     <Modal
-      title="New maintenance request"
+      title={t("portal.new_request_title")}
       onClose={onClose}
       footer={
         <>
           <button className="btn" onClick={onClose}>
-            Cancel
+            {t("common.cancel")}
           </button>
           <button className="btn btn-primary" disabled={!f.title || save.isPending} onClick={() => save.mutate()}>
-            {save.isPending ? "Submitting…" : "Submit request"}
+            {save.isPending ? t("portal.submitting") : t("portal.submit_request")}
           </button>
         </>
       }
     >
       <div className="form">
         <ErrorBox error={save.error} />
-        <Field label="What's the problem?">
-          <Input value={f.title} onChange={(e) => setF({ ...f, title: e.target.value })} placeholder="Dishwasher not draining" autoFocus />
+        <Field label={t("portal.problem")}>
+          <Input value={f.title} onChange={(e) => setF({ ...f, title: e.target.value })} placeholder={t("portal.problem_placeholder")} autoFocus />
         </Field>
-        <Field label="Details" hint="where, when it started, anything you've tried">
+        <Field label={t("maintenance.details")} hint={t("portal.details_hint")}>
           <Textarea value={f.description} onChange={(e) => setF({ ...f, description: e.target.value })} />
         </Field>
         <div className="form-row">
-          <Field label="Category">
+          <Field label={t("common.category")}>
             <Select value={f.category} onChange={(e) => setF({ ...f, category: e.target.value })} options={WO_CATEGORIES} />
           </Field>
-          <Field label="Urgency">
+          <Field label={t("portal.urgency")}>
             <Select
               value={f.priority}
               onChange={(e) => setF({ ...f, priority: e.target.value })}
               options={[
-                { value: "low", label: "Low — whenever convenient" },
-                { value: "medium", label: "Medium — this week" },
-                { value: "high", label: "High — as soon as possible" },
-                { value: "emergency", label: "Emergency — flooding, no heat, gas" },
+                { value: "low", label: t("portal.urgency_low") },
+                { value: "medium", label: t("portal.urgency_medium") },
+                { value: "high", label: t("portal.urgency_high") },
+                { value: "emergency", label: t("portal.urgency_emergency") },
               ]}
             />
           </Field>
         </div>
-        {f.priority === "emergency" && <div className="error-box">For fire, gas leaks or anything dangerous, call 911 first.</div>}
-        <Field label="Photos or video" hint="(optional, up to 4 MB each)">
+        {f.priority === "emergency" && <div className="error-box">{t("portal.emergency_warning")}</div>}
+        <Field label={t("portal.photos_video")} hint={t("portal.photos_hint")}>
           <input className="input" type="file" accept="image/*,video/*" multiple onChange={(e) => setFiles(Array.from(e.target.files ?? []))} />
         </Field>
         <label className="check">
           <input type="checkbox" checked={f.permission_to_enter} onChange={(e) => setF({ ...f, permission_to_enter: e.target.checked })} />
-          Maintenance may enter if I'm not home
+          {t("portal.permission_to_enter")}
         </label>
       </div>
     </Modal>
@@ -313,15 +328,16 @@ function NewRequestModal({ onClose }: { onClose: () => void }) {
 }
 
 export function PortalMaintenancePage() {
+  const { t } = useTranslation();
   const [creating, setCreating] = useState(() => new URLSearchParams(window.location.search).get("new") === "1");
   const { data, error, isLoading } = useQuery({ queryKey: ["portal-requests"], queryFn: () => api.get<WorkOrder[]>("/portal/work-orders") });
   return (
     <>
       <PageHeader
-        title="Maintenance"
+        title={t("nav.maintenance")}
         actions={
           <button className="btn btn-primary" onClick={() => setCreating(true)}>
-            <Plus size={16} /> New request
+            <Plus size={16} /> {t("portal.newRequest")}
           </button>
         }
       />
@@ -330,8 +346,16 @@ export function PortalMaintenancePage() {
         <Spinner />
       ) : data?.length === 0 ? (
         <Card>
-          <Empty icon={<Wrench size={40} />} title="No requests yet" action={<button className="btn btn-primary" onClick={() => setCreating(true)}>Submit a request</button>}>
-            Something broken? Let your landlord know and track the repair here.
+          <Empty
+            icon={<Wrench size={40} />}
+            title={t("portal.requests_empty_title")}
+            action={
+              <button className="btn btn-primary" onClick={() => setCreating(true)}>
+                {t("portal.submit_a_request")}
+              </button>
+            }
+          >
+            {t("portal.requests_empty_body")}
           </Empty>
         </Card>
       ) : (
@@ -341,9 +365,9 @@ export function PortalMaintenancePage() {
               <thead>
                 <tr>
                   <th>#</th>
-                  <th>Request</th>
-                  <th>Status</th>
-                  <th>Updated</th>
+                  <th>{t("portal.request")}</th>
+                  <th>{t("common.status")}</th>
+                  <th>{t("portal.updated")}</th>
                 </tr>
               </thead>
               <tbody>
@@ -372,6 +396,7 @@ export function PortalMaintenancePage() {
 }
 
 export function PortalWorkOrderPage() {
+  const { t } = useTranslation();
   const { id = "" } = useParams();
   const qc = useQueryClient();
   const fileRef = useRef<HTMLInputElement>(null);
@@ -402,24 +427,24 @@ export function PortalWorkOrderPage() {
   return (
     <>
       <PageHeader
-        breadcrumb={<Link to="/portal/maintenance">Maintenance</Link>}
+        breadcrumb={<Link to="/portal/maintenance">{t("nav.maintenance")}</Link>}
         title={
           <>
             #{wo.number} {wo.title}
           </>
         }
-        subtitle={<>Submitted {dateTime(wo.created_at)}</>}
+        subtitle={t("portal.submitted_on", { date: dateTime(wo.created_at) })}
         actions={<Badge value={wo.status} />}
       />
       <div className="two-col">
         <div className="stack">
           <ErrorBox error={post.error || upload.error} />
           {wo.description && (
-            <Card title="Details">
+            <Card title={t("maintenance.details")}>
               <p style={{ whiteSpace: "pre-wrap" }}>{wo.description}</p>
             </Card>
           )}
-          <Card title="Updates">
+          <Card title={t("portal.updates")}>
             <div className="timeline">
               {wo.comments?.map((c) => (
                 <div key={c.id} className={`comment${c.is_system ? " system" : ""}`}>
@@ -441,10 +466,10 @@ export function PortalWorkOrderPage() {
             </div>
             {wo.status !== "closed" && (
               <div className="form" style={{ marginTop: 16 }}>
-                <Textarea value={comment} onChange={(e) => setComment(e.target.value)} placeholder="Add a message for your landlord…" aria-label="Message" />
+                <Textarea value={comment} onChange={(e) => setComment(e.target.value)} placeholder={t("portal.message_placeholder")} aria-label={t("portal.message")} />
                 <div>
                   <button className="btn btn-primary btn-sm" disabled={!comment.trim() || post.isPending} onClick={() => post.mutate()}>
-                    Send
+                    {t("portal.send")}
                   </button>
                 </div>
               </div>
@@ -452,27 +477,27 @@ export function PortalWorkOrderPage() {
           </Card>
         </div>
         <div className="stack">
-          <Card title="Request">
+          <Card title={t("portal.request")}>
             <dl className="dl">
-              <dt>Status</dt>
+              <dt>{t("common.status")}</dt>
               <dd>
                 <Badge value={wo.status} />
               </dd>
-              <dt>Category</dt>
+              <dt>{t("common.category")}</dt>
               <dd>{label(wo.category)}</dd>
-              <dt>Urgency</dt>
+              <dt>{t("portal.urgency")}</dt>
               <dd>
                 <Badge value={wo.priority} />
               </dd>
               {wo.scheduled_for && (
                 <>
-                  <dt>Scheduled</dt>
+                  <dt>{t("enums.scheduled")}</dt>
                   <dd>{dateTime(wo.scheduled_for)}</dd>
                 </>
               )}
             </dl>
           </Card>
-          <Card title="Photos">
+          <Card title={t("properties.photos")}>
             {photos.length > 0 ? (
               <div className="photo-grid">
                 {photos.map((p) => (
@@ -482,14 +507,14 @@ export function PortalWorkOrderPage() {
                 ))}
               </div>
             ) : (
-              <p className="muted small">No photos.</p>
+              <p className="muted small">{t("portal.no_photos")}</p>
             )}
             {others.length > 0 && <PortalDocList docs={others} />}
             {wo.status !== "closed" && (
               <div style={{ marginTop: 12 }}>
                 <input ref={fileRef} type="file" accept="image/*,video/*" multiple hidden onChange={(e) => e.target.files && upload.mutate(e.target.files)} />
                 <button className="btn btn-sm" onClick={() => fileRef.current?.click()} disabled={upload.isPending}>
-                  <Upload size={14} /> {upload.isPending ? "Uploading…" : "Add photos"}
+                  <Upload size={14} /> {upload.isPending ? t("common.uploading") : t("documents.add_photos")}
                 </button>
               </div>
             )}
@@ -501,16 +526,17 @@ export function PortalWorkOrderPage() {
 }
 
 export function PortalDocumentsPage() {
+  const { t } = useTranslation();
   const { data, error, isLoading } = useQuery({ queryKey: ["portal-docs"], queryFn: () => api.get<DocumentRow[]>("/portal/documents") });
   return (
     <>
-      <PageHeader title="Documents" subtitle="Documents your landlord has shared with you." />
+      <PageHeader title={t("documents.title")} subtitle={t("portal.documents_subtitle")} />
       <ErrorBox error={error} />
       {isLoading ? (
         <Spinner />
       ) : data?.length === 0 ? (
         <Card>
-          <Empty icon={<FolderOpen size={40} />} title="No shared documents" />
+          <Empty icon={<FolderOpen size={40} />} title={t("portal.no_shared_documents")} />
         </Card>
       ) : (
         <Card>
