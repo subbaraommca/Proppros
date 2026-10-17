@@ -1,5 +1,6 @@
 """Health check, audit log viewer, notification log and cron endpoints."""
 import hmac
+import os
 import uuid
 
 from fastapi import APIRouter, Depends, Header, HTTPException, Query
@@ -29,6 +30,10 @@ def health():
             "status": "degraded",
             "db": "not_configured",
             "hint": "Connect Neon Postgres in Vercel → Storage so DATABASE_URL is set, then redeploy.",
+            # Names only (never values) of database-like variables this deployment can see.
+            "database_env_names_seen": sorted(
+                k for k in os.environ if any(w in k.upper() for w in ("DATABASE", "POSTGRES", "NEON", "PGHOST"))
+            ),
             "storage": _storage_status(),
             "environment": settings.environment,
         }

@@ -67,6 +67,11 @@ class Settings(BaseSettings):
 
     @model_validator(mode="after")
     def validate_production(self) -> "Settings":
+        # Neon/Vercel may provide the standard POSTGRES_* names instead of DATABASE_URL*.
+        if self.database_url.startswith("sqlite") and os.environ.get("POSTGRES_URL"):
+            self.database_url = os.environ["POSTGRES_URL"]
+        if not self.database_url_unpooled and os.environ.get("POSTGRES_URL_NON_POOLING"):
+            self.database_url_unpooled = os.environ["POSTGRES_URL_NON_POOLING"]
         # Neon / Vercel provide "postgres://" or "postgresql://"; SQLAlchemy needs the psycopg driver.
         for attr in ("database_url", "database_url_unpooled"):
             url = getattr(self, attr)
