@@ -31,7 +31,7 @@ This is the step-by-step execution plan. Work is split into **iterations**. Each
 | 6 | Maintenance & work orders | MVP | ✅ |
 | 7 | Tenant portal | MVP | 🟦 Code done — invite a real tenant |
 | 8 | Notifications, documents & audit | MVP | 🟨 i18n partial; needs Resend for real emails |
-| 9 | Hardening & go-live with own 3 properties | MVP | ⬜ |
+| 9 | Hardening & go-live with own 3 properties | MVP | 🟨 Code hardening done — custom domain, backups check, 1-month trial left |
 | 10 | Online payments (Stripe Connect) | v2 | ⬜ |
 | 11 | SaaS: subscriptions, onboarding, admin | v2 | ⬜ |
 | 12 | Leasing workflows (templates, e-sign, renewals) | v2 | ⬜ |
@@ -238,13 +238,13 @@ Legend: ⬜ Not started · 🟨 In progress · 🟦 Code complete, waiting on a 
 
 ## Iteration 9 — Hardening & go-live
 
-- [ ] Security review: auth flows, org isolation, upload access (signed URLs only), rate limits
+- [x] Security review: auth flows, org isolation, upload access, rate limits — *fixed CSV formula injection, non-ASCII download names; added CSP/X-Frame-Options/Permissions-Policy; uploads are private Blob streamed after permission checks. Open: rate limits are per-instance until Upstash is configured*
 - [ ] Backups: confirm Neon point-in-time restore; test a restore to a branch
-- [ ] Error handling and empty/loading states on every screen
-- [ ] Performance: DB indexes on `organization_id` + foreign keys *(indexes done)*; check cold start time
-- [ ] Accessibility pass (keyboard, contrast, labels) *(contrast done: all Strata text pairs ≥ 4.5:1, CVD-safe chart pair; keyboard and screen-reader pass still to do)*
+- [x] Error handling and empty/loading states on every screen — *ErrorBoundary recovery screen, offline message, network retries*
+- [x] Performance: DB indexes on `organization_id` + foreign keys; check cold start time — *route code-splitting cut initial JS 498 → 259 kB; live `/api/health` ≈ 0.6–0.9 s*
+- [ ] Accessibility pass (keyboard, contrast, labels) *(done: contrast ≥ 4.5:1, CVD-safe chart, modal focus trap/restore, skip link, labelled icon buttons. Open: a screen-reader walkthrough)*
 - [ ] Custom domain on Vercel + SSL
-- [ ] Privacy policy and terms pages
+- [x] Privacy policy and terms pages — *drafts at /privacy and /terms; set `CONTACT_EMAIL` in `frontend/src/pages/LegalPages.tsx` and have them reviewed before onboarding other landlords*
 - [ ] Use it for one full month for all 3 properties, and log issues found
 
 **Done when:**
@@ -365,3 +365,4 @@ Record notes when each iteration closes.
 | 2026-10-17 | UI | Adopted the "Strata" design system ([DESIGN_GUIDELINES.md](DESIGN_GUIDELINES.md)), adapted from the principles in HEX_DESIGN_SYSTEM.md: dark-first Basalt + Limestone themes, mineral accents with one job each, Archivo/DM Sans/JetBrains Mono, sharp radii, borders over shadows, noise texture. All text pairs ≥ 4.5:1; chart pair validated for colorblind safety. Checked by screenshots at 1440px and 390px in both themes. |
 | 2026-10-17 | 0 | Switched hosting config to **Vercel Services** after the first import built only the frontend (Root Directory was `frontend`). `vercel.json` now defines `frontend` (Vite) and `backend` (FastAPI) services; runtime deps moved to `backend/requirements.txt`; `api/index.py` removed (services pass the original path). Cron with services to be confirmed after the first deploy. |
 | 2026-10-17 | 0 | **Deployed** to https://proppros.vercel.app (Vercel Services: Vite frontend + FastAPI backend), Neon Postgres (migration 0001 applied, `alembic check` clean on Postgres), private Vercel Blob. Fixes made during setup: no crash on startup without a DB, private-Blob support, `POSTGRES_URL` fallback, setup diagnostics in `/api/health`. Neon password rotated after it was shared in chat. |
+| 2026-10-17 | 7, 9 | Shareable invite links (copy button) so tenants/team can join without email. Iteration 9 hardening: CSV formula-injection fix, RFC 6266 filenames, CSP + security headers, ErrorBoundary/offline handling, route code-splitting, modal focus management + skip link, draft Privacy/Terms. Verified on production: headers present, no CSP violations on public pages. |
