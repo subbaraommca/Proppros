@@ -54,3 +54,16 @@ npm run typecheck          # TypeScript
 npx expo install --check   # dependency versions match the Expo SDK
 npx expo export --platform android   # full native bundle build
 ```
+
+## Keeping the SDK current
+
+Expo Go from the app stores only opens projects on the **current** Expo SDK. When Expo releases a new SDK (roughly every 3–4 months), upgrade with:
+
+```bash
+npm install expo@~<new-version>
+npx expo install --fix
+npx expo-doctor
+npm run typecheck
+```
+
+Store builds made with EAS don't depend on Expo Go, so released apps keep working, but stay within the last two SDKs so Apple and Google accept new submissions.

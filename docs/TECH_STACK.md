@@ -194,7 +194,7 @@ Stripe Connect **Express** with **destination charges**: each owner onboards the
 
 ### Mobile app (Iteration 18)
 
-- `mobile/` — Expo SDK 54, Expo Router (file-based routes: `app/(staff)/…`, `app/(tenant)/…`), TanStack Query, `expo-secure-store` for the token (localStorage in the web preview), `expo-image-picker` + `expo-image-manipulator` for photos, `expo-notifications` for push, `expo-web-browser` for Stripe Checkout. Strata tokens in `mobile/src/theme/tokens.ts`; fonts via `@expo-google-fonts`.
+- `mobile/` — Expo SDK 57, Expo Router (file-based routes: `app/(staff)/…`, `app/(tenant)/…`), TanStack Query, `expo-secure-store` for the token (localStorage in the web preview), `expo-image-picker` + `expo-image-manipulator` for photos, `expo-notifications` for push, `expo-web-browser` for Stripe Checkout. Strata tokens in `mobile/src/theme/tokens.ts`; fonts via `@expo-google-fonts`.
 - **Auth:** `POST /api/auth/token` → `{access_token, me}` (or the 2FA step, then `/api/auth/token/mfa`). The API already accepted `Authorization: Bearer`; the app sends it plus `X-Org-Id`. A web sign-out (`/auth/logout`) bumps `token_version` and also signs out phones.
 - **Push:** `push_devices` (Expo push token per phone). `app/services/push.py` posts to `https://exp.host/--/api/v2/push/send` in batches of 100, deletes tokens Expo reports as `DeviceNotRegistered`, and never raises. `PUSH_ENABLED=false` keeps pushes in an outbox (tests). `EXPO_ACCESS_TOKEN` only if Expo's enhanced push security is turned on.
 - **CORS:** off by default. `CORS_ORIGINS` exists only for the Expo web preview; native apps don't use CORS.
