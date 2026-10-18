@@ -1,7 +1,7 @@
 # Proppros Design Guidelines — "Strata"
 
-> **Version:** 1.0 · **Date:** 2026-10-17
-> **Implements:** `frontend/src/styles.css` (all tokens live there)
+> **Version:** 1.1 · **Date:** 2026-10-18 (added §10 Mobile app)
+> **Implements:** `frontend/src/styles.css` (web tokens) and `mobile/src/theme/tokens.ts` (app tokens)
 > **Inspired by:** the principles of an external design-system reference ("HEX_DESIGN_SYSTEM.md", not kept in this repo). Proppros uses its own palette, names and freely licensed fonts. Never copy Hex's brand colors or typefaces.
 
 Strata is named for the mineral layers under every property: dark bedrock surfaces, warm mineral accents, and layers stacked by tone rather than shadow. Proppros is a working tool that landlords open every day to check money, leases and repairs. So the design goal is **calm, premium and very legible**, not flashy.
@@ -193,3 +193,107 @@ Plain, short, landlord-friendly words: "Record payment", "End lease", "Balance d
 **Do:** use tokens for every color, radius and font. Use the layer scale for depth. Keep one primary button per area. Use mono for numbers in tables. Keep corners sharp.
 
 **Don't:** hard-code hex values in components. Use pure black or pure white backgrounds in dark mode. Use radii above 8px on cards or buttons. Use colored text for whole paragraphs. Reuse status colors as chart series. Stack shadows on cards. Use the editorial serif in controls.
+
+---
+
+## 10. Mobile app (Expo)
+
+The app (`mobile/`) is the same product in a pocket: the same minerals, type and voice, adapted to thumbs, small screens and the iOS/Android conventions people already know. Rules from §1–§9 apply unless this section says otherwise.
+
+### 10.1 Tokens and themes
+
+- All colors come from `mobile/src/theme/tokens.ts`, a copy of the web `--pp-*` values (Basalt `dark`, Limestone `light`). When a web token changes, change it there too.
+- The app **follows the phone's appearance setting** (dark or light). If the system gives no answer, use Basalt.
+- No paper texture on mobile: flat `bg` keeps scrolling smooth and saves battery.
+- Status bar: light content on Basalt, dark content on Limestone.
+
+### 10.2 Type
+
+Same families, loaded with `@expo-google-fonts` (Archivo, DM Sans, JetBrains Mono, all OFL). Until the fonts have loaded, keep the splash screen up. Never flash system fonts.
+
+| Role | Size / line-height | Family |
+|---|---|---|
+| Screen title | 24 / 30 | Archivo 700 |
+| Hero figure (balance due) | 36 / 40 | Archivo 700 |
+| Stat value | 22 / 26 | Archivo 700 |
+| Section title | 16 / 22 | Archivo 600 |
+| Body, list rows, inputs | **16 / 22** | DM Sans 400 |
+| Secondary | 14 / 20 | DM Sans 400 |
+| Eyebrow / badge | 11 / 14, uppercase, tracking 0.08em | JetBrains Mono 500 |
+| Money in lists | 16 | JetBrains Mono 500, right-aligned |
+
+- Body is 16, not the web's 14. That's the comfortable reading size on phones, and inputs under 16 make the browser zoom on web builds.
+- **Respect Dynamic Type / font scaling** up to 1.3× (`maxFontSizeMultiplier={1.3}`). Layouts must wrap, not clip, at that size.
+
+### 10.3 Touch and layout
+
+- **Touch targets ≥ 44×44 pt** (iOS) / 48×48 dp (Android). Small icons get padding, not tiny hit areas (`hitSlop`).
+- Screen padding 16. Card padding 16. Gap between cards 12.
+- Respect safe areas (notch, home indicator, Android navigation bar) on every screen.
+- **Lists, not tables.** Each row: title (body), one muted meta line, right-aligned mono amount or a badge, and a chevron when it opens something. Rows are at least 56 tall with `borderSubtle` dividers.
+- Pull to refresh on every list. A skeleton or spinner appears only after 300ms.
+- No sideways scrolling, except deliberate horizontal chips/photo strips.
+
+### 10.4 Navigation
+
+- **Bottom tab bar** with at most 5 tabs, always icon (Lucide, 22px, stroke 1.75) **plus label**. Active tab: carnelian icon and label. Inactive: `textMuted`. Tab bar uses `surface` with a 1px `border` top line.
+- Owner tabs: **Home · Repairs · Messages · Money · More**. Tenant tabs: **Home · Repairs · Messages · More**. Tab labels stay one short word ("Repairs" rather than "Maintenance") so five fit on a 360pt-wide phone without truncation; screens inside keep the full wording.
+- The Home tab's header shows the portfolio name, not "Home".
+- Drill-down uses native stack navigation with a back button and the iOS swipe-back gesture; Android hardware back must always work.
+- Unread messages show a small carnelian count badge on the tab icon.
+
+### 10.5 Actions and forms
+
+- **One primary action per screen**, in the thumb zone: a full-width primary button (48 tall, 0 radius) pinned above the home indicator on forms, or at the bottom of the content on detail screens.
+- Forms are one column. Labels sit above fields, in DM Sans 500 14. Inputs are 48 tall, with radius 6 and a 1px `border`. The focused field gets a carnelian border.
+- Use the right keyboard: `decimal-pad` for money (with a `$` prefix), `email-address`, `phone-pad`, `number-pad` for 2FA codes (with `textContentType="oneTimeCode"` so iOS can autofill).
+- Forms stay above the keyboard (`KeyboardAvoidingView`), and the keyboard's return key moves to the next field.
+- Destructive actions use a native confirmation dialog (`Alert`) with the destructive button styled as such.
+- After a successful action, show a short inline confirmation ("Payment recorded") and return to the list. Don't use a modal for good news.
+
+### 10.6 Camera, photos and files
+
+- Ask for camera or photo permission **at the moment it's needed**, after the user taps "Take photo". Never ask at launch. If they deny, explain how to enable it in Settings.
+- Offer both **Take photo** and **Choose from library**.
+- Downscale before upload (long edge ≤ 1600px, JPEG quality 0.7). Show a thumbnail and upload progress, and let the user remove a photo before sending.
+- Receipts and documents open in the system viewer or browser, not an in-app PDF renderer.
+
+### 10.7 Push notifications
+
+- Ask for notification permission **after sign-in, with context** (e.g. "Get notified about repairs and messages"), not on first launch.
+- Notification copy: title ≤ 40 characters, which says who or what ("Request #12: In progress"); body ≤ 120 characters. Never put balances, codes or personal data in a notification.
+- Tapping a notification deep-links to the exact screen (work order, conversation, notice).
+- Android uses a single `default` channel named "Proppros updates" with high importance.
+
+### 10.8 Payments
+
+- Rent is paid in Stripe's hosted checkout, opened with the in-app browser (`expo-web-browser`). The app never shows card fields.
+- When online payments are off, the Pay button is replaced by the landlord's instructions ("Pay as you usually do"), not a disabled button.
+
+### 10.9 States and offline
+
+- When the device is offline, show a slim citrine banner ("You're offline — changes will be sent when you reconnect") and keep what's on screen. Never lose text the user typed. Forms keep their draft until sent.
+- Errors use plain words (same voice as §7) and a **Try again** action. HTTP codes never appear.
+- Empty states: muted 32px icon, one line, one action. Same content as the web, shorter words.
+
+### 10.10 Motion and feedback
+
+- Use native transitions only. Custom animations ≤ 200ms, and they turn off when the system's **Reduce Motion** is on.
+- Light haptic feedback (iOS) on success actions, such as payment recorded or request sent. No haptics on errors or scrolling.
+
+### 10.11 Accessibility (in addition to §8)
+
+- Every icon-only control has an `accessibilityLabel`. Buttons, links, tabs and toggles set `accessibilityRole`.
+- Status stays in words, never color alone. Badges and balances read correctly in VoiceOver and TalkBack ("Balance 925 dollars, owed").
+- Test every screen at the largest font size and with VoiceOver/TalkBack order before release.
+
+### 10.12 App icon and splash
+
+- Icon: the carnelian house mark on Basalt (`#111217`), with no text and no gradient. Android adaptive icon uses the same mark with safe-zone padding.
+- Splash: Basalt background with the mark centered, held until fonts and the session check finish.
+
+### 10.13 Mobile do / don't
+
+**Do:** keep screens to one job. Put the main action under the thumb. Show money in mono. Follow the phone's dark/light setting. Request permissions in context.
+
+**Don't:** shrink web tables onto a phone. Hide labels under icons. Ask for every permission at launch. Put sensitive data in notifications. Lock font scaling.

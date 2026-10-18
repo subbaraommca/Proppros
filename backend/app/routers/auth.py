@@ -26,6 +26,7 @@ from app.core.security import (
 from app.models import AuthToken, Invitation, Membership, Organization, Tenant, User, utcnow
 from app.services import mfa
 from app.schemas import (
+    PushDeviceIn,
     AcceptInviteIn,
     ChangePasswordIn,
     EmailIn,
@@ -173,6 +174,55 @@ def login_mfa(payload: MfaLoginIn, response: Response, session: Session = Depend
     session.commit()
     _set_cookie(response, user)
     return me_payload(session, user)
+
+
+# ── Mobile app sign-in (bearer token instead of a cookie) ────────────────────
+
+
+def mobile_session(session: Session, user: User) -> dict:
+    token = create_access_token(str(user.id), {"ver": user.token_version, "client": "mobile"})
+    return {"access_token": token, "token_type": "bearer", "me": me_payload(session, user)}
+
+
+@router.post("/token", dependencies=[Depends(rate_limit("login", 10, 60))])
+def token_login(payload: LoginIn, session: Session = Depends(get_session)):
+    """Email + password → bearer token for the mobile app (or the 2FA step)."""
+    user = session.exec(select(User).where(User.email == payload.email.lower())).first()
+    if not user or not verify_password(payload.password, user.password_hash):
+        raise HTTPException(status_code=401, detail="Incorrect email or password.")
+    if user.mfa_enabled_at:
+        token = create_access_token(str(user.id), {"ver": user.token_version, "purpose": "mfa"}, expires_minutes=MFA_TOKEN_MINUTES)
+        return {"mfa_required": True, "mfa_token": token}
+    return mobile_session(session, user)
+
+
+@router.post("/token/mfa", dependencies=[Depends(rate_limit("login_mfa", 10, 60))])
+def token_login_mfa(payload: MfaLoginIn, session: Session = Depends(get_session)):
+    claims = decode_token(payload.mfa_token) or {}
+    user = session.get(User, uuid.UUID(claims["sub"])) if claims.get("purpose") == "mfa" and claims.get("sub") else None
+    if not user or claims.get("ver") != user.token_version or not user.mfa_enabled_at:
+        raise HTTPException(status_code=401, detail="Your sign-in expired. Please sign in again.")
+    if not mfa.verify_second_factor(user, payload.code):
+        raise HTTPException(status_code=401, detail="That code isn't right. Try the current code from your authenticator app.")
+    session.add(user)
+    session.commit()
+    return mobile_session(session, user)
+
+
+@router.post("/devices", status_code=201)
+def register_device(payload: PushDeviceIn, user: User = Depends(get_current_user), session: Session = Depends(get_session)):
+    from app.services import push
+
+    push.register(session, user.id, payload.token, payload.platform)
+    return {"ok": True}
+
+
+@router.post("/devices/unregister")
+def unregister_device(payload: PushDeviceIn, user: User = Depends(get_current_user), session: Session = Depends(get_session)):
+    from app.services import push
+
+    push.unregister(session, user.id, payload.token)
+    return {"ok": True}
 
 
 @router.post("/logout")

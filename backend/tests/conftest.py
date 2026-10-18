@@ -9,6 +9,7 @@ os.environ["BLOB_READ_WRITE_TOKEN"] = ""
 os.environ["UPSTASH_REDIS_REST_URL"] = ""
 os.environ["CRON_SECRET"] = "test-cron-secret"
 os.environ["TWILIO_ACCOUNT_SID"] = ""
+os.environ["PUSH_ENABLED"] = "false"
 
 import tempfile  # noqa: E402
 
@@ -26,6 +27,7 @@ import app.core.database as _db  # noqa: E402
 _db.engine = _ENGINE
 
 from app.core import email as _email  # noqa: E402
+from app.services import push as _push  # noqa: E402
 from app.services import sms as _sms  # noqa: E402
 from app.core import limiter as _limiter  # noqa: E402
 from app.main import app  # noqa: E402
@@ -36,6 +38,7 @@ def _fresh_db():
     SQLModel.metadata.create_all(_ENGINE)
     _email.outbox.clear()
     _sms.outbox.clear()
+    _push.outbox.clear()
     _limiter.reset()
     yield
     SQLModel.metadata.drop_all(_ENGINE)
@@ -60,3 +63,8 @@ def outbox():
 @pytest.fixture
 def sms_outbox():
     return _sms.outbox
+
+
+@pytest.fixture
+def push_outbox():
+    return _push.outbox

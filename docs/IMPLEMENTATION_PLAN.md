@@ -38,9 +38,9 @@ This is the step-by-step execution plan. Work is split into **iterations**. Each
 | 13 | Vendors & preventive maintenance | v2 | 🟦 Code done — add your vendors, appliances and recurring tasks |
 | 14 | Vacancy, listings & screening | v2 | 🟦 Code done — screening reports entered from your provider; automatic feed needs a provider partnership |
 | 15 | Communication (messaging, SMS, notices) | v2 | 🟦 Code done — SMS logged until Twilio is configured |
-| 16 | Advanced finance (Plaid, tax, exports) | v2 | ⬜ |
-| 17 | AI features | v2 | ⬜ |
-| 18 | Mobile app (Expo) | v3 | ⬜ |
+| 16 | Advanced finance (Plaid, tax, exports) | v2 | ⏸ Paused (owner's decision, 2026-10-18) — back after 18 |
+| 17 | AI features | v2 | ⏸ Paused (owner's decision, 2026-10-18) — back after 18 |
+| 18 | Mobile app (Expo) | v3 | 🟦 App built (`mobile/`) — EAS builds and store submission are your part |
 | 19 | Scale features | v3 | ⬜ |
 
 Legend: ⬜ Not started · 🟨 In progress · 🟦 Code complete, waiting on a go-live step only you can do · ✅ Done
@@ -347,10 +347,11 @@ Legend: ⬜ Not started · 🟨 In progress · 🟦 Code complete, waiting on a 
 
 **Requirements:** PLT-07, COM-04 (push)
 
-- [ ] Expo app reusing Pickzona's mobile patterns (Expo Router, secure-store JWT), with a `tokens.ts` mirroring the Strata tokens
-- [ ] Owner: dashboard, work orders, record payment, receipt capture
-- [ ] Tenant: pay rent, submit maintenance with camera
-- [ ] Push notifications; EAS builds; App Store / Play Store submission
+- [x] Expo app reusing Pickzona's mobile patterns (Expo Router, secure-store JWT), with a `tokens.ts` mirroring the Strata tokens — *Expo SDK 54; `POST /auth/token` (+ `/auth/token/mfa`) issues bearer tokens; design rules in DESIGN_GUIDELINES §10*
+- [x] Owner: dashboard, work orders, record payment, receipt capture — *Home, Repairs (status, notes, photos), Messages, Money (record payment, expense with receipt photo), More*
+- [x] Tenant: pay rent, submit maintenance with camera — *Stripe Checkout in the in-app browser; camera/library photos downscaled to 1600px*
+- [x] Push notifications — *`push_devices` + Expo push service: new requests, status changes, messages, announcements, notices; deep links on tap*
+- [ ] **Your part:** Expo account + `eas init`, EAS builds, Apple Developer ($99/yr) and Google Play ($25) accounts, store listings and submission (`mobile/README.md`)
 
 ## Iteration 19 — Scale features
 
@@ -379,3 +380,5 @@ Record notes when each iteration closes.
 | 2026-10-18 | 13 | Vendors & preventive maintenance: vendor directory with insurance/W-9 tracking and ratings, vendor assignment with job-details email, quotes with approve/decline, vendor invoices that create expenses automatically, preventive schedules run by the daily job, appliance/system register with warranty reminders, keys & access codes per property/unit. Migration `0005` (new tables + nullable work-order columns). 7 new tests (100 total). Checked in a browser: add vendor, quotes → approve → invoice → expense, schedule from a preset, assets and keys tabs, phone width. |
 | 2026-10-18 | 14 | Vacancy & screening: listings with public page + share page (OG/JSON-LD), public application form with status page and uploads, application fee via Stripe (reusing Connect), screening reports with credit/criminal/eviction sections (user request: landlords must see these histories), FCRA adverse action notice PDF, applicant comparison, approve/decline, convert to tenants + lease. Decisions: no SSNs or report pulls inside Proppros — reports come from a consumer reporting agency and are entered (or later fed) into a structured report; applicant files and reports are owners/managers only and excluded from the documents library; HUD criminal-history guidance shown next to reports. Also fixed: `/properties` list now includes units (schedule/listing unit pickers were empty). Migration `0006`. 6 new tests (106 total). |
 | 2026-10-18 | 15 | Communication: message threads (staff ↔ tenant, portal and email/SMS notifications, unread badge), announcements, notice templates with PDF + email + portal, Twilio SMS (opt-in, STOP/START, inbound webhook with signature check), renter's insurance uploads with reminders, tenant move-out notices with acknowledge. Found and fixed: an effect that returned `scrollIntoView()`'s result crashed the chat in current Chrome (it now returns a Promise). Migration `0007` (server default for `tenants.sms_opt_in`). 7 new tests (113 total). |
+| 2026-10-18 | 16–17 | Paused at the owner's request; Iteration 18 done first. |
+| 2026-10-18 | 18 | Mobile app (`mobile/`, Expo SDK 54 + Expo Router): owner/manager/maintenance tabs (Home, Repairs, Messages, Money, More) and tenant tabs (Home + pay rent, Repairs with camera, Messages, More). Backend: bearer-token sign-in (`/auth/token`, `/auth/token/mfa`), push device registration and Expo push hooks, opt-in `CORS_ORIGINS` for the web preview. DESIGN_GUIDELINES gained §10 (mobile): 44pt targets, 16pt body, bottom tabs with labels, safe areas, permissions in context, push copy rules, offline banner, Dynamic Type up to 1.3×. Generated icon/splash. Verified: `tsc`, `expo install --check`, Android bundle export, and the web preview in a browser (dark and light) with real submissions — tenant request → owner Repairs, owner records a payment. Migration `0008`. 3 new tests (116 total). |

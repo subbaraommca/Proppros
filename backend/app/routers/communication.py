@@ -41,7 +41,7 @@ from app.schemas import (
 )
 from app.services import billing
 from app.services import leasing as L
-from app.services import sms
+from app.services import push, sms
 from app.services.notify import notify, staff_recipients
 from app.services.receipts import money
 
@@ -161,6 +161,7 @@ def _post(session: Session, org: Organization, t: MessageThread, author_id: uuid
 
 def _notify_tenant_of_message(session: Session, org: Organization, t: MessageThread, sender: str, body: str) -> dict:
     tenant = session.get(Tenant, t.tenant_id)
+    push.send(session, [tenant.user_id], f"{org.name}: {t.subject}", body, {"type": "portal_thread", "id": str(t.id)})
     html = layout(
         f"New message from {org.name}",
         f"<p><strong>{esc(sender)}</strong> wrote about “{esc(t.subject)}”:</p><blockquote style='border-left:3px solid #a4502a;margin:0;padding:4px 12px;white-space:pre-wrap'>{esc(body)}</blockquote>",
@@ -231,6 +232,7 @@ def _my_thread(ctx: Ctx, thread_id: uuid.UUID) -> MessageThread:
 
 
 def _notify_staff_of_message(session: Session, org: Organization, t: MessageThread, tenant: Tenant, body: str) -> None:
+    push.send(session, push.staff_user_ids(session, org.id), f"{tenant.first_name} {tenant.last_name}: {t.subject}", body, {"type": "thread", "id": str(t.id)})
     html = layout(
         f"Message from {tenant.first_name} {tenant.last_name}",
         f"<p>About “{esc(t.subject)}”:</p><blockquote style='border-left:3px solid #a4502a;margin:0;padding:4px 12px;white-space:pre-wrap'>{esc(body)}</blockquote>",
@@ -337,6 +339,7 @@ def create_announcement(payload: AnnouncementIn, ctx: Ctx = Depends(messengers))
     audit.log(ctx, "announcement", a.id, "create", f"Announcement to {len(tenants)} tenants: {a.title}")
     ctx.session.commit()
     html = layout(a.title, f"<p style='white-space:pre-wrap'>{esc(a.body)}</p><p style='color:#64748b;font-size:13px'>Announcement for {esc(where)}</p>", "Open the tenant portal", _portal_url())
+    push.send(ctx.session, [t.user_id for t in tenants], f"{where}: {a.title}", a.body, {"type": "announcement", "id": str(a.id)})
     for t in tenants:
         if a.send_email and t.email:
             a.email_count += notify(ctx.session, ctx.org_id, "announcement", t.email, f"{where}: {a.title}", html, dedupe_key=f"ann:{a.id}:{t.email}")
@@ -520,6 +523,7 @@ def send_notice(lease_id: uuid.UUID, payload: NoticeIn, ctx: Ctx = Depends(messe
     audit.log(ctx, "lease", lease.id, "notice", f"Sent {payload.title}")
     ctx.session.commit()
     tenants = L.lease_tenant_rows(ctx.session, lease.id)
+    push.send(ctx.session, [t.user_id for t in tenants], payload.title, f"{ctx.org.name} sent you a notice. Open the app to read it.", {"type": "notice", "id": str(n.id)})
     emailed = []
     for t in tenants:
         if payload.send_email and t.email:

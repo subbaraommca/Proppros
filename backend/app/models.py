@@ -806,6 +806,19 @@ class MoveOutNotice(SQLModel, table=True):
     created_at: datetime = Field(default_factory=utcnow)
 
 
+class PushDevice(SQLModel, table=True):
+    """A phone running the Proppros app, identified by its Expo push token."""
+
+    __tablename__ = "push_devices"
+    __table_args__ = (UniqueConstraint("token", name="uq_push_devices_token"),)
+    id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
+    user_id: uuid.UUID = Field(foreign_key="users.id", index=True)
+    token: str = Field(max_length=200)
+    platform: str = Field(default="unknown", max_length=10)  # ios | android | web
+    created_at: datetime = Field(default_factory=utcnow)
+    last_seen_at: datetime = Field(default_factory=utcnow)
+
+
 class Feedback(SQLModel, table=True):
     """Bug reports and ideas from users (Help → Send feedback), reviewed in the admin console."""
 

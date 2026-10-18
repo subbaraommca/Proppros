@@ -37,6 +37,14 @@ class Settings(BaseSettings):
     smtp_password: str = ""
     email_from: str = "Proppros <noreply@proppros.app>"
 
+    # Comma-separated origins allowed to call the API cross-origin (only the Expo web preview needs it;
+    # the website is same-origin and native apps don't use CORS). Blank → CORS off.
+    cors_origins: str = ""
+
+    # Mobile push (Expo). EXPO_ACCESS_TOKEN is optional (only if "enhanced push security" is on in Expo).
+    push_enabled: bool = True
+    expo_access_token: str = ""
+
     # SMS (Twilio). Blank → texts are logged instead of sent.
     twilio_account_sid: str = ""
     twilio_auth_token: str = ""

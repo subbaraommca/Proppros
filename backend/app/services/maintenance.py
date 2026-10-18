@@ -84,9 +84,17 @@ def notify_new(session: Session, org: Organization, wo: WorkOrder) -> None:
     )
     for email in staff_recipients(session, org.id, "maintenance_updates"):
         notify(session, org.id, "work_order_new", email, subject, html)
+    from app.services import push
+
+    push.send(session, push.staff_user_ids(session, org.id) + [wo.assigned_to_user_id], f"New request #{wo.number}", f"{wo.title} — {where}", {"type": "work_order", "id": str(wo.id)})
 
 
 def notify_tenant(session: Session, org: Organization, wo: WorkOrder, message: str) -> None:
+    tenant = session.get(Tenant, wo.tenant_id) if wo.tenant_id else None
+    if tenant and tenant.user_id:
+        from app.services import push
+
+        push.send(session, [tenant.user_id], f"Request #{wo.number}: {STATUS_LABELS.get(wo.status, wo.status)}", message[:200], {"type": "portal_work_order", "id": str(wo.id)})
     email = _tenant_email(session, wo)
     if not email:
         return

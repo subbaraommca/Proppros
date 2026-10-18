@@ -192,6 +192,14 @@ Stripe Connect **Express** with **destination charges**: each owner onboards the
 - **Notices** (`notices`): templates in `routers/communication.py` reuse the lease merge fields plus notice fields; rendered → fpdf2 PDF → lease document (`kind = notice`, shared with tenants).
 - **Move-out notices** (`move_out_notices`) and **renter's insurance** (tenant documents of kind `insurance` with `expires_on`; reminders via the daily job).
 
+### Mobile app (Iteration 18)
+
+- `mobile/` — Expo SDK 54, Expo Router (file-based routes: `app/(staff)/…`, `app/(tenant)/…`), TanStack Query, `expo-secure-store` for the token (localStorage in the web preview), `expo-image-picker` + `expo-image-manipulator` for photos, `expo-notifications` for push, `expo-web-browser` for Stripe Checkout. Strata tokens in `mobile/src/theme/tokens.ts`; fonts via `@expo-google-fonts`.
+- **Auth:** `POST /api/auth/token` → `{access_token, me}` (or the 2FA step, then `/api/auth/token/mfa`). The API already accepted `Authorization: Bearer`; the app sends it plus `X-Org-Id`. A web sign-out (`/auth/logout`) bumps `token_version` and also signs out phones.
+- **Push:** `push_devices` (Expo push token per phone). `app/services/push.py` posts to `https://exp.host/--/api/v2/push/send` in batches of 100, deletes tokens Expo reports as `DeviceNotRegistered`, and never raises. `PUSH_ENABLED=false` keeps pushes in an outbox (tests). `EXPO_ACCESS_TOKEN` only if Expo's enhanced push security is turned on.
+- **CORS:** off by default. `CORS_ORIGINS` exists only for the Expo web preview; native apps don't use CORS.
+- Builds and store releases use EAS (`mobile/eas.json`), not Vercel.
+
 ### Translations (i18n)
 
 All UI text lives in `frontend/src/locales/en.json`, grouped by area (`nav`, `leases`, `portal`, …); API enum values (statuses, categories, roles) are labelled in the `enums` section and rendered through `label()`. Use `t("section.key")` in components, i18next plural keys (`_one` / `_other`) for counts, and `<Trans>` for sentences with links or bold text. To add a language: copy `en.json` to `<code>.json`, translate the values, register it in `LANGUAGES` in `src/i18n.ts`. `src/locales/locales.test.ts` fails if code uses a missing key or a locale is missing keys. Server-generated text (API error details, emails, PDF receipts) is still English.

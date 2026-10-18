@@ -1,0 +1,74 @@
+{
+  "expo": {
+    "name": "Proppros",
+    "slug": "proppros",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "scheme": "proppros",
+    "userInterfaceStyle": "automatic",
+    "newArchEnabled": true,
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "app.proppros.mobile",
+      "infoPlist": {
+        "NSCameraUsageDescription": "Proppros uses the camera to photograph maintenance issues and receipts.",
+        "NSPhotoLibraryUsageDescription": "Proppros lets you attach photos of maintenance issues and receipts.",
+        "ITSAppUsesNonExemptEncryption": false
+      }
+    },
+    "android": {
+      "package": "app.proppros.mobile",
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#111217"
+      },
+      "permissions": [
+        "android.permission.CAMERA"
+      ]
+    },
+    "web": {
+      "bundler": "metro",
+      "output": "single",
+      "favicon": "./assets/favicon.png"
+    },
+    "plugins": [
+      "expo-router",
+      "expo-secure-store",
+      "expo-web-browser",
+      [
+        "expo-image-picker",
+        {
+          "cameraPermission": "Proppros uses the camera to photograph maintenance issues and receipts.",
+          "photosPermission": "Proppros lets you attach photos of maintenance issues and receipts."
+        }
+      ],
+      [
+        "expo-notifications",
+        {
+          "color": "#edaf88",
+          "defaultChannel": "default",
+          "icon": "./assets/adaptive-icon.png"
+        }
+      ],
+      [
+        "expo-splash-screen",
+        {
+          "backgroundColor": "#111217",
+          "image": "./assets/splash-icon.png",
+          "imageWidth": 160
+        }
+      ],
+      "expo-font"
+    ],
+    "extra": {
+      "apiBase": "https://proppros.vercel.app/api",
+      "eas": {
+        "projectId": ""
+      }
+    },
+    "experiments": {
+      "typedRoutes": false
+    },
+    "icon": "./assets/icon.png"
+  }
+}

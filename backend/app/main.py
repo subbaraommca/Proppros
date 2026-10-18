@@ -67,4 +67,14 @@ api = APIRouter(prefix="/api")
 for module in (system, auth, orgs, properties, tenants, leases, finance, work_orders, documents, portal, online_payments, billing, admin, leasing, vendors, listings, communication):
     api.include_router(module.router)
 app.include_router(api)
+if settings.cors_origins:
+    from fastapi.middleware.cors import CORSMiddleware
+
+    app.add_middleware(
+        CORSMiddleware,
+        allow_origins=[o.strip() for o in settings.cors_origins.split(",") if o.strip()],
+        allow_credentials=False,
+        allow_methods=["*"],
+        allow_headers=["Authorization", "Content-Type", "X-Org-Id"],
+    )
 app.include_router(listings.share_router)  # /l/{slug} share pages (rewritten to the backend on Vercel)

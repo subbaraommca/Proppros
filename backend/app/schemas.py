@@ -67,6 +67,11 @@ class MfaLoginIn(Base):
     code: str = Field(min_length=6, max_length=20)
 
 
+class PushDeviceIn(Base):
+    token: str = Field(min_length=10, max_length=200, pattern=r"^(ExponentPushToken|ExpoPushToken)\[[A-Za-z0-9_\-]+\]$")
+    platform: Literal["ios", "android", "web"] = "ios"
+
+
 class MfaCodeIn(Base):
     code: str = Field(min_length=6, max_length=20)
 
