@@ -19,8 +19,8 @@ ExpenseCategory = Literal[
 WorkOrderCategory = Literal["plumbing", "electrical", "hvac", "appliance", "pest", "roof", "landscaping", "general", "other"]
 WorkOrderPriority = Literal["low", "medium", "high", "emergency"]
 WorkOrderStatus = Literal["new", "assigned", "scheduled", "in_progress", "completed", "closed"]
-DocumentOwnerType = Literal["organization", "property", "unit", "tenant", "lease", "expense", "work_order", "vendor"]
-DocumentKind = Literal["photo", "lease", "insurance", "deed", "hoa", "inspection", "receipt", "invoice", "license", "id", "notice", "other"]
+DocumentOwnerType = Literal["organization", "property", "unit", "tenant", "lease", "expense", "work_order", "vendor", "asset"]
+DocumentKind = Literal["photo", "lease", "insurance", "deed", "hoa", "inspection", "receipt", "invoice", "license", "id", "notice", "w9", "quote", "warranty", "manual", "other"]
 
 
 
@@ -319,6 +319,7 @@ class WorkOrderIn(Base):
     priority: WorkOrderPriority = "medium"
     assigned_to_user_id: uuid.UUID | None = None
     permission_to_enter: bool = False
+    asset_id: uuid.UUID | None = None
 
 
 class PortalWorkOrderIn(Base):
@@ -458,3 +459,141 @@ class DepositDispositionIn(Base):
     balance_applied_cents: int = Field(default=0, ge=0, le=100_000_000)
     forwarding_address: str | None = Field(default=None, max_length=500)
     notes: str | None = Field(default=None, max_length=5000)
+
+
+# ── Vendors & preventive maintenance ─────────────────────────────────────────
+
+AssetCategory = Literal["appliance", "hvac", "water_heater", "plumbing", "electrical", "roof", "safety", "exterior", "other"]
+AccessKind = Literal["key", "fob", "remote", "code", "lockbox", "mailbox", "other"]
+
+
+class VendorIn(Base):
+    name: str = Field(min_length=1, max_length=160)
+    contact_name: str | None = Field(default=None, max_length=120)
+    email: EmailStr | None = None
+    phone: str | None = Field(default=None, max_length=40)
+    address: str | None = Field(default=None, max_length=300)
+    trades: list[WorkOrderCategory] = Field(default_factory=list, max_length=10)
+    hourly_rate_cents: int | None = Field(default=None, ge=0, le=10_000_000)
+    call_out_fee_cents: int | None = Field(default=None, ge=0, le=10_000_000)
+    license_number: str | None = Field(default=None, max_length=80)
+    w9_on_file: bool = False
+    insurance_expires_on: date | None = None
+    notes: str | None = Field(default=None, max_length=5000)
+
+    @field_validator("email", mode="before")
+    @classmethod
+    def blank_email(cls, v):
+        return v or None
+
+
+class VendorUpdate(VendorIn):
+    name: str | None = Field(default=None, min_length=1, max_length=160)
+    trades: list[WorkOrderCategory] | None = Field(default=None, max_length=10)
+    w9_on_file: bool | None = None
+    archived: bool | None = None
+
+
+class WorkOrderVendorIn(Base):
+    vendor_id: uuid.UUID | None  # None → remove the vendor
+    email_vendor: bool = False
+    message: str | None = Field(default=None, max_length=2000)
+
+
+class QuoteIn(Base):
+    vendor_id: uuid.UUID
+    amount_cents: int = Field(gt=0, le=100_000_000)
+    description: str | None = Field(default=None, max_length=2000)
+    valid_until: date | None = None
+    document_id: uuid.UUID | None = None
+
+
+class VendorInvoiceIn(Base):
+    vendor_id: uuid.UUID | None = None  # defaults to the work order's vendor
+    invoice_number: str | None = Field(default=None, max_length=60)
+    amount_cents: int = Field(gt=0, le=100_000_000)
+    invoice_date: date
+    due_date: date | None = None
+    category: ExpenseCategory = "repairs"
+    document_id: uuid.UUID | None = None
+    paid_on: date | None = None
+    complete_work_order: bool = True
+
+
+class InvoicePaidIn(Base):
+    paid_on: date
+
+
+class VendorRatingIn(Base):
+    rating: int = Field(ge=1, le=5)
+
+
+class ScheduleIn(Base):
+    property_id: uuid.UUID
+    unit_id: uuid.UUID | None = None
+    title: str = Field(min_length=1, max_length=160)
+    description: str | None = Field(default=None, max_length=2000)
+    category: WorkOrderCategory = "general"
+    priority: WorkOrderPriority = "low"
+    interval_months: int = Field(default=12, ge=1, le=120)
+    next_due_on: date
+    lead_days: int = Field(default=7, ge=0, le=90)
+    vendor_id: uuid.UUID | None = None
+    assigned_to_user_id: uuid.UUID | None = None
+    asset_id: uuid.UUID | None = None
+
+
+class ScheduleUpdate(Base):
+    unit_id: uuid.UUID | None = None
+    title: str | None = Field(default=None, min_length=1, max_length=160)
+    description: str | None = Field(default=None, max_length=2000)
+    category: WorkOrderCategory | None = None
+    priority: WorkOrderPriority | None = None
+    interval_months: int | None = Field(default=None, ge=1, le=120)
+    next_due_on: date | None = None
+    lead_days: int | None = Field(default=None, ge=0, le=90)
+    vendor_id: uuid.UUID | None = None
+    assigned_to_user_id: uuid.UUID | None = None
+    asset_id: uuid.UUID | None = None
+    active: bool | None = None
+
+
+class AssetIn(Base):
+    property_id: uuid.UUID
+    unit_id: uuid.UUID | None = None
+    name: str = Field(min_length=1, max_length=120)
+    category: AssetCategory = "appliance"
+    make: str | None = Field(default=None, max_length=80)
+    model: str | None = Field(default=None, max_length=80)
+    serial_number: str | None = Field(default=None, max_length=80)
+    installed_on: date | None = None
+    purchase_price_cents: int | None = Field(default=None, ge=0, le=100_000_000)
+    warranty_expires_on: date | None = None
+    location: str | None = Field(default=None, max_length=120)
+    notes: str | None = Field(default=None, max_length=2000)
+
+
+class AssetUpdate(AssetIn):
+    property_id: uuid.UUID | None = None
+    name: str | None = Field(default=None, min_length=1, max_length=120)
+    category: AssetCategory | None = None
+    archived: bool | None = None
+
+
+class AccessItemIn(Base):
+    property_id: uuid.UUID
+    unit_id: uuid.UUID | None = None
+    kind: AccessKind = "key"
+    label: str = Field(min_length=1, max_length=120)
+    code: str | None = Field(default=None, max_length=120)
+    quantity: int = Field(default=1, ge=0, le=999)
+    holder: str | None = Field(default=None, max_length=120)
+    notes: str | None = Field(default=None, max_length=1000)
+    changed_on: date | None = None
+
+
+class AccessItemUpdate(AccessItemIn):
+    property_id: uuid.UUID | None = None
+    kind: AccessKind | None = None
+    label: str | None = Field(default=None, min_length=1, max_length=120)
+    quantity: int | None = Field(default=None, ge=0, le=999)

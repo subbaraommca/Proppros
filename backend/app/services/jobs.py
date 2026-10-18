@@ -161,6 +161,10 @@ def run_daily_for_org(
         stats["reminders"] += rent_reminders(session, org, lease, today)
         stats["lease_alerts"] += lease_expiry_alerts(session, org, lease, today)
     stats["document_alerts"] += document_expiry_alerts(session, org, today)
+    # Preventive maintenance work orders, warranty and vendor-insurance reminders.
+    from app.routers.vendors import daily_maintenance
+
+    stats.update(daily_maintenance(session, org, today))
     # Autopay runs after rent has posted, so it charges the up-to-date balance.
     from app.services.online_payments import run_autopay_for_org
 

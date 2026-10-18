@@ -41,6 +41,9 @@ const PricingPage = page(() => import("./pages/MarketingPages"), "PricingPage");
 const OnboardingPage = page(() => import("./pages/OnboardingPage"), "OnboardingPage");
 const AdminPage = page(() => import("./pages/AdminPage"), "AdminPage");
 const InspectionPage = page(() => import("./pages/InspectionPage"), "InspectionPage");
+const VendorsPage = page(() => import("./pages/VendorPages"), "VendorsPage");
+const VendorDetailPage = page(() => import("./pages/VendorPages"), "VendorDetailPage");
+const SchedulesPage = page(() => import("./pages/VendorPages"), "SchedulesPage");
 const SignPage = page(() => import("./components/Signing"), "SignPage");
 const PortalSignPage = page(() => import("./components/Signing"), "PortalSignPage");
 
@@ -137,7 +140,10 @@ export default function App() {
         <Route path="payments" element={<PaymentsPage />} />
         <Route path="expenses" element={<ExpensesPage />} />
         <Route path="maintenance" element={<WorkOrdersPage />} />
+        <Route path="maintenance/schedules" element={<SchedulesPage />} />
         <Route path="maintenance/:id" element={<WorkOrderDetailPage />} />
+        <Route path="vendors" element={<VendorsPage />} />
+        <Route path="vendors/:id" element={<VendorDetailPage />} />
         <Route path="documents" element={<DocumentsPage />} />
         <Route path="reports" element={<ReportsPage />} />
         <Route path="settings" element={<SettingsPage />} />

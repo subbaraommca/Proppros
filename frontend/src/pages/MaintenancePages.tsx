@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
-import { CheckCircle2, DoorOpen, Lock, Plus, Wrench } from "lucide-react";
+import { CalendarClock, CheckCircle2, DoorOpen, HardHat, Lock, Plus, Wrench } from "lucide-react";
 import { api } from "../services/api";
 import { useAuth } from "../hooks/useAuth";
 import type { Property, Unit, WorkOrder } from "../types";
@@ -10,6 +10,7 @@ import { PhotoGrid, DocumentsPanel } from "../components/Documents";
 import { Badge, Card, Empty, ErrorBox, Field, Input, Modal, MoneyInput, PageHeader, Select, Spinner, Textarea } from "../components/ui";
 import { date, dateTime, label, money, toCents, todayISO } from "../utils/format";
 import { EXPENSE_CATEGORIES } from "./FinancePages";
+import { WorkOrderVendorCards } from "../components/WorkOrderVendor";
 
 export const WO_STATUSES = ["new", "assigned", "scheduled", "in_progress", "completed", "closed"] as const;
 export const WO_CATEGORIES = ["plumbing", "electrical", "hvac", "appliance", "pest", "roof", "landscaping", "general", "other"];
@@ -115,6 +116,9 @@ export function WorkOrdersPage() {
         title={t("nav.maintenance")}
         actions={
           <>
+            <Link to="/maintenance/schedules" className="btn btn-ghost">
+              <CalendarClock size={15} /> {t("schedules.title")}
+            </Link>
             <label className="check small">
               <input type="checkbox" checked={mine} onChange={(e) => setMine(e.target.checked)} /> {t("maintenance.assigned_to_me")}
             </label>
@@ -159,6 +163,11 @@ export function WorkOrdersPage() {
                       {w.property_name}
                       {w.unit_name ? ` · ${w.unit_name}` : ""}
                     </div>
+                    {w.vendor_name && (
+                      <div className="small muted">
+                        <HardHat size={11} /> {w.vendor_name}
+                      </div>
+                    )}
                   </Link>
                 ))}
               </div>
@@ -353,6 +362,20 @@ export function WorkOrderDetailPage() {
               </dd>
               <dt>{t("common.category")}</dt>
               <dd>{label(wo.category)}</dd>
+              {wo.asset && (
+                <>
+                  <dt>{t("assets.asset")}</dt>
+                  <dd>{wo.asset.name}</dd>
+                </>
+              )}
+              {wo.schedule_id && (
+                <>
+                  <dt>{t("schedules.source")}</dt>
+                  <dd>
+                    <Link to="/maintenance/schedules">{t("schedules.preventive")}</Link>
+                  </dd>
+                </>
+              )}
               <dt>{t("maintenance.requested_by")}</dt>
               <dd>{wo.tenant_name ?? t("maintenance.staff")}</dd>
               <dt>{t("maintenance.entry")}</dt>
@@ -393,6 +416,7 @@ export function WorkOrderDetailPage() {
               </dd>
             </dl>
           </Card>
+          {can("owner", "manager", "accountant") && <WorkOrderVendorCards wo={wo} extras={{ vendor: wo.vendor ?? null, quotes: wo.quotes ?? [], invoices: wo.invoices ?? [] }} />}
           {wo.expenses && wo.expenses.length > 0 && (
             <Card title={t("maintenance.costs")}>
               <ul className="list-plain">

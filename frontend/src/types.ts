@@ -209,6 +209,14 @@ export interface WorkOrder {
   expenses?: Expense[];
   attachments?: DocumentRow[];
   can_edit?: boolean;
+  vendor_id?: string | null;
+  vendor_name?: string | null;
+  vendor_rating?: number | null;
+  schedule_id?: string | null;
+  asset?: { id: string; name: string } | null;
+  vendor?: { id: string; name: string; email: string | null; phone: string | null } | null;
+  quotes?: import("./components/WorkOrderVendor").WoQuote[];
+  invoices?: import("./components/WorkOrderVendor").WoInvoice[];
 }
 
 export interface DocumentRow {

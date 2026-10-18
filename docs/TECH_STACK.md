@@ -170,6 +170,13 @@ Stripe Connect **Express** with **destination charges**: each owner onboards the
 - **Inspections** (`inspections`): items are JSON `{id, area, item, condition, notes, photo_ids}`; photos are lease documents of kind `inspection` (only added through the upload endpoint). Completing renders a PDF report with photos.
 - **Deposit statement** (`deposit_dispositions`, one per lease): deductions + deposit applied to the unpaid balance (posted once as a ledger credit, `source_key deposit:<lease>`); sending renders a letter PDF and emails it.
 
+### Vendors & preventive maintenance (Iteration 13)
+
+- **Vendors** (`vendors`): org-wide, so `get_owned` isn't used (it would 404 for property-scoped members); vendor documents fall outside every property scope, so only full-access members see W-9s. Rating = average of `work_orders.vendor_rating`.
+- **Quotes / invoices** (`quotes`, `vendor_invoices`): an invoice creates an `Expense` (with `work_order_id`, vendor name and the invoice document as receipt) in the same transaction and keeps its `expense_id`.
+- **Schedules** (`maintenance_schedules`): `routers/vendors.py → daily_maintenance` (called from the daily job) opens a work order when `next_due_on − lead_days ≤ today`, then advances `next_due_on` by `interval_months` until it's in the future — idempotent across reruns.
+- **Assets / access items** (`assets`, `access_items`): property-scoped like units. Access codes are masked for accountants and changes are audited without the code value.
+
 ### Translations (i18n)
 
 All UI text lives in `frontend/src/locales/en.json`, grouped by area (`nav`, `leases`, `portal`, …); API enum values (statuses, categories, roles) are labelled in the `enums` section and rendered through `label()`. Use `t("section.key")` in components, i18next plural keys (`_one` / `_other`) for counts, and `<Trans>` for sentences with links or bold text. To add a language: copy `en.json` to `<code>.json`, translate the values, register it in `LANGUAGES` in `src/i18n.ts`. `src/locales/locales.test.ts` fails if code uses a missing key or a locale is missing keys. Server-generated text (API error details, emails, PDF receipts) is still English.

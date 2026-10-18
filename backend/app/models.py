@@ -55,12 +55,16 @@ EXPENSE_CATEGORIES = (
 WORK_ORDER_CATEGORIES = ("plumbing", "electrical", "hvac", "appliance", "pest", "roof", "landscaping", "general", "other")
 WORK_ORDER_PRIORITIES = ("low", "medium", "high", "emergency")
 WORK_ORDER_STATUSES = ("new", "assigned", "scheduled", "in_progress", "completed", "closed")
-DOCUMENT_OWNER_TYPES = ("organization", "property", "unit", "tenant", "lease", "expense", "work_order", "vendor")
-DOCUMENT_KINDS = ("photo", "lease", "insurance", "deed", "hoa", "inspection", "receipt", "invoice", "license", "id", "notice", "other")
+DOCUMENT_OWNER_TYPES = ("organization", "property", "unit", "tenant", "lease", "expense", "work_order", "vendor", "asset")
+DOCUMENT_KINDS = ("photo", "lease", "insurance", "deed", "hoa", "inspection", "receipt", "invoice", "license", "id", "notice", "w9", "quote", "warranty", "manual", "other")
 SIGNATURE_STATUSES = ("sent", "completed", "voided")
 RENEWAL_STATUSES = ("sent", "accepted", "declined", "withdrawn", "expired")
 INSPECTION_KINDS = ("move_in", "move_out")
 INSPECTION_CONDITIONS = ("good", "fair", "poor", "damaged", "na")
+QUOTE_STATUSES = ("pending", "approved", "declined")
+INVOICE_STATUSES = ("unpaid", "paid")
+ASSET_CATEGORIES = ("appliance", "hvac", "water_heater", "plumbing", "electrical", "roof", "safety", "exterior", "other")
+ACCESS_KINDS = ("key", "fob", "remote", "code", "lockbox", "mailbox", "other")
 
 
 class TimestampMixin(SQLModel):
@@ -360,6 +364,126 @@ class WorkOrder(TimestampMixin, table=True):
     closed_at: datetime | None = None
     permission_to_enter: bool = False
     created_by_user_id: uuid.UUID | None = Field(default=None, foreign_key="users.id")
+    vendor_id: uuid.UUID | None = Field(default=None, foreign_key="vendors.id", index=True)
+    vendor_rating: int | None = None  # 1-5, given when the job is done
+    schedule_id: uuid.UUID | None = Field(default=None, foreign_key="maintenance_schedules.id")
+    asset_id: uuid.UUID | None = Field(default=None, foreign_key="assets.id")
+
+
+class Vendor(TimestampMixin, table=True):
+    """Contractors and service companies. W-9 / insurance certificates are vendor documents."""
+
+    __tablename__ = "vendors"
+    id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
+    org_id: uuid.UUID = Field(foreign_key="organizations.id", index=True)
+    name: str = Field(max_length=160)
+    contact_name: str | None = Field(default=None, max_length=120)
+    email: str | None = Field(default=None, max_length=255)
+    phone: str | None = Field(default=None, max_length=40)
+    address: str | None = Field(default=None, max_length=300)
+    trades: list[str] = Field(default_factory=list, sa_column=Column(JSON, nullable=False))  # work-order categories
+    hourly_rate_cents: int | None = None
+    call_out_fee_cents: int | None = None
+    license_number: str | None = Field(default=None, max_length=80)
+    w9_on_file: bool = False
+    insurance_expires_on: date | None = None
+    notes: str | None = Field(default=None, max_length=5000)
+    archived_at: datetime | None = None
+
+
+class Quote(TimestampMixin, table=True):
+    __tablename__ = "quotes"
+    id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
+    org_id: uuid.UUID = Field(foreign_key="organizations.id", index=True)
+    work_order_id: uuid.UUID = Field(foreign_key="work_orders.id", index=True)
+    vendor_id: uuid.UUID = Field(foreign_key="vendors.id", index=True)
+    amount_cents: int
+    description: str | None = Field(default=None, max_length=2000)
+    valid_until: date | None = None
+    status: str = Field(default="pending", max_length=10)
+    document_id: uuid.UUID | None = Field(default=None, foreign_key="documents.id")
+    decided_at: datetime | None = None
+    decided_by_user_id: uuid.UUID | None = Field(default=None, foreign_key="users.id")
+
+
+class VendorInvoice(TimestampMixin, table=True):
+    """A vendor's bill for a work order. Recording it creates the matching expense."""
+
+    __tablename__ = "vendor_invoices"
+    id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
+    org_id: uuid.UUID = Field(foreign_key="organizations.id", index=True)
+    work_order_id: uuid.UUID = Field(foreign_key="work_orders.id", index=True)
+    vendor_id: uuid.UUID = Field(foreign_key="vendors.id", index=True)
+    invoice_number: str | None = Field(default=None, max_length=60)
+    amount_cents: int
+    invoice_date: date
+    due_date: date | None = None
+    status: str = Field(default="unpaid", max_length=10)
+    paid_on: date | None = None
+    document_id: uuid.UUID | None = Field(default=None, foreign_key="documents.id")
+    expense_id: uuid.UUID | None = Field(default=None, foreign_key="expenses.id")
+    created_by_user_id: uuid.UUID | None = Field(default=None, foreign_key="users.id")
+
+
+class MaintenanceSchedule(TimestampMixin, table=True):
+    """Preventive maintenance: the daily job opens a work order `lead_days` before each due date."""
+
+    __tablename__ = "maintenance_schedules"
+    id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
+    org_id: uuid.UUID = Field(foreign_key="organizations.id", index=True)
+    property_id: uuid.UUID = Field(foreign_key="properties.id", index=True)
+    unit_id: uuid.UUID | None = Field(default=None, foreign_key="units.id")
+    title: str = Field(max_length=160)
+    description: str | None = Field(default=None, max_length=2000)
+    category: str = Field(default="general", max_length=20)
+    priority: str = Field(default="low", max_length=20)
+    interval_months: int = 12
+    next_due_on: date = Field(index=True)
+    lead_days: int = 7
+    vendor_id: uuid.UUID | None = Field(default=None, foreign_key="vendors.id")
+    assigned_to_user_id: uuid.UUID | None = Field(default=None, foreign_key="users.id")
+    asset_id: uuid.UUID | None = Field(default=None, foreign_key="assets.id")
+    active: bool = True
+    last_work_order_id: uuid.UUID | None = None
+    created_by_user_id: uuid.UUID | None = Field(default=None, foreign_key="users.id")
+
+
+class Asset(TimestampMixin, table=True):
+    """Appliances and building systems, with warranty dates (manuals/warranties are asset documents)."""
+
+    __tablename__ = "assets"
+    id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
+    org_id: uuid.UUID = Field(foreign_key="organizations.id", index=True)
+    property_id: uuid.UUID = Field(foreign_key="properties.id", index=True)
+    unit_id: uuid.UUID | None = Field(default=None, foreign_key="units.id")
+    name: str = Field(max_length=120)
+    category: str = Field(default="appliance", max_length=20)
+    make: str | None = Field(default=None, max_length=80)
+    model: str | None = Field(default=None, max_length=80)
+    serial_number: str | None = Field(default=None, max_length=80)
+    installed_on: date | None = None
+    purchase_price_cents: int | None = None
+    warranty_expires_on: date | None = Field(default=None, index=True)
+    location: str | None = Field(default=None, max_length=120)
+    notes: str | None = Field(default=None, max_length=2000)
+    archived_at: datetime | None = None
+
+
+class AccessItem(TimestampMixin, table=True):
+    """Keys, fobs, remotes and access codes for a property or unit."""
+
+    __tablename__ = "access_items"
+    id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
+    org_id: uuid.UUID = Field(foreign_key="organizations.id", index=True)
+    property_id: uuid.UUID = Field(foreign_key="properties.id", index=True)
+    unit_id: uuid.UUID | None = Field(default=None, foreign_key="units.id")
+    kind: str = Field(default="key", max_length=10)
+    label: str = Field(max_length=120)  # e.g. "Front door", "Garage remote", "Lockbox"
+    code: str | None = Field(default=None, max_length=120)  # door/gate/lockbox code
+    quantity: int = 1
+    holder: str | None = Field(default=None, max_length=120)  # who has them: tenant, office, cleaner...
+    notes: str | None = Field(default=None, max_length=1000)
+    changed_on: date | None = None  # last rekey / code change
 
 
 class WorkOrderComment(SQLModel, table=True):

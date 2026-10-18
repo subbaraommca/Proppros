@@ -35,7 +35,7 @@ This is the step-by-step execution plan. Work is split into **iterations**. Each
 | 10 | Online payments (Stripe Connect) | v2 | 🟦 Code done (hidden until Stripe keys are set) — create a Stripe account to test |
 | 11 | SaaS: subscriptions, onboarding, admin | v2 | 🟦 Code done — billing & Google sign-in dormant until configured |
 | 12 | Leasing workflows (templates, e-sign, renewals) | v2 | 🟦 Code done — try it on one of your leases |
-| 13 | Vendors & preventive maintenance | v2 | ⬜ |
+| 13 | Vendors & preventive maintenance | v2 | 🟦 Code done — add your vendors, appliances and recurring tasks |
 | 14 | Vacancy, listings & screening | v2 | ⬜ |
 | 15 | Communication (messaging, SMS, notices) | v2 | ⬜ |
 | 16 | Advanced finance (Plaid, tax, exports) | v2 | ⬜ |
@@ -293,10 +293,11 @@ Legend: ⬜ Not started · 🟨 In progress · 🟦 Code complete, waiting on a 
 
 **Requirements:** MNT-04, MNT-05, MNT-06, PRP-04, PRP-05
 
-- [ ] Vendor directory (trades, rates, W-9, insurance expiry, ratings)
-- [ ] Quotes → approval → invoice → automatic expense
-- [ ] Recurring maintenance schedules (cron creates work orders)
-- [ ] Appliance/asset tracking with warranty reminders; key and access-code tracking
+- [x] Vendor directory (trades, rates, W-9, insurance expiry, ratings) — *Vendors page; W-9/insurance files as vendor documents (full-access members only); 30-day insurance reminder; per-job 1–5 rating*
+- [x] Quotes → approval → invoice → automatic expense — *approving one quote declines the rest and assigns the vendor; recording an invoice creates the expense (deleting it removes both); optional "email job details to vendor"*
+- [x] Recurring maintenance schedules (cron creates work orders) — *daily job opens the work order `lead_days` before each due date and advances the schedule; overdue schedules create one work order, not a backlog; "Create now", pause*
+- [x] Appliance/asset tracking with warranty reminders; key and access-code tracking — *property tabs "Appliances & systems" (warranty reminder 30 days before, manuals as asset documents) and "Keys & codes" (codes hidden from accountants and never written to the audit log)*
+- [ ] **Your part:** add your vendors, the main appliances/systems per property, and recurring tasks (HVAC filters, smoke detectors)
 
 ## Iteration 14 — Vacancy, listings & screening
 
@@ -373,3 +374,4 @@ Record notes when each iteration closes.
 | 2026-10-17 | 10 | Online payments via Stripe Connect Express (destination charges): owner onboarding, Checkout (ACH/card, optional card-fee pass-through), webhook-driven ledger with processing/succeeded/failed/reversed states, returned-payment fee, autopay with idempotent off-session charges, partial-payment and per-lease block rules. Migration `0002` (server defaults so existing rows migrate). 15 new tests with a faked Stripe gateway; feature hidden until `STRIPE_SECRET_KEY` is set. Not yet tested against real Stripe. |
 | 2026-10-17 | 11 | SaaS layer: plans + Stripe Billing (per-unit, quantity synced daily, limits only when billing is on), property-scoped memberships enforced in every list/detail route, TOTP 2FA with hashed recovery codes and a short-lived `mfa` token, Google OIDC sign-in, super-admin console with audited impersonation, help center (Markdown) + feedback, onboarding wizard, landing and pricing pages. Migration `0003` (server defaults). 13 new tests (83 total). Checked in a browser: landing/pricing/help signed out, onboarding, admin, team access, 2FA setup and the 2FA sign-in step. |
 | 2026-10-18 | 12 | Leasing workflows: lease templates with merge fields, built-in e-signature (signing links work without an account; portal signing for tenants with accounts; landlord signs in-app), renewal offers with portal accept/decline and automatic successor lease, move-in/move-out inspections with photos and PDF reports, itemized security-deposit statements. Decision: built-in e-signature instead of Dropbox Sign/DocuSign (no cost or account; records consent, IP, device, time and a SHA-256 fingerprint of the text). Migration `0004` (new tables + one nullable column). 10 new tests (93 total). Checked in a browser: template editor, send → public link signing → landlord signing → signed PDF, renewal offer → tenant portal card, inspection checklist (desktop + phone). |
+| 2026-10-18 | 13 | Vendors & preventive maintenance: vendor directory with insurance/W-9 tracking and ratings, vendor assignment with job-details email, quotes with approve/decline, vendor invoices that create expenses automatically, preventive schedules run by the daily job, appliance/system register with warranty reminders, keys & access codes per property/unit. Migration `0005` (new tables + nullable work-order columns). 7 new tests (100 total). Checked in a browser: add vendor, quotes → approve → invoice → expense, schedule from a preset, assets and keys tabs, phone width. |

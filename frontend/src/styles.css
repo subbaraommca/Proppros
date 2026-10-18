@@ -701,3 +701,9 @@ main:focus { outline: none; }
 @media (max-width: 640px) {
   .sign-doc { padding: 20px 18px; }
 }
+
+/* ── Iteration 13: vendors ─────────────────────────────────────────────────── */
+.stars { display: inline-flex; gap: 1px; vertical-align: middle; color: var(--pp-border-strong); }
+.stars svg.on { color: var(--pp-citrine); fill: var(--pp-citrine); }
+.stars button { background: none; border: 0; padding: 2px; cursor: pointer; color: inherit; line-height: 0; }
+.stars button:hover svg { color: var(--pp-citrine); }

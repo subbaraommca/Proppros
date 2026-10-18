@@ -20,8 +20,10 @@ from app.models import (
     Organization,
     Property,
     Tenant,
+    Asset,
     Unit,
     User,
+    Vendor,
     WorkOrder,
     utcnow,
 )
@@ -37,6 +39,8 @@ OWNER_MODELS = {
     "lease": Lease,
     "expense": Expense,
     "work_order": WorkOrder,
+    "vendor": Vendor,
+    "asset": Asset,
 }
 
 ALLOWED_TYPES = {

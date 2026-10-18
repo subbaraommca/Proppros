@@ -9,6 +9,7 @@ import type { DocumentRow, Lease, Property, Unit } from "../types";
 import { DocumentsPanel, PhotoGrid } from "../components/Documents";
 import { Badge, BalanceText, Card, ErrorBox, Field, Input, Modal, MoneyInput, PageHeader, Spinner, Tabs, Textarea } from "../components/ui";
 import { date, fromCents, label, money, toCents } from "../utils/format";
+import { AccessPanel, AssetsPanel } from "../components/PropertyAssets";
 import { PropertyFormModal } from "./PropertiesPage";
 
 function UnitModal({ propertyId, unit, onClose }: { propertyId: string; unit?: Unit; onClose: () => void }) {
@@ -103,7 +104,7 @@ export function PropertyDetailPage() {
   const { can } = useAuth();
   const navigate = useNavigate();
   const qc = useQueryClient();
-  const [tab, setTab] = useState<"units" | "photos" | "documents">("units");
+  const [tab, setTab] = useState<"units" | "photos" | "documents" | "assets" | "keys">("units");
   const [editing, setEditing] = useState(false);
   const [unitModal, setUnitModal] = useState<{ unit?: Unit } | null>(null);
   const canEdit = can("owner", "manager");
@@ -203,6 +204,8 @@ export function PropertyDetailPage() {
             { id: "units", label: t("properties.units_tab", { count: p.unit_count }) },
             { id: "photos", label: t("properties.photos") },
             { id: "documents", label: t("documents.title") },
+            { id: "assets", label: t("assets.tab") },
+            { id: "keys", label: t("access.tab") },
           ]}
         />
 
@@ -320,6 +323,8 @@ export function PropertyDetailPage() {
         )}
 
         {tab === "documents" && <DocumentsPanel ownerType="property" ownerId={p.id} />}
+        {tab === "assets" && <AssetsPanel property={p} />}
+        {tab === "keys" && <AccessPanel property={p} />}
       </div>
 
       {editing && <PropertyFormModal property={p} onClose={() => setEditing(false)} />}

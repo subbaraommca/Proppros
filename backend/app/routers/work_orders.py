@@ -5,7 +5,7 @@ from sqlmodel import select
 
 from app.core import audit
 from app.core.deps import Ctx, get_owned, staff
-from app.models import Expense, Membership, Property, Unit, WorkOrder, WorkOrderComment, utcnow
+from app.models import Asset, Expense, Membership, Property, Unit, Vendor, WorkOrder, WorkOrderComment, utcnow
 from app.schemas import CommentIn, CompleteWithExpenseIn, WorkOrderIn, WorkOrderUpdate
 from app.services import maintenance as mx
 
@@ -84,7 +84,8 @@ def list_work_orders(
     if mine:
         q = q.where(WorkOrder.assigned_to_user_id == ctx.user.id)
     rows = ctx.session.exec(q.order_by(WorkOrder.created_at.desc()).limit(500)).all()
-    return [{**w.model_dump(), "property_name": pn, "unit_name": un} for w, pn, un in rows]
+    vendors = {v.id: v.name for v in ctx.session.exec(select(Vendor).where(Vendor.org_id == ctx.org_id)).all()}
+    return [{**w.model_dump(), "property_name": pn, "unit_name": un, "vendor_name": vendors.get(w.vendor_id)} for w, pn, un in rows]
 
 
 @router.post("", status_code=201)
@@ -98,6 +99,10 @@ def create_work_order(payload: WorkOrderIn, ctx: Ctx = Depends(staff)):
             raise HTTPException(status_code=400, detail="That unit doesn't belong to the selected property.")
     if payload.assigned_to_user_id:
         _check_assignee(ctx, payload.assigned_to_user_id)
+    if payload.asset_id:
+        asset = get_owned(ctx, Asset, payload.asset_id, "Asset")
+        if asset.property_id != payload.property_id:
+            raise HTTPException(status_code=400, detail="That asset is at a different property.")
     wo = WorkOrder(
         org_id=ctx.org_id,
         number=mx.next_number(ctx.session, ctx.org_id),
@@ -118,8 +123,17 @@ def create_work_order(payload: WorkOrderIn, ctx: Ctx = Depends(staff)):
 @router.get("/{work_order_id}")
 def get_work_order(work_order_id: uuid.UUID, ctx: Ctx = Depends(staff)):
     wo = get_owned(ctx, WorkOrder, work_order_id, "Work order")
+    from app.routers.vendors import work_order_vendor_extras
+
     expenses = ctx.session.exec(select(Expense).where(Expense.work_order_id == wo.id)).all()
-    return {**mx.serialize(ctx.session, wo, include_internal=True), "expenses": expenses, "can_edit": _can_edit(ctx, wo)}
+    asset = ctx.session.get(Asset, wo.asset_id) if wo.asset_id else None
+    return {
+        **mx.serialize(ctx.session, wo, include_internal=True),
+        **work_order_vendor_extras(ctx.session, wo),
+        "asset": {"id": str(asset.id), "name": asset.name} if asset else None,
+        "expenses": expenses,
+        "can_edit": _can_edit(ctx, wo),
+    }
 
 
 @router.patch("/{work_order_id}")
