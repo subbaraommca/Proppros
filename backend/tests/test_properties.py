@@ -55,3 +55,27 @@ def test_audit_log_records_changes():
     update = next(e for e in log if e["action"] == "update" and e["entity_type"] == "property")
     assert update["changes"]["name"] == ["Oak St", "Oak Street House"]
     assert update["actor_name"] == "Owner One"
+
+
+def _png() -> bytes:
+    import io
+
+    from PIL import Image
+
+    buf = io.BytesIO()
+    Image.new("RGB", (8, 8), (200, 120, 90)).save(buf, "PNG")
+    return buf.getvalue()
+
+
+def test_property_tile_falls_back_to_first_photo():
+    c, _ = register()
+    prop = make_property(c)
+    up = lambda name: c.post("/api/documents", data={"owner_type": "property", "owner_id": prop["id"]}, files={"file": (name, _png(), "image/png")})
+    first = up("front.png").json()
+    second = up("yard.png").json()
+    tile = lambda: next(p for p in c.get("/api/properties").json() if p["id"] == prop["id"])
+    # No cover chosen yet: the first uploaded photo shows on the tile
+    assert tile()["cover_photo_id"] == first["id"]
+    # A chosen cover wins
+    c.patch(f"/api/properties/{prop['id']}", json={"cover_photo_id": second["id"]})
+    assert tile()["cover_photo_id"] == second["id"]

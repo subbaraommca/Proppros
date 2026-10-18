@@ -30,8 +30,22 @@ def list_properties(include_archived: bool = False, ctx: Ctx = Depends(staff)):
     by_prop: dict[uuid.UUID, list[Unit]] = {}
     for u in units:
         by_prop.setdefault(u.property_id, []).append(u)
+    # Tiles show the chosen cover photo, or else the property's first uploaded photo.
+    first_photo: dict[uuid.UUID, uuid.UUID] = {}
+    photos = ctx.session.exec(
+        select(Document)
+        .where(Document.org_id == ctx.org_id, Document.owner_type == "property", Document.content_type.startswith("image/"))
+        .order_by(Document.created_at)
+    ).all()
+    for d in photos:
+        first_photo.setdefault(d.owner_id, d.id)
     return [
-        {**p.model_dump(), **_unit_summary(by_prop.get(p.id, [])), "units": sorted(by_prop.get(p.id, []), key=lambda u: u.name)}
+        {
+            **p.model_dump(),
+            "cover_photo_id": p.cover_photo_id or first_photo.get(p.id),
+            **_unit_summary(by_prop.get(p.id, [])),
+            "units": sorted(by_prop.get(p.id, []), key=lambda u: u.name),
+        }
         for p in props
     ]
 

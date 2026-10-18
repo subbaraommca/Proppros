@@ -66,6 +66,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setOrgId(null);
       qc.clear();
       qc.setQueryData(["me"], null);
+      // Land on the public home page, not the sign-in redirect for the page the user was on.
+      window.location.assign("/");
     }
   }, [qc]);
 
