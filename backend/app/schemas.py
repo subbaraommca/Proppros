@@ -20,7 +20,7 @@ WorkOrderCategory = Literal["plumbing", "electrical", "hvac", "appliance", "pest
 WorkOrderPriority = Literal["low", "medium", "high", "emergency"]
 WorkOrderStatus = Literal["new", "assigned", "scheduled", "in_progress", "completed", "closed"]
 DocumentOwnerType = Literal["organization", "property", "unit", "tenant", "lease", "expense", "work_order", "vendor"]
-DocumentKind = Literal["photo", "lease", "insurance", "deed", "hoa", "inspection", "receipt", "invoice", "license", "id", "other"]
+DocumentKind = Literal["photo", "lease", "insurance", "deed", "hoa", "inspection", "receipt", "invoice", "license", "id", "notice", "other"]
 
 
 
@@ -371,3 +371,90 @@ class DocumentUpdate(Base):
     expires_on: date | None = None
     clear_expiry: bool = False
     visible_to_tenant: bool | None = None
+
+
+# ── Leasing workflows ────────────────────────────────────────────────────────
+
+
+class LeaseTemplateIn(Base):
+    name: str = Field(min_length=1, max_length=120)
+    body: str | None = Field(default=None, max_length=100_000)  # blank → starter template
+
+
+class LeaseTemplateUpdate(Base):
+    name: str | None = Field(default=None, min_length=1, max_length=120)
+    body: str | None = Field(default=None, min_length=1, max_length=100_000)
+
+
+class RenderIn(Base):
+    template_id: uuid.UUID | None = None
+    body: str | None = Field(default=None, max_length=100_000)
+
+
+class SignatureRequestIn(Base):
+    title: str = Field(min_length=1, max_length=200)
+    template_id: uuid.UUID | None = None
+    body: str | None = Field(default=None, max_length=100_000)  # edited text; wins over the template
+    landlord_signs: bool = True
+
+
+class SignIn(Base):
+    signature_name: str = Field(min_length=2, max_length=160)
+    signature_image: str | None = Field(default=None, max_length=300_000)  # PNG data URL from the signature pad
+    consent: bool
+
+    @field_validator("consent")
+    @classmethod
+    def must_consent(cls, v: bool) -> bool:
+        if not v:
+            raise ValueError("Please agree to sign electronically.")
+        return v
+
+
+class RenewalOfferIn(Base):
+    rent_cents: int = Field(gt=0, le=100_000_000)
+    start_date: date
+    end_date: date | None = None
+    respond_by: date
+    message: str | None = Field(default=None, max_length=2000)
+
+
+class RenewalResponseIn(Base):
+    accept: bool
+    note: str | None = Field(default=None, max_length=2000)
+
+
+class InspectionIn(Base):
+    kind: Literal["move_in", "move_out"]
+    inspected_on: date
+
+
+class InspectionItemIn(Base):
+    id: str = Field(min_length=1, max_length=20)
+    area: str = Field(min_length=1, max_length=80)
+    item: str = Field(min_length=1, max_length=120)
+    condition: Literal["", "good", "fair", "poor", "damaged", "na"] = ""
+    notes: str = Field(default="", max_length=1000)
+    photo_ids: list[str] = Field(default_factory=list, max_length=20)
+
+
+class InspectionUpdate(Base):
+    inspected_on: date | None = None
+    notes: str | None = Field(default=None, max_length=5000)
+    items: list[InspectionItemIn] | None = Field(default=None, max_length=300)
+
+
+class InspectionCompleteIn(Base):
+    share_with_tenant: bool = True
+
+
+class DeductionIn(Base):
+    description: str = Field(min_length=1, max_length=200)
+    amount_cents: int = Field(ge=0, le=100_000_000)
+
+
+class DepositDispositionIn(Base):
+    deductions: list[DeductionIn] = Field(default_factory=list, max_length=50)
+    balance_applied_cents: int = Field(default=0, ge=0, le=100_000_000)
+    forwarding_address: str | None = Field(default=None, max_length=500)
+    notes: str | None = Field(default=None, max_length=5000)

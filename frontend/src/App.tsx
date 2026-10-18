@@ -40,6 +40,9 @@ const LandingPage = page(() => import("./pages/MarketingPages"), "LandingPage");
 const PricingPage = page(() => import("./pages/MarketingPages"), "PricingPage");
 const OnboardingPage = page(() => import("./pages/OnboardingPage"), "OnboardingPage");
 const AdminPage = page(() => import("./pages/AdminPage"), "AdminPage");
+const InspectionPage = page(() => import("./pages/InspectionPage"), "InspectionPage");
+const SignPage = page(() => import("./components/Signing"), "SignPage");
+const PortalSignPage = page(() => import("./components/Signing"), "PortalSignPage");
 
 function wrap(routes: ReactNode) {
   return (
@@ -73,6 +76,7 @@ export default function App() {
       <Route path="/reset-password" element={<ResetPasswordPage />} />
       <Route path="/privacy" element={<LegalPage doc="privacy" />} />
       <Route path="/terms" element={<LegalPage doc="terms" />} />
+      <Route path="/sign/:token" element={<SignPage />} />
     </>
   );
 
@@ -105,6 +109,7 @@ export default function App() {
           <Route path="documents" element={<PortalDocumentsPage />} />
           <Route path="help" element={<HelpPage />} />
           <Route path="help/:slug" element={<HelpPage />} />
+          <Route path="sign/:signerId" element={<PortalSignPage />} />
         </Route>
         <Route path="*" element={<Navigate to="/portal" replace />} />
       </Routes>
@@ -128,6 +133,7 @@ export default function App() {
         <Route path="leases" element={<LeasesPage />} />
         <Route path="leases/new" element={<LeaseNewPage />} />
         <Route path="leases/:id" element={<LeaseDetailPage />} />
+        <Route path="leases/:id/inspections/:inspectionId" element={<InspectionPage />} />
         <Route path="payments" element={<PaymentsPage />} />
         <Route path="expenses" element={<ExpensesPage />} />
         <Route path="maintenance" element={<WorkOrdersPage />} />

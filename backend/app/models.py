@@ -56,7 +56,11 @@ WORK_ORDER_CATEGORIES = ("plumbing", "electrical", "hvac", "appliance", "pest", 
 WORK_ORDER_PRIORITIES = ("low", "medium", "high", "emergency")
 WORK_ORDER_STATUSES = ("new", "assigned", "scheduled", "in_progress", "completed", "closed")
 DOCUMENT_OWNER_TYPES = ("organization", "property", "unit", "tenant", "lease", "expense", "work_order", "vendor")
-DOCUMENT_KINDS = ("photo", "lease", "insurance", "deed", "hoa", "inspection", "receipt", "invoice", "license", "id", "other")
+DOCUMENT_KINDS = ("photo", "lease", "insurance", "deed", "hoa", "inspection", "receipt", "invoice", "license", "id", "notice", "other")
+SIGNATURE_STATUSES = ("sent", "completed", "voided")
+RENEWAL_STATUSES = ("sent", "accepted", "declined", "withdrawn", "expired")
+INSPECTION_KINDS = ("move_in", "move_out")
+INSPECTION_CONDITIONS = ("good", "fair", "poor", "damaged", "na")
 
 
 class TimestampMixin(SQLModel):
@@ -226,6 +230,7 @@ class Lease(TimestampMixin, table=True):
     ended_on: date | None = None
     notes: str | None = None
     block_online_payments: bool = False  # e.g. after an eviction notice
+    renewal_of_id: uuid.UUID | None = Field(default=None, foreign_key="leases.id")  # set on the lease a renewal created
 
 
 class LeaseTenant(SQLModel, table=True):
@@ -387,6 +392,110 @@ class Document(TimestampMixin, table=True):
     expires_on: date | None = Field(default=None, index=True)
     visible_to_tenant: bool = False
     uploaded_by_user_id: uuid.UUID | None = Field(default=None, foreign_key="users.id")
+
+
+# ── Leasing workflows ────────────────────────────────────────────────────────
+
+
+class LeaseTemplate(TimestampMixin, table=True):
+    """Lease text with {{merge_fields}}, rendered per lease for signing."""
+
+    __tablename__ = "lease_templates"
+    id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
+    org_id: uuid.UUID = Field(foreign_key="organizations.id", index=True)
+    name: str = Field(max_length=120)
+    body: str = Field(max_length=100_000)
+
+
+class SignatureRequest(TimestampMixin, table=True):
+    """A document sent for e-signature. `body` is the frozen text everyone signs; `content_hash` is its SHA-256."""
+
+    __tablename__ = "signature_requests"
+    id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
+    org_id: uuid.UUID = Field(foreign_key="organizations.id", index=True)
+    lease_id: uuid.UUID = Field(foreign_key="leases.id", index=True)
+    template_id: uuid.UUID | None = Field(default=None, foreign_key="lease_templates.id")
+    title: str = Field(max_length=200)
+    body: str = Field(max_length=100_000)
+    content_hash: str = Field(max_length=64)
+    status: str = Field(default="sent", max_length=12)
+    document_id: uuid.UUID | None = Field(default=None, foreign_key="documents.id")  # signed PDF
+    completed_at: datetime | None = None
+    voided_at: datetime | None = None
+    created_by_user_id: uuid.UUID | None = Field(default=None, foreign_key="users.id")
+
+
+class Signer(SQLModel, table=True):
+    __tablename__ = "signers"
+    id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
+    request_id: uuid.UUID = Field(foreign_key="signature_requests.id", index=True)
+    role: str = Field(default="tenant", max_length=10)  # tenant | landlord
+    tenant_id: uuid.UUID | None = Field(default=None, foreign_key="tenants.id")
+    user_id: uuid.UUID | None = Field(default=None, foreign_key="users.id")
+    name: str = Field(max_length=160)
+    email: str | None = Field(default=None, max_length=255)
+    order: int = 0
+    token_hash: str | None = Field(default=None, max_length=64, index=True)  # SHA-256 of the signing-link token
+    token_expires_at: datetime | None = None
+    viewed_at: datetime | None = None
+    signed_at: datetime | None = None
+    signature_name: str | None = Field(default=None, max_length=160)  # typed name
+    signature_image: str | None = Field(default=None, max_length=300_000)  # drawn signature, PNG data URL
+    ip_address: str | None = Field(default=None, max_length=64)
+    user_agent: str | None = Field(default=None, max_length=300)
+
+
+class RenewalOffer(TimestampMixin, table=True):
+    __tablename__ = "renewal_offers"
+    id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
+    org_id: uuid.UUID = Field(foreign_key="organizations.id", index=True)
+    lease_id: uuid.UUID = Field(foreign_key="leases.id", index=True)
+    status: str = Field(default="sent", max_length=12)
+    rent_cents: int
+    start_date: date
+    end_date: date | None = None  # None → month-to-month
+    respond_by: date
+    message: str | None = Field(default=None, max_length=2000)
+    responded_at: datetime | None = None
+    responded_by_user_id: uuid.UUID | None = Field(default=None, foreign_key="users.id")
+    response_note: str | None = Field(default=None, max_length=2000)
+    new_lease_id: uuid.UUID | None = Field(default=None, foreign_key="leases.id")
+    created_by_user_id: uuid.UUID | None = Field(default=None, foreign_key="users.id")
+
+
+class Inspection(TimestampMixin, table=True):
+    """Move-in / move-out checklist. `items` = [{id, area, item, condition, notes, photo_ids}]."""
+
+    __tablename__ = "inspections"
+    id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
+    org_id: uuid.UUID = Field(foreign_key="organizations.id", index=True)
+    lease_id: uuid.UUID = Field(foreign_key="leases.id", index=True)
+    kind: str = Field(max_length=10)
+    status: str = Field(default="draft", max_length=10)  # draft | completed
+    inspected_on: date
+    items: list[dict[str, Any]] = Field(default_factory=list, sa_column=Column(JSON, nullable=False))
+    notes: str | None = Field(default=None, max_length=5000)
+    completed_at: datetime | None = None
+    document_id: uuid.UUID | None = Field(default=None, foreign_key="documents.id")  # PDF report
+    created_by_user_id: uuid.UUID | None = Field(default=None, foreign_key="users.id")
+
+
+class DepositDisposition(TimestampMixin, table=True):
+    """Itemized security-deposit statement sent after move-out. `deductions` = [{description, amount_cents}]."""
+
+    __tablename__ = "deposit_dispositions"
+    __table_args__ = (UniqueConstraint("lease_id", name="uq_deposit_dispositions_lease_id"),)
+    id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
+    org_id: uuid.UUID = Field(foreign_key="organizations.id", index=True)
+    lease_id: uuid.UUID = Field(foreign_key="leases.id")
+    status: str = Field(default="draft", max_length=10)  # draft | sent
+    deposit_cents: int = 0
+    deductions: list[dict[str, Any]] = Field(default_factory=list, sa_column=Column(JSON, nullable=False))
+    balance_applied_cents: int = 0  # deposit used to pay the lease's unpaid balance (posted as a ledger credit)
+    forwarding_address: str | None = Field(default=None, max_length=500)
+    notes: str | None = Field(default=None, max_length=5000)
+    sent_at: datetime | None = None
+    document_id: uuid.UUID | None = Field(default=None, foreign_key="documents.id")
 
 
 class Feedback(SQLModel, table=True):

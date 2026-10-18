@@ -116,6 +116,7 @@ export interface Lease {
   ended_on: string | null;
   notes?: string | null;
   block_online_payments?: boolean;
+  renewal_of_id?: string | null;
   balance_cents: number;
   tenants: LeaseTenant[];
   unit_name?: string;

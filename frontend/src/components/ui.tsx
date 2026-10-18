@@ -201,6 +201,8 @@ export function MoneyInput({ value, onChange, ...rest }: { value: string; onChan
 // Strata status → mineral mapping (docs/DESIGN_GUIDELINES.md §2.3)
 const STATUS_TONES: Record<string, string> = {
   active: "jade",
+  pending: "citrine",
+  draft: "citrine",
   occupied: "jade",
   completed: "jade",
   paid: "jade",

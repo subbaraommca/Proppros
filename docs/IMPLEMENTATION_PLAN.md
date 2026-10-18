@@ -34,7 +34,7 @@ This is the step-by-step execution plan. Work is split into **iterations**. Each
 | 9 | Hardening & go-live with own 3 properties | MVP | 🟨 Code hardening done — custom domain, backups check, 1-month trial left |
 | 10 | Online payments (Stripe Connect) | v2 | 🟦 Code done (hidden until Stripe keys are set) — create a Stripe account to test |
 | 11 | SaaS: subscriptions, onboarding, admin | v2 | 🟦 Code done — billing & Google sign-in dormant until configured |
-| 12 | Leasing workflows (templates, e-sign, renewals) | v2 | ⬜ |
+| 12 | Leasing workflows (templates, e-sign, renewals) | v2 | 🟦 Code done — try it on one of your leases |
 | 13 | Vendors & preventive maintenance | v2 | ⬜ |
 | 14 | Vacancy, listings & screening | v2 | ⬜ |
 | 15 | Communication (messaging, SMS, notices) | v2 | ⬜ |
@@ -283,10 +283,11 @@ Legend: ⬜ Not started · 🟨 In progress · 🟦 Code complete, waiting on a 
 
 **Requirements:** LSE-05, LSE-06, LSE-07, LSE-08
 
-- [ ] Lease templates with merge fields → PDF generation (queued job)
-- [ ] E-signature integration
-- [ ] Renewal workflow (offer → accept/decline → new lease)
-- [ ] Move-in/move-out inspections with photos + deposit disposition letter
+- [x] Lease templates with merge fields → PDF generation — *Settings → Lease templates; 16 merge fields; starter template. PDFs are generated in the request (a few pages, well inside the function limit), so no queue was needed*
+- [x] E-signature integration — *built in, no third-party account: personal single-use links (30 days), typed + drawn signature, consent, IP/device/time per signer, SHA-256 of the text, signing certificate page; signed PDF saved to the lease and emailed*
+- [x] Renewal workflow (offer → accept/decline → new lease) — *tenant answers in the portal or staff records it; acceptance creates the new lease (tenants, charges, rules copied) and the old one hands over billing on its end date; offers expire after their deadline*
+- [x] Move-in/move-out inspections with photos + deposit disposition letter — *room-by-room checklist from the unit's beds/baths, photos per item, move-out compares to move-in; PDF report; itemized deposit statement with suggested deductions and a ledger credit for unpaid rent*
+- [ ] **Your part:** create a lease template and send one real lease for signature
 
 ## Iteration 13 — Vendors & preventive maintenance
 
@@ -371,3 +372,4 @@ Record notes when each iteration closes.
 | 2026-10-17 | 8 | Full UI string extraction to `en.json` (~665 keys across 23 sections), i18next plurals (fixes “1 properties”-style grammar), language-aware ordinals/money/dates, central enum labels, language picker (shown once a 2nd locale exists), and a Vitest guard for missing keys. Checked 23 screens + modals in a browser for raw keys. |
 | 2026-10-17 | 10 | Online payments via Stripe Connect Express (destination charges): owner onboarding, Checkout (ACH/card, optional card-fee pass-through), webhook-driven ledger with processing/succeeded/failed/reversed states, returned-payment fee, autopay with idempotent off-session charges, partial-payment and per-lease block rules. Migration `0002` (server defaults so existing rows migrate). 15 new tests with a faked Stripe gateway; feature hidden until `STRIPE_SECRET_KEY` is set. Not yet tested against real Stripe. |
 | 2026-10-17 | 11 | SaaS layer: plans + Stripe Billing (per-unit, quantity synced daily, limits only when billing is on), property-scoped memberships enforced in every list/detail route, TOTP 2FA with hashed recovery codes and a short-lived `mfa` token, Google OIDC sign-in, super-admin console with audited impersonation, help center (Markdown) + feedback, onboarding wizard, landing and pricing pages. Migration `0003` (server defaults). 13 new tests (83 total). Checked in a browser: landing/pricing/help signed out, onboarding, admin, team access, 2FA setup and the 2FA sign-in step. |
+| 2026-10-18 | 12 | Leasing workflows: lease templates with merge fields, built-in e-signature (signing links work without an account; portal signing for tenants with accounts; landlord signs in-app), renewal offers with portal accept/decline and automatic successor lease, move-in/move-out inspections with photos and PDF reports, itemized security-deposit statements. Decision: built-in e-signature instead of Dropbox Sign/DocuSign (no cost or account; records consent, IP, device, time and a SHA-256 fingerprint of the text). Migration `0004` (new tables + one nullable column). 10 new tests (93 total). Checked in a browser: template editor, send → public link signing → landlord signing → signed PDF, renewal offer → tenant portal card, inspection checklist (desktop + phone). |

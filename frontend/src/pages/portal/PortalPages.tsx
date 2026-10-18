@@ -6,6 +6,7 @@ import { CalendarDays, FileDown, FolderOpen, Plus, Upload, Wrench } from "lucide
 import { api, fileUrl } from "../../services/api";
 import type { DocumentRow, Lease, LedgerRow, Payment, WorkOrder } from "../../types";
 import { DocIcon } from "../../components/Documents";
+import { PendingSignatures, PortalRenewalCard } from "../../components/PortalLeasing";
 import { PortalPayActions, PaymentBadges, usePortalPayOptions } from "../../components/OnlinePayments";
 import { Badge, BalanceText, Card, Empty, ErrorBox, Field, Input, Modal, PageHeader, Select, Spinner, Textarea } from "../../components/ui";
 import { date, dateTime, fileSize, label, money, ordinal } from "../../utils/format";
@@ -37,6 +38,7 @@ export function PortalHomePage() {
       <PageHeader title={t("portal.welcome", { name: data.tenant_name })} subtitle={data.organization} />
       <div className="stack">
         {flash && <div className={flash === "payment_cancelled" ? "info-box" : "success-box"}>{t(`online.${flash}`)}</div>}
+        <PendingSignatures />
         {data.leases.length === 0 && (
           <Card>
             <Empty title={t("portal.no_lease_title")}>{t("portal.no_lease_body")}</Empty>
@@ -160,6 +162,7 @@ export function PortalLeasePage() {
             </div>
           </div>
         </div>
+        {l.status === "active" && <PortalRenewalCard leaseId={l.id} currentRent={l.rent_cents} />}
         <Card title={t("portal.statement_title")} pad={false}>
           <div className="table-wrap">
             <table className="table">

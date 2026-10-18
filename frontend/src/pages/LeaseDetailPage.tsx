@@ -7,6 +7,7 @@ import { api, fileUrl } from "../services/api";
 import { useAuth } from "../hooks/useAuth";
 import type { Lease, LedgerRow, Payment } from "../types";
 import { DocumentsPanel } from "../components/Documents";
+import { MovePanel, RenewalPanel, SignaturesPanel } from "../components/LeasingPanels";
 import { PaymentBadges } from "../components/OnlinePayments";
 import { Badge, BalanceText, Card, ErrorBox, Field, Input, Modal, MoneyInput, PageHeader, Select, Spinner, Tabs, Textarea } from "../components/ui";
 import { date, fromCents, label, money, ordinal, toCents, todayISO } from "../utils/format";
@@ -342,7 +343,7 @@ export function LeaseDetailPage() {
   const { can, org } = useAuth();
   const navigate = useNavigate();
   const qc = useQueryClient();
-  const [tab, setTab] = useState<"ledger" | "payments" | "documents">("ledger");
+  const [tab, setTab] = useState<"ledger" | "payments" | "documents" | "signing" | "renewal" | "move">("ledger");
   const [modal, setModal] = useState<"payment" | "adjust" | "terms" | "charge" | "end" | null>(null);
   const canEdit = can("owner", "manager");
 
@@ -457,6 +458,9 @@ export function LeaseDetailPage() {
                 { id: "ledger", label: t("ledger.title") },
                 { id: "payments", label: t("nav.payments") },
                 { id: "documents", label: t("documents.title") },
+                { id: "signing", label: t("signing.tab") },
+                { id: "renewal", label: t("renewal.tab") },
+                { id: "move", label: t("inspections.tab") },
               ]}
             />
             {tab === "ledger" && (
@@ -584,6 +588,9 @@ export function LeaseDetailPage() {
               </Card>
             )}
             {tab === "documents" && <DocumentsPanel ownerType="lease" ownerId={lease.id} allowTenantShare />}
+            {tab === "signing" && <SignaturesPanel lease={lease} />}
+            {tab === "renewal" && <RenewalPanel lease={lease} />}
+            {tab === "move" && <MovePanel lease={lease} />}
           </div>
 
           <div className="stack">

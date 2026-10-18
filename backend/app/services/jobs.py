@@ -150,6 +150,10 @@ def run_daily_for_org(
 ) -> dict[str, int]:
     today = today or today_in(org.timezone)
     stats = {"rent_entries": 0, "late_fees": 0, "reminders": 0, "lease_alerts": 0, "document_alerts": 0, "autopay": 0}
+    # Expire renewal offers and hand over from renewed leases before rent posts.
+    from app.routers.leasing import daily_leasing
+
+    stats.update(daily_leasing(session, org, today))
     for lease in billing.active_leases(session, org.id):
         stats["rent_entries"] += billing.post_rent_for_lease(session, lease, today)
         stats["late_fees"] += int(billing.apply_late_fee_for_lease(session, lease, today))

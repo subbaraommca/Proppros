@@ -162,6 +162,14 @@ Stripe Connect **Express** with **destination charges**: each owner onboards the
 - **Help & feedback:** help articles are Markdown files in `frontend/src/help/` rendered by a small built-in renderer; feedback goes to the `feedback` table (optionally emailed).
 - **Public pages:** `/` (landing), `/pricing`, `/help` when signed out; `/welcome` onboarding wizard after sign-up.
 
+### Leasing workflows (Iteration 12)
+
+- **Templates** (`lease_templates`): Markdown-style text with `{{merge_fields}}` (`app/services/leasing.py → MERGE_FIELDS`). Unknown fields are rejected on save. Rendering is plain string substitution — no template engine, so template text can't run code.
+- **E-signature** (`signature_requests`, `signers`): the rendered text is frozen on the request with its SHA-256. Tenants sign through `/sign/<token>` (token stored hashed, single-use, 30-day expiry, rate-limited) or in the portal; the landlord signs in-app. Each signature stores typed name, optional drawn PNG, time, IP and user agent. When the last signer signs, `fpdf2` builds the signed PDF (document + signatures + signing certificate), saves it as a lease document visible to tenants and emails it.
+- **Renewals** (`renewal_offers`): accepting creates a lease with `renewal_of_id` pointing at the old one; the daily job ends the old lease after its end date and expires unanswered offers.
+- **Inspections** (`inspections`): items are JSON `{id, area, item, condition, notes, photo_ids}`; photos are lease documents of kind `inspection` (only added through the upload endpoint). Completing renders a PDF report with photos.
+- **Deposit statement** (`deposit_dispositions`, one per lease): deductions + deposit applied to the unpaid balance (posted once as a ledger credit, `source_key deposit:<lease>`); sending renders a letter PDF and emails it.
+
 ### Translations (i18n)
 
 All UI text lives in `frontend/src/locales/en.json`, grouped by area (`nav`, `leases`, `portal`, …); API enum values (statuses, categories, roles) are labelled in the `enums` section and rendered through `label()`. Use `t("section.key")` in components, i18next plural keys (`_one` / `_other`) for counts, and `<Trans>` for sentences with links or bold text. To add a language: copy `en.json` to `<code>.json`, translate the values, register it in `LANGUAGES` in `src/i18n.ts`. `src/locales/locales.test.ts` fails if code uses a missing key or a locale is missing keys. Server-generated text (API error details, emails, PDF receipts) is still English.

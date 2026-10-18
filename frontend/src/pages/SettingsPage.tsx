@@ -10,6 +10,7 @@ import { dateTime, label } from "../utils/format";
 import { LANGUAGES, setLanguage } from "../i18n";
 import { PaymentsSettingsTab } from "../components/OnlinePayments";
 import { AccessSummary, BillingTab, PropertyAccessPicker, SecurityCard } from "../components/AccountSettings";
+import { LeaseTemplatesTab } from "../components/LeaseTemplates";
 import { Modal } from "../components/ui";
 import { useSearchParams } from "react-router-dom";
 
@@ -425,10 +426,12 @@ export function SettingsPage() {
   const { t } = useTranslation();
   const { can, org } = useAuth();
   const isWriter = can("owner", "manager") && !org?.scoped;
-  type TabId = "org" | "team" | "payments" | "billing" | "account" | "audit";
+  const canTemplates = can("owner", "manager");
+  type TabId = "org" | "team" | "payments" | "billing" | "templates" | "account" | "audit";
   const [params] = useSearchParams();
   const requested = params.get("tab") as TabId | null;
-  const [tab, setTab] = useState<TabId>(requested && (isWriter || requested === "account") ? requested : isWriter ? "org" : "account");
+  const allowed = (id: TabId) => isWriter || id === "account" || (id === "templates" && canTemplates);
+  const [tab, setTab] = useState<TabId>(requested && allowed(requested) ? requested : isWriter ? "org" : "account");
   const tabs = [
     ...(isWriter
       ? [
@@ -438,6 +441,7 @@ export function SettingsPage() {
           { id: "billing" as const, label: t("settings.billing_tab") },
         ]
       : []),
+    ...(canTemplates ? [{ id: "templates" as const, label: t("templates.tab") }] : []),
     { id: "account" as const, label: t("settings.my_account") },
     ...(isWriter ? [{ id: "audit" as const, label: t("settings.audit_log") }] : []),
   ];
@@ -449,6 +453,7 @@ export function SettingsPage() {
       {tab === "team" && <Team />}
       {tab === "payments" && <PaymentsSettingsTab />}
       {tab === "billing" && <BillingTab />}
+      {tab === "templates" && <LeaseTemplatesTab />}
       {tab === "account" && <Account />}
       {tab === "audit" && <AuditLog />}
     </>
