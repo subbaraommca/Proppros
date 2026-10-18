@@ -34,6 +34,12 @@ const PortalMaintenancePage = page(() => import("./pages/portal/PortalPages"), "
 const PortalWorkOrderPage = page(() => import("./pages/portal/PortalPages"), "PortalWorkOrderPage");
 const PortalDocumentsPage = page(() => import("./pages/portal/PortalPages"), "PortalDocumentsPage");
 const LegalPage = page(() => import("./pages/LegalPages"), "LegalPage");
+const HelpPage = page(() => import("./pages/HelpPages"), "HelpPage");
+const PublicHelpPage = page(() => import("./pages/MarketingPages"), "PublicHelpPage");
+const LandingPage = page(() => import("./pages/MarketingPages"), "LandingPage");
+const PricingPage = page(() => import("./pages/MarketingPages"), "PricingPage");
+const OnboardingPage = page(() => import("./pages/OnboardingPage"), "OnboardingPage");
+const AdminPage = page(() => import("./pages/AdminPage"), "AdminPage");
 
 function wrap(routes: ReactNode) {
   return (
@@ -77,6 +83,10 @@ export default function App() {
         <Route path="/login" element={<LoginPage />} />
         <Route path="/register" element={<RegisterPage />} />
         <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+        <Route path="/" element={<LandingPage />} />
+        <Route path="/pricing" element={<PricingPage />} />
+        <Route path="/help" element={<PublicHelpPage />} />
+        <Route path="/help/:slug" element={<PublicHelpPage />} />
         <Route path="*" element={<Navigate to="/login" replace state={{ from: location.pathname }} />} />
       </Routes>
     );
@@ -93,6 +103,8 @@ export default function App() {
           <Route path="maintenance" element={<PortalMaintenancePage />} />
           <Route path="maintenance/:id" element={<PortalWorkOrderPage />} />
           <Route path="documents" element={<PortalDocumentsPage />} />
+          <Route path="help" element={<HelpPage />} />
+          <Route path="help/:slug" element={<HelpPage />} />
         </Route>
         <Route path="*" element={<Navigate to="/portal" replace />} />
       </Routes>
@@ -106,6 +118,7 @@ export default function App() {
       <Route path="/login" element={<Navigate to="/" replace />} />
       <Route path="/register" element={<Navigate to="/" replace />} />
       <Route path="/portal/*" element={<Navigate to="/" replace />} />
+      <Route path="/pricing" element={<Navigate to="/settings" replace />} />
       <Route element={<Layout />}>
         <Route index element={isMaintenance ? <Navigate to="/maintenance" replace /> : <DashboardPage />} />
         <Route path="properties" element={<PropertiesPage />} />
@@ -122,6 +135,10 @@ export default function App() {
         <Route path="documents" element={<DocumentsPage />} />
         <Route path="reports" element={<ReportsPage />} />
         <Route path="settings" element={<SettingsPage />} />
+        <Route path="welcome" element={<OnboardingPage />} />
+        <Route path="help" element={<HelpPage />} />
+        <Route path="help/:slug" element={<HelpPage />} />
+        {me.is_superadmin && <Route path="admin" element={<AdminPage />} />}
         <Route path="*" element={<NotFound />} />
       </Route>
     </Routes>

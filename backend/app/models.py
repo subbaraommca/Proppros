@@ -69,6 +69,7 @@ class TimestampMixin(SQLModel):
 
 class User(TimestampMixin, table=True):
     __tablename__ = "users"
+    __table_args__ = (UniqueConstraint("google_sub", name="uq_users_google_sub"),)
     id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
     email: str = Field(index=True, unique=True, max_length=255)
     name: str = Field(max_length=120)
@@ -77,6 +78,11 @@ class User(TimestampMixin, table=True):
     email_verified_at: datetime | None = None
     token_version: int = 0  # bump to invalidate all issued JWTs (logout, password reset)
     is_superadmin: bool = False
+    # Two-factor auth (TOTP authenticator apps)
+    mfa_secret: str | None = Field(default=None, max_length=64)  # set during setup; active once mfa_enabled_at is set
+    mfa_enabled_at: datetime | None = None
+    mfa_recovery_codes: list[str] = Field(default_factory=list, sa_column=Column(JSON, nullable=False))  # sha256 hashes
+    google_sub: str | None = Field(default=None, max_length=64)
 
 
 class Organization(TimestampMixin, table=True):
@@ -95,6 +101,12 @@ class Organization(TimestampMixin, table=True):
     allow_partial_payments: bool = True
     pass_card_fee: bool = False  # tenant pays the card processing fee
     returned_payment_fee_cents: int = 0
+    # Proppros subscription (Stripe Billing, on the platform account)
+    billing_customer_id: str | None = Field(default=None, max_length=64)
+    subscription_id: str | None = Field(default=None, max_length=64)
+    subscription_status: str = Field(default="none", max_length=20)  # none | active | trialing | past_due | canceled
+    current_period_end: datetime | None = None
+    plan_comped: bool = False  # set by a super admin: plan granted without billing
 
 
 class Membership(TimestampMixin, table=True):
@@ -105,6 +117,8 @@ class Membership(TimestampMixin, table=True):
     user_id: uuid.UUID = Field(foreign_key="users.id", index=True)
     role: str = Field(max_length=20)
     notification_prefs: dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSON, nullable=False))
+    # Property-scoped access for managers/accountants/maintenance; None = all properties
+    property_ids: list[str] | None = Field(default=None, sa_column=Column(JSON, nullable=True))
 
 
 class AuthToken(SQLModel, table=True):
@@ -127,6 +141,7 @@ class Invitation(SQLModel, table=True):
     email: str = Field(max_length=255, index=True)
     role: str = Field(max_length=20)
     tenant_id: uuid.UUID | None = Field(default=None, foreign_key="tenants.id")
+    property_ids: list[str] | None = Field(default=None, sa_column=Column(JSON, nullable=True))
     token_hash: str = Field(index=True, unique=True, max_length=64)
     invited_by_user_id: uuid.UUID = Field(foreign_key="users.id")
     expires_at: datetime
@@ -372,6 +387,20 @@ class Document(TimestampMixin, table=True):
     expires_on: date | None = Field(default=None, index=True)
     visible_to_tenant: bool = False
     uploaded_by_user_id: uuid.UUID | None = Field(default=None, foreign_key="users.id")
+
+
+class Feedback(SQLModel, table=True):
+    """Bug reports and ideas from users (Help → Send feedback), reviewed in the admin console."""
+
+    __tablename__ = "feedback"
+    id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
+    user_id: uuid.UUID = Field(foreign_key="users.id", index=True)
+    org_id: uuid.UUID | None = Field(default=None, foreign_key="organizations.id")
+    kind: str = Field(default="idea", max_length=10)  # bug | idea | question
+    message: str = Field(max_length=5000)
+    page: str | None = Field(default=None, max_length=300)
+    status: str = Field(default="new", max_length=10, index=True)  # new | reviewed | done
+    created_at: datetime = Field(default_factory=utcnow, index=True)
 
 
 # ── Notifications & audit ────────────────────────────────────────────────────

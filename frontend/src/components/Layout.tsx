@@ -9,11 +9,13 @@ import {
   FolderOpen,
   Home,
   LayoutDashboard,
+  LifeBuoy,
   LogOut,
   Menu,
   Moon,
   Receipt,
   Settings,
+  ShieldCheck,
   Sun,
   Users,
   Wrench,
@@ -22,6 +24,7 @@ import { useAuth } from "../hooks/useAuth";
 import { api } from "../services/api";
 import { label } from "../utils/format";
 import type { Role } from "../types";
+import { ImpersonationBanner } from "./ImpersonationBanner";
 
 type NavItem = { to: string; key: string; icon: typeof Home; roles?: Role[]; group: keyof typeof GROUP_LABELS };
 const GROUP_LABELS = { portfolio: "nav.group_portfolio", money: "nav.group_money", operations: "nav.group_operations", account: "nav.group_account" } as const;
@@ -38,7 +41,9 @@ const NAV: NavItem[] = [
   { to: "/maintenance", key: "maintenance", icon: Wrench, group: "operations" },
   { to: "/documents", key: "documents", icon: FolderOpen, roles: FINANCE, group: "operations" },
   { to: "/settings", key: "settings", icon: Settings, group: "account" },
+  { to: "/help", key: "help", icon: LifeBuoy, group: "account" },
 ];
+const ADMIN_ITEM: NavItem = { to: "/admin", key: "admin", icon: ShieldCheck, group: "account" };
 
 export function useTheme() {
   const [theme, setTheme] = useState<"light" | "dark">(() => {
@@ -90,7 +95,7 @@ export function Layout() {
   const location = useLocation();
   useEffect(() => setOpen(false), [location.pathname]);
 
-  const items = NAV.filter((n) => !n.roles || (org && n.roles.includes(org.role)));
+  const items = [...NAV.filter((n) => !n.roles || (org && n.roles.includes(org.role))), ...(me?.is_superadmin ? [ADMIN_ITEM] : [])];
 
   return (
     <div className="shell">
@@ -148,6 +153,7 @@ export function Layout() {
             <Menu size={20} />
           </button>
         </header>
+        <ImpersonationBanner />
         <VerifyBanner />
         <main id="main" className="content" tabIndex={-1}>
           <Outlet />

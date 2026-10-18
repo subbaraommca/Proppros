@@ -6,6 +6,7 @@ export interface OrgSummary {
   role: Role;
   timezone: string;
   currency: string;
+  scoped?: boolean;
 }
 
 export interface Me {
@@ -15,6 +16,9 @@ export interface Me {
   phone: string | null;
   email_verified: boolean;
   is_superadmin: boolean;
+  mfa_enabled?: boolean;
+  google_linked?: boolean;
+  impersonated_by?: string | null;
   organizations: OrgSummary[];
 }
 

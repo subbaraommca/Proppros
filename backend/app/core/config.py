@@ -50,6 +50,19 @@ class Settings(BaseSettings):
     stripe_card_fee_bps: int = 290  # used when the owner passes the card fee to tenants (2.9% …
     stripe_card_fee_fixed_cents: int = 30  # … + 30¢)
 
+    # Proppros subscriptions (Stripe Billing). BILLING_ENABLED=false → no plan limits, no checkout.
+    billing_enabled: bool = False
+    stripe_price_pro: str = ""  # price_… (per-unit, monthly, licensed quantity)
+    stripe_price_business: str = ""
+
+    # Platform admins (comma-separated emails) — get the super-admin console
+    superadmin_emails: str = ""
+    feedback_notify_email: str = ""  # feedback submissions are emailed here (blank → super admins)
+
+    # Google sign-in (OAuth 2.0 / OpenID Connect). Blank → button hidden.
+    google_client_id: str = ""
+    google_client_secret: str = ""
+
     # Rate limiting (Upstash Redis REST). Blank → in-memory (dev only).
     upstash_redis_rest_url: str = ""
     upstash_redis_rest_token: str = ""
@@ -71,6 +84,17 @@ class Settings(BaseSettings):
     def database_configured(self) -> bool:
         """False on Vercel until a real Postgres URL (Neon) is set — the SQLite default can't work there."""
         return not (self.on_vercel and self.database_url.startswith("sqlite"))
+
+    @property
+    def billing_active(self) -> bool:
+        return self.billing_enabled and bool(self.stripe_secret_key) and bool(self.stripe_price_pro)
+
+    @property
+    def google_enabled(self) -> bool:
+        return bool(self.google_client_id and self.google_client_secret)
+
+    def is_superadmin_email(self, email: str) -> bool:
+        return email.lower() in {e.strip().lower() for e in self.superadmin_emails.split(",") if e.strip()}
 
     @property
     def stripe_enabled(self) -> bool:

@@ -62,6 +62,8 @@ def list_expenses(
         .outerjoin(Unit, Unit.id == Expense.unit_id)
         .where(Expense.org_id == ctx.org_id)
     )
+    if ctx.scope is not None:
+        q = q.where(Expense.property_id.in_(ctx.scope))
     if property_id:
         q = q.where(Expense.property_id == property_id)
     if category:
@@ -161,11 +163,15 @@ def profit_and_loss(ctx: Ctx, start: date, end: date, group_by: str = "property"
     for e in payments:
         lease = leases.get(e.lease_id)
         unit = units.get(lease.unit_id) if lease else None
+        if not ctx.can_see_property(unit.property_id if unit else None):
+            continue
         income[key_for(unit.property_id if unit else None, unit.id if unit else None, e.entry_date)] += -e.amount_cents
 
     for x in ctx.session.exec(
         select(Expense).where(Expense.org_id == ctx.org_id, Expense.expense_date >= start, Expense.expense_date <= end)
     ).all():
+        if not ctx.can_see_property(x.property_id):
+            continue
         expense[key_for(x.property_id, x.unit_id, x.expense_date)] += x.amount_cents
         by_category[x.category] += x.amount_cents
 
@@ -191,6 +197,7 @@ def rent_roll(ctx: Ctx) -> list[dict]:
             Unit.org_id == ctx.org_id, Property.archived_at.is_(None)
         ).order_by(Property.name, Unit.name)
     ).all()
+    rows = [r for r in rows if ctx.can_see_property(r[1].id)]
     active = {l.unit_id: l for l in ctx.session.exec(select(Lease).where(Lease.org_id == ctx.org_id, Lease.status == "active")).all()}
     balances = balances_for(ctx.session, [l.id for l in active.values()])
     tenant_names = defaultdict(list)
@@ -227,6 +234,7 @@ def outstanding(ctx: Ctx) -> list[dict]:
     rows = ctx.session.exec(
         select(Lease, Unit, Property).join(Unit, Unit.id == Lease.unit_id).join(Property, Property.id == Unit.property_id).where(Lease.org_id == ctx.org_id)
     ).all()
+    rows = [r for r in rows if ctx.can_see_property(r[2].id)]
     balances = balances_for(ctx.session, [l.id for l, _, _ in rows])
     out = []
     for lease, unit, prop in rows:
@@ -360,12 +368,17 @@ def dashboard(ctx: Ctx = Depends(finance_read)):
     units = ctx.session.exec(
         select(Unit).join(Property, Property.id == Unit.property_id).where(Unit.org_id == ctx.org_id, Property.archived_at.is_(None))
     ).all()
+    units = [u for u in units if ctx.can_see_property(u.property_id)]
     occupied = sum(1 for u in units if u.status == "occupied")
+    units_by_id = {u.id: u for u in units}
 
     period = period_of(today)
     month_entries = ctx.session.exec(
         select(LedgerEntry).where(LedgerEntry.org_id == ctx.org_id, LedgerEntry.entry_date >= first_of_month, LedgerEntry.entry_date <= today)
     ).all()
+    if ctx.scope is not None:
+        lease_props = {l.id: units_by_id[l.unit_id].property_id for l in ctx.session.exec(select(Lease).where(Lease.org_id == ctx.org_id)).all() if l.unit_id in units_by_id}
+        month_entries = [e for e in month_entries if lease_props.get(e.lease_id) in ctx.scope]
     billed = sum(e.amount_cents for e in month_entries if e.entry_type in ("rent", "recurring", "late_fee", "charge") and e.amount_cents > 0)
     collected = sum(-e.amount_cents for e in month_entries if e.entry_type == "payment")
     owed = outstanding(ctx)
@@ -382,9 +395,11 @@ def dashboard(ctx: Ctx = Depends(finance_read)):
         )
         .order_by(Lease.end_date)
     ).all()
+    expiring = [r for r in expiring if r[0].unit_id in units_by_id]
     open_wo = ctx.session.exec(
         select(WorkOrder).where(WorkOrder.org_id == ctx.org_id, WorkOrder.status.not_in(("completed", "closed")))
     ).all()
+    open_wo = [w for w in open_wo if ctx.can_see_property(w.property_id)]
 
     return {
         "today": today,

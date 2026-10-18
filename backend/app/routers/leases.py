@@ -99,6 +99,8 @@ def list_leases(status: str | None = None, unit_id: uuid.UUID | None = None, ctx
         .join(Property, Property.id == Unit.property_id)
         .where(Lease.org_id == ctx.org_id)
     )
+    if ctx.scope is not None:
+        q = q.where(Property.id.in_(ctx.scope))
     if status:
         q = q.where(Lease.status == status)
     if unit_id:
@@ -386,6 +388,8 @@ def list_payments(lease_id: uuid.UUID | None = None, ctx: Ctx = Depends(finance_
         .outerjoin(Tenant, Tenant.id == Payment.tenant_id)
         .where(Payment.org_id == ctx.org_id)
     )
+    if ctx.scope is not None:
+        q = q.where(Property.id.in_(ctx.scope))
     if lease_id:
         q = q.where(Payment.lease_id == lease_id)
     rows = ctx.session.exec(q.order_by(Payment.received_on.desc(), Payment.created_at.desc()).limit(500)).all()

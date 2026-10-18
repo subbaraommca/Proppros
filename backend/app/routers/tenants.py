@@ -4,7 +4,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlmodel import select
 
 from app.core import audit
-from app.core.deps import Ctx, get_owned, staff, writer
+from app.core.deps import Ctx, get_owned, staff, tenant_in_scope, writer
 from app.models import Invitation, Lease, LeaseTenant, Membership, Property, Tenant, Unit, User, utcnow
 from app.routers.orgs import create_invitation
 from app.schemas import TenantIn, TenantUpdate
@@ -59,6 +59,8 @@ def _portal_status(ctx: Ctx, tenant: Tenant) -> str:
 @router.get("")
 def list_tenants(ctx: Ctx = Depends(staff)):
     tenants = ctx.session.exec(select(Tenant).where(Tenant.org_id == ctx.org_id).order_by(Tenant.last_name, Tenant.first_name)).all()
+    if ctx.scope is not None:
+        tenants = [t for t in tenants if tenant_in_scope(ctx, t.id)]
     leases = _leases_for_tenants(ctx, [t.id for t in tenants])
     out = []
     for t in tenants:

@@ -9,7 +9,7 @@ from sqlmodel import Session, select
 from app.core import audit, storage
 from app.core.config import settings
 from app.core.dates import today_in
-from app.core.deps import Ctx, get_ctx, staff, writer
+from app.core.deps import Ctx, get_ctx, property_id_of, staff, tenant_in_scope, writer
 from app.models import (
     DOCUMENT_KINDS,
     DOCUMENT_OWNER_TYPES,
@@ -141,6 +141,23 @@ def serve(doc: Document, download: bool = False):
     )
 
 
+def owner_in_scope(ctx: Ctx, owner_type: str, owner_id: uuid.UUID) -> bool:
+    """Whether a property-scoped member may see records attached to this owner."""
+    if ctx.scope is None:
+        return True
+    if owner_type == "organization":
+        return False  # org-wide documents are for full-access members
+    if owner_type == "tenant":
+        return tenant_in_scope(ctx, owner_id)
+    model = OWNER_MODELS.get(owner_type)
+    obj = ctx.session.get(model, owner_id) if model else None
+    return bool(obj) and ctx.can_see_property(property_id_of(ctx.session, obj))
+
+
+def doc_in_scope(ctx: Ctx, doc: Document) -> bool:
+    return owner_in_scope(ctx, doc.owner_type, doc.owner_id)
+
+
 def tenant_can_view(session: Session, user: User, doc: Document) -> bool:
     if not doc.visible_to_tenant:
         return False
@@ -210,6 +227,8 @@ def list_documents(
     if expiring_within_days is not None:
         q = q.where(Document.expires_on.is_not(None), Document.expires_on <= today_in(ctx.org.timezone) + timedelta(days=expiring_within_days))
     docs = ctx.session.exec(q.order_by(Document.created_at.desc()).limit(1000)).all()
+    if ctx.scope is not None:
+        docs = [d for d in docs if doc_in_scope(ctx, d)]
     return _with_owner_label(ctx.session, list(docs))
 
 
@@ -228,6 +247,8 @@ async def upload_document(
     if ctx.role == "maintenance" and owner_type != "work_order":
         raise HTTPException(status_code=403, detail="Maintenance staff can only attach files to work orders.")
     check_owner(ctx.session, ctx.org_id, owner_type, owner_id)
+    if ctx.scope is not None and not owner_in_scope(ctx, owner_type, owner_id):
+        raise HTTPException(status_code=404, detail="Record not found")
     doc = await store_upload(ctx.session, ctx.org_id, ctx.user.id, file, owner_type, owner_id, kind, expires_on, visible_to_tenant)
     ctx.session.flush()
     audit.log(ctx, "document", doc.id, "upload", f"Uploaded {doc.name} to {owner_type}")
@@ -243,7 +264,7 @@ def download_document(document_id: uuid.UUID, download: bool = False, ctx: Ctx =
         raise HTTPException(status_code=404, detail="Document not found")
     if ctx.role == "tenant" and not tenant_can_view(ctx.session, ctx.user, doc):
         raise HTTPException(status_code=404, detail="Document not found")
-    if ctx.role == "vendor":
+    if ctx.role == "vendor" or (ctx.role != "tenant" and not doc_in_scope(ctx, doc)):
         raise HTTPException(status_code=404, detail="Document not found")
     return serve(doc, download)
 

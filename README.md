@@ -75,3 +75,22 @@ Online payments stay hidden until these are set.
 2. In Vercel, add `STRIPE_SECRET_KEY` (`sk_test_…` while testing).
 3. In Stripe → Developers → Webhooks, add the endpoint `https://<your-domain>/api/stripe/webhook` with these events: `payment_intent.processing`, `payment_intent.succeeded`, `payment_intent.payment_failed`, `charge.refunded`, `charge.dispute.created`, `checkout.session.completed`, `account.updated`. Copy its signing secret into `STRIPE_WEBHOOK_SECRET`, then redeploy.
 4. In Proppros, go to **Settings → Payments → Connect with Stripe**, finish onboarding, and turn on **Accept online payments**. Test with card `4242 4242 4242 4242` or Stripe's test bank account.
+
+### Platform admin
+
+Set `SUPERADMIN_EMAILS=you@example.com` (comma-separated) and redeploy. Those users see **Admin** in the sidebar: usage overview, organizations (change plan, comp), users (sign in as a user for support — 60 minutes, written to that organization's audit log) and in-app feedback. Set `FEEDBACK_NOTIFY_EMAIL` to get new feedback by email.
+
+### Optional: Google sign-in
+
+1. Google Cloud Console → APIs & Services → Credentials → **Create OAuth client ID** (Web application).
+2. Authorized redirect URI: `https://<your-domain>/api/auth/google/callback` (and `http://localhost:5173/api/auth/google/callback` for local dev).
+3. Add `GOOGLE_CLIENT_ID` and `GOOGLE_CLIENT_SECRET` in Vercel and redeploy. The "Continue with Google" button appears on sign-in and sign-up. A Google account is linked to an existing Proppros user only when the verified email matches.
+
+### Optional: paid plans (Stripe Billing)
+
+Plans: **Free** (3 units, 2 team members), **Pro** ($2/unit/month, 10 members), **Business** ($3/unit/month, unlimited). Limits apply only when billing is on.
+
+1. In Stripe → Products, create *Proppros Pro* and *Proppros Business*, each with a **recurring monthly, per-unit** price. Put the price IDs in `STRIPE_PRICE_PRO` / `STRIPE_PRICE_BUSINESS`.
+2. Add these events to the same webhook endpoint: `customer.subscription.created`, `customer.subscription.updated`, `customer.subscription.deleted`.
+3. Turn on the customer portal (Stripe → Settings → Billing → Customer portal).
+4. Set `BILLING_ENABLED=true` and redeploy. Owners upgrade from **Settings → Plan & billing**; the daily job keeps the subscription quantity equal to the number of units. Comp an organization from **Admin → Organizations**.

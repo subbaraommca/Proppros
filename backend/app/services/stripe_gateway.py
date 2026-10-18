@@ -169,3 +169,42 @@ def parse_webhook(payload: bytes, signature: str) -> dict[str, Any]:
     """Verify the Stripe-Signature header and return the event as a plain dict."""
     event = stripe.Webhook.construct_event(payload, signature, settings.stripe_webhook_secret)
     return event.to_dict()
+
+
+# ── Proppros subscriptions (Stripe Billing, platform account) ────────────────
+
+
+def create_billing_customer(email: str, org_name: str, org_id: str) -> str:
+    _client()
+    return stripe.Customer.create(email=email, name=org_name, metadata={"org_id": org_id, "purpose": "proppros_subscription"}).id
+
+
+def checkout_subscription(*, customer_id: str, price_id: str, quantity: int, org_id: str, success_url: str, cancel_url: str) -> str:
+    _client()
+    session = stripe.checkout.Session.create(
+        mode="subscription",
+        customer=customer_id,
+        line_items=[{"price": price_id, "quantity": quantity}],
+        subscription_data={"metadata": {"org_id": org_id}},
+        metadata={"org_id": org_id, "purpose": "subscription"},
+        success_url=success_url,
+        cancel_url=cancel_url,
+        allow_promotion_codes=True,
+    )
+    return session.url
+
+
+def billing_portal(customer_id: str, return_url: str) -> str:
+    _client()
+    return stripe.billing_portal.Session.create(customer=customer_id, return_url=return_url).url
+
+
+def set_subscription_quantity(subscription_id: str, quantity: int) -> bool:
+    """Returns True if the quantity changed."""
+    _client()
+    sub = stripe.Subscription.retrieve(subscription_id)
+    item = sub["items"]["data"][0]
+    if item["quantity"] == quantity:
+        return False
+    stripe.SubscriptionItem.modify(item["id"], quantity=quantity, proration_behavior="create_prorations")
+    return True

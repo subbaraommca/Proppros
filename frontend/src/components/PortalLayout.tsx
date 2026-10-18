@@ -3,6 +3,7 @@ import { useTranslation } from "react-i18next";
 import { LogOut, Moon, Sun } from "lucide-react";
 import { useAuth } from "../hooks/useAuth";
 import { Brand, useTheme } from "./Layout";
+import { ImpersonationBanner } from "./ImpersonationBanner";
 
 export function PortalLayout() {
   const { t } = useTranslation();
@@ -23,6 +24,7 @@ export function PortalLayout() {
             <NavLink to="/portal/payments">{t("nav.payments")}</NavLink>
             <NavLink to="/portal/maintenance">{t("nav.maintenance")}</NavLink>
             <NavLink to="/portal/documents">{t("nav.documents")}</NavLink>
+            <NavLink to="/portal/help">{t("nav.help")}</NavLink>
           </nav>
           {me && me.organizations.length > 1 && (
             <select className="org-select" value={org?.id} onChange={(e) => switchOrg(e.target.value)} aria-label={t("nav.switch_account")}>
@@ -41,6 +43,7 @@ export function PortalLayout() {
           </button>
         </div>
       </header>
+      <ImpersonationBanner />
       <main id="main" className="portal-content" tabIndex={-1}>
         <Outlet />
       </main>

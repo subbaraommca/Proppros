@@ -4,7 +4,8 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlmodel import select
 
 from app.core import audit
-from app.core.deps import Ctx, get_owned, staff, writer
+from app.core.deps import Ctx, admin_writer, get_owned, staff, writer
+from app.services import plans
 from app.models import Document, Expense, Lease, Property, Unit, WorkOrder, utcnow
 from app.schemas import PropertyIn, PropertyUpdate, UnitIn, UnitUpdate
 
@@ -20,6 +21,8 @@ def _unit_summary(units: list[Unit]) -> dict:
 @router.get("/properties")
 def list_properties(include_archived: bool = False, ctx: Ctx = Depends(staff)):
     q = select(Property).where(Property.org_id == ctx.org_id)
+    if ctx.scope is not None:
+        q = q.where(Property.id.in_(ctx.scope))
     if not include_archived:
         q = q.where(Property.archived_at.is_(None))
     props = ctx.session.exec(q.order_by(Property.name)).all()
@@ -31,7 +34,9 @@ def list_properties(include_archived: bool = False, ctx: Ctx = Depends(staff)):
 
 
 @router.post("/properties", status_code=201)
-def create_property(payload: PropertyIn, ctx: Ctx = Depends(writer)):
+def create_property(payload: PropertyIn, ctx: Ctx = Depends(admin_writer)):
+    if payload.property_type in ("single_family", "condo", "townhouse"):
+        plans.check_unit_limit(ctx.session, ctx.org)
     prop = Property(org_id=ctx.org_id, **payload.model_dump())
     ctx.session.add(prop)
     ctx.session.flush()
@@ -111,6 +116,8 @@ def delete_property(property_id: uuid.UUID, ctx: Ctx = Depends(writer)):
 @router.get("/units")
 def list_units(property_id: uuid.UUID | None = None, ctx: Ctx = Depends(staff)):
     q = select(Unit, Property.name).join(Property, Property.id == Unit.property_id).where(Unit.org_id == ctx.org_id)
+    if ctx.scope is not None:
+        q = q.where(Unit.property_id.in_(ctx.scope))
     if property_id:
         q = q.where(Unit.property_id == property_id)
     rows = ctx.session.exec(q.order_by(Property.name, Unit.name)).all()
@@ -120,6 +127,7 @@ def list_units(property_id: uuid.UUID | None = None, ctx: Ctx = Depends(staff)):
 @router.post("/properties/{property_id}/units", status_code=201)
 def create_unit(property_id: uuid.UUID, payload: UnitIn, ctx: Ctx = Depends(writer)):
     prop = get_owned(ctx, Property, property_id, "Property")
+    plans.check_unit_limit(ctx.session, ctx.org)
     unit = Unit(org_id=ctx.org_id, property_id=prop.id, **payload.model_dump())
     ctx.session.add(unit)
     ctx.session.flush()

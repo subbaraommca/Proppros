@@ -62,6 +62,20 @@ class AcceptInviteIn(TokenIn):
     password: str | None = Field(default=None, max_length=200)
 
 
+class MfaLoginIn(Base):
+    mfa_token: str = Field(min_length=10, max_length=2000)
+    code: str = Field(min_length=6, max_length=20)
+
+
+class MfaCodeIn(Base):
+    code: str = Field(min_length=6, max_length=20)
+
+
+class MfaDisableIn(Base):
+    password: str = Field(max_length=200)
+    code: str = Field(min_length=6, max_length=20)
+
+
 class ProfileUpdate(Base):
     name: str | None = Field(default=None, min_length=1, max_length=120)
     phone: str | None = Field(default=None, max_length=40)
@@ -101,10 +115,13 @@ class OrgUpdate(Base):
 class InviteIn(Base):
     email: EmailStr
     role: Literal["manager", "accountant", "maintenance"]
+    property_ids: list[uuid.UUID] | None = Field(default=None, max_length=500)  # None = all properties
 
 
 class MemberUpdate(Base):
-    role: Literal["owner", "manager", "accountant", "maintenance"]
+    role: Literal["owner", "manager", "accountant", "maintenance"] | None = None
+    property_ids: list[uuid.UUID] | None = Field(default=None, max_length=500)
+    all_properties: bool = False  # set True to clear the scope
 
 
 class NotificationPrefs(Base):

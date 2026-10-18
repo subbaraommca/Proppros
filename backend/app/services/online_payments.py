@@ -201,6 +201,9 @@ def handle_event(session: Session, event: dict[str, Any]) -> str:
         "charge.dispute.created": _charge_reversed,
         "checkout.session.completed": _checkout_completed,
         "account.updated": _account_updated,
+        "customer.subscription.created": _subscription,
+        "customer.subscription.updated": _subscription,
+        "customer.subscription.deleted": _subscription,
     }
     handler = handlers.get(kind)
     outcome = handler(session, obj) if handler else "ignored"
@@ -381,6 +384,12 @@ def _checkout_completed(session: Session, cs: dict) -> str:
     session.add(e)
     audit.record(session, org.id, None, "lease", lease_id, "autopay_on", f"Autopay enabled ({pm['label']})")
     return "autopay_enabled"
+
+
+def _subscription(session: Session, sub: dict) -> str:
+    from app.services.plans import apply_subscription
+
+    return apply_subscription(session, sub)
 
 
 def _account_updated(session: Session, account: dict) -> str:

@@ -9,6 +9,8 @@ import { Badge, Card, ErrorBox, Field, Input, InviteLink, PageHeader, Select, Sp
 import { dateTime, label } from "../utils/format";
 import { LANGUAGES, setLanguage } from "../i18n";
 import { PaymentsSettingsTab } from "../components/OnlinePayments";
+import { AccessSummary, BillingTab, PropertyAccessPicker, SecurityCard } from "../components/AccountSettings";
+import { Modal } from "../components/ui";
 import { useSearchParams } from "react-router-dom";
 
 const TIMEZONES = [
@@ -33,8 +35,8 @@ interface Org {
   currency: string;
 }
 interface Members {
-  members: { membership_id: string; user_id: string; name: string; email: string; role: string }[];
-  invitations: { id: string; email: string; role: string; expires_at: string }[];
+  members: { membership_id: string; user_id: string; name: string; email: string; role: string; property_ids: string[] | null }[];
+  invitations: { id: string; email: string; role: string; expires_at: string; property_ids: string[] | null }[];
 }
 type Prefs = Record<"rent_reminders" | "maintenance_updates" | "lease_expiry" | "document_expiry" | "payment_receipts", boolean>;
 
@@ -115,9 +117,11 @@ function Team() {
   const { data, error } = useQuery({ queryKey: ["members"], queryFn: () => api.get<Members>("/org/members") });
   const [email, setEmail] = useState("");
   const [role, setRole] = useState("manager");
+  const [scope, setScope] = useState<string[] | null>(null);
+  const [editing, setEditing] = useState<{ id: string; name: string; ids: string[] | null } | null>(null);
   const refresh = () => qc.invalidateQueries({ queryKey: ["members"] });
   const invite = useMutation({
-    mutationFn: () => api.post<{ invite_url: string; email_sent: boolean; email: string }>("/org/invitations", { email, role }),
+    mutationFn: () => api.post<{ invite_url: string; email_sent: boolean; email: string }>("/org/invitations", { email, role, property_ids: scope }),
     onSuccess: () => {
       setEmail("");
       refresh();
@@ -126,10 +130,17 @@ function Team() {
   const revoke = useMutation({ mutationFn: (id: string) => api.del(`/org/invitations/${id}`), onSuccess: refresh });
   const changeRole = useMutation({ mutationFn: ({ id, role }: { id: string; role: string }) => api.patch(`/org/members/${id}`, { role }), onSuccess: refresh });
   const remove = useMutation({ mutationFn: (id: string) => api.del(`/org/members/${id}`), onSuccess: refresh });
+  const saveAccess = useMutation({
+    mutationFn: ({ id, ids }: { id: string; ids: string[] | null }) => api.patch(`/org/members/${id}`, ids === null ? { all_properties: true } : { property_ids: ids }),
+    onSuccess: () => {
+      setEditing(null);
+      refresh();
+    },
+  });
   const owner = can("owner");
   return (
     <div className="stack">
-      <ErrorBox error={error || invite.error || changeRole.error || remove.error} />
+      <ErrorBox error={error || invite.error || changeRole.error || remove.error || saveAccess.error} />
       <Card title={t("settings.invite_title")}>
         <div className="toolbar" style={{ marginBottom: 0 }}>
           <input
@@ -151,9 +162,12 @@ function Team() {
               { value: "maintenance", label: t("settings.role_maintenance") },
             ]}
           />
-          <button className="btn btn-primary" disabled={!email || invite.isPending} onClick={() => invite.mutate()}>
+          <button className="btn btn-primary" disabled={!email || invite.isPending || (scope !== null && scope.length === 0)} onClick={() => invite.mutate()}>
             <UserPlus size={15} /> {t("settings.send_invite")}
           </button>
+        </div>
+        <div style={{ marginTop: 14 }}>
+          <PropertyAccessPicker value={scope} onChange={setScope} />
         </div>
         {invite.data && (
           <div style={{ marginTop: 12 }}>
@@ -169,6 +183,7 @@ function Team() {
                 <th>{t("common.name")}</th>
                 <th>{t("common.email")}</th>
                 <th>{t("common.role")}</th>
+                <th>{t("team.access")}</th>
                 <th />
               </tr>
             </thead>
@@ -187,6 +202,16 @@ function Team() {
                       />
                     ) : (
                       <Badge value={m.role} />
+                    )}
+                  </td>
+                  <td>
+                    {m.role === "owner" ? <span className="small muted">{t("team.all_properties")}</span> : <AccessSummary ids={m.property_ids} />}
+                    {owner && m.role !== "owner" && (
+                      <div>
+                        <button className="link-btn small" onClick={() => setEditing({ id: m.membership_id, name: m.name, ids: m.property_ids })}>
+                          {t("team.edit_access")}
+                        </button>
+                      </div>
                     )}
                   </td>
                   <td className="right">
@@ -209,6 +234,9 @@ function Team() {
                   <td>
                     <Badge value={i.role} />
                   </td>
+                  <td>
+                    <AccessSummary ids={i.property_ids} />
+                  </td>
                   <td className="right">
                     <button className="btn btn-sm btn-ghost" onClick={() => revoke.mutate(i.id)}>
                       {t("settings.revoke")}
@@ -220,6 +248,28 @@ function Team() {
           </table>
         </div>
       </Card>
+      {editing && (
+        <Modal
+          title={t("team.edit_access_for", { name: editing.name })}
+          onClose={() => setEditing(null)}
+          footer={
+            <>
+              <button className="btn" onClick={() => setEditing(null)}>
+                {t("common.cancel")}
+              </button>
+              <button
+                className="btn btn-primary"
+                disabled={saveAccess.isPending || (editing.ids !== null && editing.ids.length === 0)}
+                onClick={() => saveAccess.mutate({ id: editing.id, ids: editing.ids })}
+              >
+                {t("common.save")}
+              </button>
+            </>
+          }
+        >
+          <PropertyAccessPicker value={editing.ids} onChange={(ids) => setEditing({ ...editing, ids })} />
+        </Modal>
+      )}
     </div>
   );
 }
@@ -262,6 +312,7 @@ function Account() {
         </div>
       </Card>
       <div className="stack">
+        <SecurityCard />
         <Card title={t("settings.email_notifications")}>
           {prefs ? (
             <div className="stack" style={{ gap: 8 }}>
@@ -372,9 +423,9 @@ function fmt(v: unknown): string {
 
 export function SettingsPage() {
   const { t } = useTranslation();
-  const { can } = useAuth();
-  const isWriter = can("owner", "manager");
-  type TabId = "org" | "team" | "payments" | "account" | "audit";
+  const { can, org } = useAuth();
+  const isWriter = can("owner", "manager") && !org?.scoped;
+  type TabId = "org" | "team" | "payments" | "billing" | "account" | "audit";
   const [params] = useSearchParams();
   const requested = params.get("tab") as TabId | null;
   const [tab, setTab] = useState<TabId>(requested && (isWriter || requested === "account") ? requested : isWriter ? "org" : "account");
@@ -384,6 +435,7 @@ export function SettingsPage() {
           { id: "org" as const, label: t("settings.portfolio") },
           { id: "team" as const, label: t("settings.team") },
           { id: "payments" as const, label: t("settings.payments_tab") },
+          { id: "billing" as const, label: t("settings.billing_tab") },
         ]
       : []),
     { id: "account" as const, label: t("settings.my_account") },
@@ -396,6 +448,7 @@ export function SettingsPage() {
       {tab === "org" && <OrgSettings />}
       {tab === "team" && <Team />}
       {tab === "payments" && <PaymentsSettingsTab />}
+      {tab === "billing" && <BillingTab />}
       {tab === "account" && <Account />}
       {tab === "audit" && <AuditLog />}
     </>

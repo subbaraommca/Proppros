@@ -33,7 +33,7 @@ This is the step-by-step execution plan. Work is split into **iterations**. Each
 | 8 | Notifications, documents & audit | MVP | 🟦 Code done — real email needs a verified sending domain |
 | 9 | Hardening & go-live with own 3 properties | MVP | 🟨 Code hardening done — custom domain, backups check, 1-month trial left |
 | 10 | Online payments (Stripe Connect) | v2 | 🟦 Code done (hidden until Stripe keys are set) — create a Stripe account to test |
-| 11 | SaaS: subscriptions, onboarding, admin | v2 | ⬜ |
+| 11 | SaaS: subscriptions, onboarding, admin | v2 | 🟦 Code done — billing & Google sign-in dormant until configured |
 | 12 | Leasing workflows (templates, e-sign, renewals) | v2 | ⬜ |
 | 13 | Vendors & preventive maintenance | v2 | ⬜ |
 | 14 | Vacancy, listings & screening | v2 | ⬜ |
@@ -270,13 +270,14 @@ Legend: ⬜ Not started · 🟨 In progress · 🟦 Code complete, waiting on a 
 
 **Requirements:** PLT-03, PLT-04, PLT-05, ACC-04, ACC-05
 
-- [ ] Plans + Stripe Billing (per-unit pricing), with limits enforced by plan
-- [ ] Onboarding wizard for new landlords (org → first property → first lease)
-- [ ] Team invites with property-scoped access
-- [ ] 2FA (TOTP) + Google sign-in
-- [ ] Super-admin console (orgs, plans, usage, impersonation with audit)
-- [ ] Port Pickzona's help center and feedback features
-- [ ] Marketing landing page + pricing page
+- [x] Plans + Stripe Billing (per-unit pricing), with limits enforced by plan — *Free 3 units / Pro $2 / Business $3 per unit; limits only when `BILLING_ENABLED`*
+- [x] Onboarding wizard for new landlords (org → first property → first lease) — *`/welcome`, shown after sign-up*
+- [x] Team invites with property-scoped access — *per-member property list; scoped members see only those properties*
+- [x] 2FA (TOTP) + Google sign-in — *recovery codes; Google hidden until `GOOGLE_CLIENT_ID` is set*
+- [x] Super-admin console (orgs, plans, usage, impersonation with audit) — *`/admin` for `SUPERADMIN_EMAILS`*
+- [x] Port Pickzona's help center and feedback features — *7 Markdown articles, search, feedback inbox in Admin*
+- [x] Marketing landing page + pricing page — *`/` and `/pricing` when signed out*
+- [ ] **Your part:** set `SUPERADMIN_EMAILS`; optionally Google OAuth credentials and Stripe Billing prices (README)
 
 ## Iteration 12 — Leasing workflows
 
@@ -369,3 +370,4 @@ Record notes when each iteration closes.
 | 2026-10-17 | 7, 9 | Shareable invite links (copy button) so tenants/team can join without email. Iteration 9 hardening: CSV formula-injection fix, RFC 6266 filenames, CSP + security headers, ErrorBoundary/offline handling, route code-splitting, modal focus management + skip link, draft Privacy/Terms. Verified on production: headers present, no CSP violations on public pages. |
 | 2026-10-17 | 8 | Full UI string extraction to `en.json` (~665 keys across 23 sections), i18next plurals (fixes “1 properties”-style grammar), language-aware ordinals/money/dates, central enum labels, language picker (shown once a 2nd locale exists), and a Vitest guard for missing keys. Checked 23 screens + modals in a browser for raw keys. |
 | 2026-10-17 | 10 | Online payments via Stripe Connect Express (destination charges): owner onboarding, Checkout (ACH/card, optional card-fee pass-through), webhook-driven ledger with processing/succeeded/failed/reversed states, returned-payment fee, autopay with idempotent off-session charges, partial-payment and per-lease block rules. Migration `0002` (server defaults so existing rows migrate). 15 new tests with a faked Stripe gateway; feature hidden until `STRIPE_SECRET_KEY` is set. Not yet tested against real Stripe. |
+| 2026-10-17 | 11 | SaaS layer: plans + Stripe Billing (per-unit, quantity synced daily, limits only when billing is on), property-scoped memberships enforced in every list/detail route, TOTP 2FA with hashed recovery codes and a short-lived `mfa` token, Google OIDC sign-in, super-admin console with audited impersonation, help center (Markdown) + feedback, onboarding wizard, landing and pricing pages. Migration `0003` (server defaults). 13 new tests (83 total). Checked in a browser: landing/pricing/help signed out, onboarding, admin, team access, 2FA setup and the 2FA sign-in step. |

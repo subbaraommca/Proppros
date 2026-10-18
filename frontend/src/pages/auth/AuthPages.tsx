@@ -53,26 +53,86 @@ function AuthShell({ title, subtitle, children }: { title: string; subtitle?: Re
   );
 }
 
+type LoginResult = Me | { mfa_required: true; mfa_token: string };
+
+function GoogleButton() {
+  const { t } = useTranslation();
+  const { data } = useQuery({ queryKey: ["auth-providers"], queryFn: () => api.get<{ google: boolean }>("/auth/providers"), staleTime: 300_000 });
+  if (!data?.google) return null;
+  return (
+    <>
+      <a className="btn btn-block" href="/api/auth/google/start">
+        <GoogleMark /> {t("auth.continue_google")}
+      </a>
+      <div className="divider-label">
+        <span>{t("auth.or")}</span>
+      </div>
+    </>
+  );
+}
+
+function GoogleMark() {
+  return (
+    <svg width="16" height="16" viewBox="0 0 48 48" aria-hidden="true">
+      <path fill="#FFC107" d="M43.6 20.5H42V20H24v8h11.3C33.7 32.7 29.2 36 24 36c-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.8 1.2 7.9 3.1l5.7-5.7C34 6.1 29.3 4 24 4 12.9 4 4 12.9 4 24s8.9 20 20 20 20-8.9 20-20c0-1.3-.1-2.4-.4-3.5z" />
+      <path fill="#FF3D00" d="m6.3 14.7 6.6 4.8C14.7 15.1 19 12 24 12c3.1 0 5.8 1.2 7.9 3.1l5.7-5.7C34 6.1 29.3 4 24 4 16.3 4 9.7 8.3 6.3 14.7z" />
+      <path fill="#4CAF50" d="M24 44c5.2 0 9.9-2 13.4-5.2l-6.2-5.2C29.2 35.1 26.7 36 24 36c-5.2 0-9.6-3.3-11.3-8l-6.5 5C9.5 39.6 16.2 44 24 44z" />
+      <path fill="#1976D2" d="M43.6 20.5H42V20H24v8h11.3c-.8 2.2-2.2 4.2-4.1 5.6l6.2 5.2C37 39.2 44 34 44 24c0-1.3-.1-2.4-.4-3.5z" />
+    </svg>
+  );
+}
+
 export function LoginPage() {
   const { t } = useTranslation();
   const { setMe } = useAuth();
   const navigate = useNavigate();
+  const [params] = useSearchParams();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [mfaToken, setMfaToken] = useState<string | null>(params.get("mfa"));
+  const [code, setCode] = useState("");
+  const done = (me: Me) => {
+    setMe(me);
+    navigate("/", { replace: true });
+  };
   const login = useMutation({
-    mutationFn: () => api.post<Me>("/auth/login", { email, password }),
-    onSuccess: (me) => {
-      setMe(me);
-      navigate("/", { replace: true });
-    },
+    mutationFn: () => api.post<LoginResult>("/auth/login", { email, password }),
+    onSuccess: (r) => ("mfa_required" in r ? setMfaToken(r.mfa_token) : done(r)),
   });
+  const verify = useMutation({ mutationFn: () => api.post<Me>("/auth/login/mfa", { mfa_token: mfaToken, code }), onSuccess: done });
   const submit = (e: FormEvent) => {
     e.preventDefault();
     login.mutate();
   };
+  if (mfaToken) {
+    return (
+      <AuthShell title={t("auth.mfa_title")} subtitle={t("auth.mfa_subtitle")}>
+        <form
+          className="form"
+          onSubmit={(e) => {
+            e.preventDefault();
+            verify.mutate();
+          }}
+        >
+          <ErrorBox error={verify.error} />
+          <Field label={t("settings.mfa_code")} hint={t("auth.mfa_hint")}>
+            <Input inputMode="numeric" autoComplete="one-time-code" required value={code} onChange={(e) => setCode(e.target.value.trim())} autoFocus />
+          </Field>
+          <button className="btn btn-primary btn-block" disabled={code.length < 6 || verify.isPending}>
+            {verify.isPending ? t("auth.signingIn") : t("auth.verify")}
+          </button>
+          <button type="button" className="link-btn small" onClick={() => setMfaToken(null)}>
+            {t("common.back")}
+          </button>
+        </form>
+      </AuthShell>
+    );
+  }
   return (
     <AuthShell title={t("auth.signIn")} subtitle={t("auth.welcome_back")}>
       <form className="form" onSubmit={submit}>
+        {params.get("error") === "google" && <div className="error-box">{t("auth.google_failed")}</div>}
+        <GoogleButton />
         <ErrorBox error={login.error} />
         <Field label={t("auth.email")}>
           <Input type="email" autoComplete="email" required value={email} onChange={(e) => setEmail(e.target.value)} />
@@ -104,7 +164,7 @@ export function RegisterPage() {
     mutationFn: () => api.post<Me>("/auth/register", { ...form, organization_name: form.organization_name || null }),
     onSuccess: (me) => {
       setMe(me);
-      navigate("/properties?welcome=1", { replace: true });
+      navigate("/welcome", { replace: true });
     },
   });
   return (
@@ -116,6 +176,7 @@ export function RegisterPage() {
           register.mutate();
         }}
       >
+        <GoogleButton />
         <ErrorBox error={register.error} />
         <Field label={t("auth.name")}>
           <Input required autoComplete="name" value={form.name} onChange={set("name")} />
@@ -257,8 +318,13 @@ export function AcceptInvitePage() {
   const [password, setPassword] = useState("");
   const preview = useQuery({ queryKey: ["invite", token], queryFn: () => api.get<InvitePreview>(`/auth/invitations/${token}`), retry: false });
   const accept = useMutation({
-    mutationFn: () => api.post<Me>("/auth/invitations/accept", { token, name: name || null, password }),
-    onSuccess: (me) => {
+    mutationFn: () => api.post<Me | { mfa_required: true; mfa_token: string }>("/auth/invitations/accept", { token, name: name || null, password }),
+    onSuccess: (r) => {
+      if ("mfa_required" in r) {
+        navigate(`/login?mfa=${encodeURIComponent(r.mfa_token)}`, { replace: true });
+        return;
+      }
+      const me = r;
       const org = me.organizations.find((o) => o.name === preview.data?.organization) ?? me.organizations[0];
       try {
         localStorage.setItem("pp-org", org.id);

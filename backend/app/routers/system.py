@@ -9,7 +9,7 @@ from sqlmodel import Session, select
 from app.core import storage
 from app.core.config import settings
 from app.core.database import check_db_connection, get_session
-from app.core.deps import Ctx, writer
+from app.core.deps import Ctx, admin_writer
 from app.models import AuditLog, Notification, User
 from app.services.jobs import run_daily, run_daily_for_org
 
@@ -80,7 +80,7 @@ def audit_log(
     entity_id: uuid.UUID | None = None,
     limit: int = Query(default=100, le=500),
     offset: int = Query(default=0, ge=0),
-    ctx: Ctx = Depends(writer),
+    ctx: Ctx = Depends(admin_writer),
 ):
     q = select(AuditLog, User.name).outerjoin(User, User.id == AuditLog.actor_user_id).where(AuditLog.org_id == ctx.org_id)
     if entity_type:
@@ -92,14 +92,14 @@ def audit_log(
 
 
 @router.get("/notifications/log")
-def notification_log(limit: int = Query(default=100, le=500), ctx: Ctx = Depends(writer)):
+def notification_log(limit: int = Query(default=100, le=500), ctx: Ctx = Depends(admin_writer)):
     return ctx.session.exec(
         select(Notification).where(Notification.org_id == ctx.org_id).order_by(Notification.created_at.desc()).limit(limit)
     ).all()
 
 
 @router.post("/automation/run")
-def run_now(ctx: Ctx = Depends(writer)):
+def run_now(ctx: Ctx = Depends(admin_writer)):
     """Let an owner trigger today's automation for their org (same idempotent job as the cron)."""
     return run_daily_for_org(ctx.session, ctx.org, trigger="manual", actor_user_id=ctx.user.id)
 

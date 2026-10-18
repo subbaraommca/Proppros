@@ -32,7 +32,9 @@
     "portal_nav": "Portal navigation",
     "legal_nav": "Legal",
     "privacy": "Privacy",
-    "terms": "Terms"
+    "terms": "Terms",
+    "help": "Help",
+    "admin": "Admin"
   },
   "common": {
     "save": "Save",
@@ -137,7 +139,14 @@
     "existing_password": "Your existing password",
     "choose_password": "Choose a password",
     "joining": "Joining…",
-    "accept_invitation": "Accept invitation"
+    "accept_invitation": "Accept invitation",
+    "continue_google": "Continue with Google",
+    "or": "or",
+    "google_failed": "Google sign-in didn't work. Try again, or sign in with your email and password.",
+    "mfa_title": "Two-step verification",
+    "mfa_subtitle": "Enter the 6-digit code from your authenticator app.",
+    "mfa_hint": "Lost your phone? Enter one of your recovery codes instead.",
+    "verify": "Verify"
   },
   "portal": {
     "welcome": "Welcome, {{name}}",
@@ -719,7 +728,26 @@
     "changes": "Changes",
     "system": "System",
     "no_activity": "No activity yet.",
-    "payments_tab": "Payments"
+    "payments_tab": "Payments",
+    "billing_tab": "Plan & billing",
+    "mfa_title": "Two-step verification",
+    "mfa_on": "On",
+    "mfa_on_body": "You'll be asked for a code from your authenticator app when you sign in.",
+    "mfa_off_body": "Add a second step to sign-in with an authenticator app like Google Authenticator, 1Password or Authy.",
+    "mfa_set_up": "Set up two-step verification",
+    "mfa_scan": "Scan this QR code with your authenticator app, then enter the 6-digit code it shows.",
+    "mfa_qr_alt": "QR code for your authenticator app",
+    "mfa_manual": "Can't scan? Enter this key:",
+    "mfa_code": "Verification code",
+    "mfa_code_or_recovery": "A code from your app, or a recovery code",
+    "mfa_turn_on": "Turn on",
+    "mfa_turn_off": "Turn off",
+    "mfa_new_codes": "New recovery codes",
+    "mfa_prompt_code": "Enter a code from your authenticator app to create new recovery codes:",
+    "recovery_title": "Save your recovery codes",
+    "recovery_body": "Each code works once if you lose access to your authenticator app. Store them somewhere safe — they won't be shown again.",
+    "recovery_saved": "I've saved them",
+    "google_linked": "Your Google account is linked — you can sign in with Google."
   },
   "online": {
     "title": "Online payments",
@@ -767,5 +795,178 @@
     "autopay_enabled": "Autopay is being set up. It'll show here in a moment.",
     "block_label": "Block online payments for this lease",
     "block_hint": "e.g. after serving an eviction notice; tenants can't pay online and autopay pauses."
+  },
+  "plans": {
+    "free": "Free",
+    "pro": "Pro",
+    "business": "Business"
+  },
+  "billing": {
+    "current_plan": "Current plan",
+    "comped": "Complimentary",
+    "renews": "Renews {{date}}",
+    "used_of": "{{used}} of {{limit}}",
+    "used_unlimited": "{{used}} · unlimited",
+    "not_active": "Paid plans aren't switched on yet. Everything works on the current plan — there's nothing to pay.",
+    "manage": "Manage billing",
+    "estimate": "About {{amount}} a month for {{units}} units",
+    "upgrade_to": "Upgrade to {{plan}}",
+    "checkout_success": "Thanks! Your subscription is active. It can take a few seconds to show here.",
+    "status_active": "Active",
+    "status_trialing": "Trial",
+    "status_past_due": "Payment overdue",
+    "status_canceled": "Canceled",
+    "status_incomplete": "Incomplete",
+    "status_unpaid": "Unpaid"
+  },
+  "marketing": {
+    "nav": "Site",
+    "pricing": "Pricing",
+    "start_free": "Start free",
+    "see_pricing": "See pricing",
+    "lead": "Leases, rent, maintenance and reports for independent landlords — in one calm, organized place your tenants can use too.",
+    "free_note": "Free for up to 3 units. No card needed.",
+    "feature_leases_title": "Leases that remember for you",
+    "feature_leases_body": "Every term, date and document in one place, with reminders before renewals and move-outs.",
+    "feature_rent_title": "Rent tracking without spreadsheets",
+    "feature_rent_body": "Charges post automatically each month. Record payments in seconds and see who's behind at a glance.",
+    "feature_maintenance_title": "Maintenance from request to done",
+    "feature_maintenance_body": "Tenants report issues with photos; you assign, track costs and keep everyone updated.",
+    "feature_reports_title": "Reports your accountant will like",
+    "feature_reports_body": "Profit and loss, rent roll and expenses by property, ready to export at tax time.",
+    "feature_portal_title": "A portal for your tenants",
+    "feature_portal_body": "Tenants see their lease, balance and documents, and send requests — no app to install.",
+    "feature_team_title": "Bring your team",
+    "feature_team_body": "Invite a manager, accountant or handyman and limit them to the properties they look after.",
+    "pricing_title": "Simple pricing that grows with you",
+    "pricing_lead": "Start free. Pay per unit only when your portfolio grows.",
+    "pricing_note": "Prices in USD per unit per month. Cancel any time.",
+    "free": "Free",
+    "per_unit_month": "/ unit / month",
+    "units_up_to_one": "Up to {{count}} unit",
+    "units_up_to_other": "Up to {{count}} units",
+    "units_unlimited": "Unlimited units",
+    "seats_up_to_one": "{{count}} team member",
+    "seats_up_to_other": "Up to {{count}} team members",
+    "seats_unlimited": "Unlimited team members",
+    "start_with": "Start with {{plan}}",
+    "free_f1": "Leases, rent tracking and maintenance",
+    "free_f2": "Tenant portal",
+    "free_f3": "Reports and CSV export",
+    "pro_f1": "Everything in Free",
+    "pro_f2": "Property-level team access",
+    "pro_f3": "Email support",
+    "business_f1": "Everything in Pro",
+    "business_f2": "Built for growing portfolios",
+    "business_f3": "Priority support"
+  },
+  "help": {
+    "title": "Help",
+    "subtitle": "Guides for getting the most out of Proppros.",
+    "search": "Search help articles",
+    "no_results": "No articles match",
+    "no_results_body": "Try another word, or tell us what you were looking for.",
+    "all_articles": "All articles",
+    "back": "Back to help",
+    "next": "Next",
+    "send_feedback": "Send feedback",
+    "feedback_title": "Send feedback",
+    "feedback_thanks": "Thanks — we read every message.",
+    "kind_idea": "Idea",
+    "kind_bug": "Something's broken",
+    "kind_question": "Question",
+    "message": "Message",
+    "message_placeholder": "What's on your mind?",
+    "articles": {
+      "getting-started": {
+        "title": "Getting started",
+        "summary": "Set up your portfolio, first property and first lease."
+      },
+      "rent-and-payments": {
+        "title": "Rent and payments",
+        "summary": "How rent charges post, recording payments and late fees."
+      },
+      "maintenance": {
+        "title": "Maintenance",
+        "summary": "Handling work orders from request to done."
+      },
+      "team-and-access": {
+        "title": "Team and access",
+        "summary": "Invite people, choose roles and limit them to certain properties."
+      },
+      "tenant-portal": {
+        "title": "Tenant portal",
+        "summary": "What your tenants can see and do."
+      },
+      "security": {
+        "title": "Security and sign-in",
+        "summary": "Two-step verification, Google sign-in and recovery codes."
+      },
+      "plans-and-billing": {
+        "title": "Plans and billing",
+        "summary": "What each plan includes and how billing works."
+      }
+    }
+  },
+  "onboarding": {
+    "eyebrow": "Welcome to Proppros",
+    "title": "Let's set up your portfolio",
+    "progress": "Setup progress",
+    "step_portfolio": "Portfolio",
+    "step_property": "First property",
+    "step_lease": "First lease",
+    "portfolio_intro": "Give your portfolio a name and confirm your time zone — it's used for due dates and reminders.",
+    "portfolio_name": "Portfolio name",
+    "continue": "Continue",
+    "skip": "Skip for now",
+    "unit_names": "Unit names",
+    "lease_intro": "Add the current lease for {{unit}}. You can add more leases later.",
+    "done_title": "You're all set",
+    "done_body": "Your portfolio is ready. Here are some good next steps.",
+    "done_with_lease": "Your lease is in. Rent charges will post automatically each month.",
+    "next_tenants": "Invite your tenants to the portal",
+    "next_documents": "Upload leases and other documents",
+    "next_help": "Read the getting-started guide",
+    "go_dashboard": "Go to dashboard"
+  },
+  "admin": {
+    "title": "Admin",
+    "subtitle": "Proppros-wide view of organizations, users and feedback.",
+    "overview": "Overview",
+    "organizations": "Organizations",
+    "users": "Users",
+    "feedback": "Feedback",
+    "active_leases": "Active leases",
+    "payments_30d": "Payments (30 days)",
+    "new_feedback": "New feedback",
+    "billing_on": "Billing is on: plan limits are enforced and paid plans can be purchased.",
+    "billing_off": "Billing is off: plan limits are not enforced. Set BILLING_ENABLED and the Stripe price IDs to turn it on.",
+    "search_orgs": "Search organizations",
+    "search_users": "Search users by name or email",
+    "members": "Members",
+    "plan": "Plan",
+    "comped": "Comped",
+    "created": "Created",
+    "effective": "Effective: {{plan}}",
+    "joined": "Joined",
+    "admin_badge": "Admin",
+    "impersonate": "Sign in as",
+    "impersonate_note": "Signing in as a user starts a 60-minute support session. It is recorded in that organization's audit log.",
+    "impersonate_confirm": "Sign in as {{email}}? This is recorded in their audit log.",
+    "impersonating": "You're signed in as {{name}} ({{email}}) for support.",
+    "stop_impersonating": "Return to admin",
+    "reviewed": "Reviewed",
+    "done": "Done",
+    "mark_reviewed": "Mark reviewed",
+    "mark_done": "Mark done",
+    "no_feedback": "No feedback here"
+  },
+  "team": {
+    "access": "Property access",
+    "all_properties": "All properties",
+    "some_properties": "Only selected properties",
+    "no_properties": "No properties",
+    "edit_access": "Edit access",
+    "edit_access_for": "Property access for {{name}}"
   }
 }

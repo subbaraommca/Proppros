@@ -161,6 +161,13 @@ def run_daily_for_org(
     from app.services.online_payments import run_autopay_for_org
 
     stats["autopay"] += run_autopay_for_org(session, org, today)
+    # Subscription quantity follows the number of active units.
+    from app.services.plans import sync_quantity
+
+    try:
+        stats["billing_synced"] = int(sync_quantity(session, org))
+    except Exception:  # noqa: BLE001 — billing sync must never block rent automation
+        logger.exception("Subscription quantity sync failed for org %s", org.id)
     # Each run leaves a trace in the audit log (Settings → Audit log), so owners can confirm
     # the scheduled job ran without any Vercel tooling.
     audit.record(

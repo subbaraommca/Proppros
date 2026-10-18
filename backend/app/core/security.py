@@ -20,12 +20,12 @@ def verify_password(password: str, password_hash: str) -> bool:
         return False
 
 
-def create_access_token(subject: str, claims: dict[str, Any] | None = None) -> str:
+def create_access_token(subject: str, claims: dict[str, Any] | None = None, expires_minutes: int | None = None) -> str:
     now = datetime.now(timezone.utc)
     payload: dict[str, Any] = {
         "sub": subject,
         "iat": now,
-        "exp": now + timedelta(minutes=settings.access_token_expire_minutes),
+        "exp": now + timedelta(minutes=expires_minutes or settings.access_token_expire_minutes),
     }
     if claims:
         payload.update(claims)

@@ -151,6 +151,17 @@ Stripe Connect **Express** with **destination charges**: each owner onboards the
 - **Autopay:** Checkout in `setup` mode saves a payment method (`AutopayEnrollment`); the daily cron charges the balance on the due date with Stripe idempotency key `autopay:<lease>:<period>`.
 - **Rules:** owner toggles for accepting online payments, partial payments and card-fee pass-through; per-lease `block_online_payments`.
 
+### SaaS features (Iteration 11)
+
+- **Plans** (`app/services/plans.py`): Free / Pro / Business with unit and seat limits. Limits are enforced (HTTP 402) only when `BILLING_ENABLED=true` and Stripe price IDs are set; otherwise everyone has unlimited use. Effective plan = comped → chosen plan; active/trialing subscription → its plan; else Free.
+- **Stripe Billing:** per-unit subscription (quantity = units), Stripe Checkout to subscribe and the Stripe customer portal to manage. `customer.subscription.*` events arrive at the same webhook and update the organization; the daily cron syncs quantity.
+- **Property-scoped access:** `memberships.property_ids` (null = all properties). `Ctx.scope` filters every list endpoint and `get_owned()` 404s objects outside the scope; organization-wide actions (team, settings, new properties, audit log) need an unscoped owner/manager (`admin_writer`).
+- **2FA (TOTP):** `pyotp` + QR via `segno`. 10 one-time recovery codes stored as SHA-256 hashes. Sign-in with 2FA returns a 5-minute `mfa` token instead of a session; tokens with a `purpose` claim are never accepted as sessions.
+- **Google sign-in:** OAuth authorization-code flow, ID token verified against Google's JWKS, `state` cookie for CSRF. Linked to an existing user only on a verified matching email; 2FA still applies.
+- **Super admin:** `SUPERADMIN_EMAILS`; `/api/admin/*`. Impersonation issues a 60-minute session carrying `impersonated_by`, keeps the admin's session in a `pp_admin` cookie to switch back, and writes an audit entry.
+- **Help & feedback:** help articles are Markdown files in `frontend/src/help/` rendered by a small built-in renderer; feedback goes to the `feedback` table (optionally emailed).
+- **Public pages:** `/` (landing), `/pricing`, `/help` when signed out; `/welcome` onboarding wizard after sign-up.
+
 ### Translations (i18n)
 
 All UI text lives in `frontend/src/locales/en.json`, grouped by area (`nav`, `leases`, `portal`, …); API enum values (statuses, categories, roles) are labelled in the `enums` section and rendered through `label()`. Use `t("section.key")` in components, i18next plural keys (`_one` / `_other`) for counts, and `<Trans>` for sentences with links or bold text. To add a language: copy `en.json` to `<code>.json`, translate the values, register it in `LANGUAGES` in `src/i18n.ts`. `src/locales/locales.test.ts` fails if code uses a missing key or a locale is missing keys. Server-generated text (API error details, emails, PDF receipts) is still English.

@@ -73,6 +73,8 @@ def list_work_orders(
         .outerjoin(Unit, Unit.id == WorkOrder.unit_id)
         .where(WorkOrder.org_id == ctx.org_id)
     )
+    if ctx.scope is not None:
+        q = q.where(WorkOrder.property_id.in_(ctx.scope))
     if status:
         q = q.where(WorkOrder.status == status)
     if open_only:
