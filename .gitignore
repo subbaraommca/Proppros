@@ -4,12 +4,14 @@ __pycache__/
 *.pyc
 .pytest_cache/
 backend/.uploads/
+backend/.showcase-uploads/
 backend/*.db
 *.db-journal
 
 # Node
 node_modules/
 frontend/dist/
+frontend/dist-ssr/
 *.tsbuildinfo
 
 # Env / secrets

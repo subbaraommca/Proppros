@@ -1,0 +1,199 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Proppros: Strata, evolved</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@112,500;112,700;112,800&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600&family=Instrument+Serif:ital@1&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#111217;--bg-deep:#0D0E12;--surface:#16171D;--muted:#1B1D24;--hover:#1F2129;
+  --line-sub:#22242C;--line:#2C2E37;--line-strong:#454753;
+  --text:#E6DFD8;--text-muted:#A3A1AA;--loud:#FFFFFF;
+  --copper:#EDAF88;--copper-soft:rgba(237,175,136,.14);
+  --jade:#62BA9E;--citrine:#D9B45B;--garnet:#DB7B7B;--lapis:#93A8E2;
+  --display:"Archivo",system-ui,sans-serif;--body:"DM Sans",system-ui,sans-serif;
+  --mono:"JetBrains Mono",ui-monospace,monospace;--serif:"Instrument Serif",Georgia,serif;
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--bg);color:var(--text);font:400 16px/1.6 var(--body);-webkit-font-smoothing:antialiased}
+a{color:inherit;text-decoration:none}
+.wrap{max-width:1180px;margin:0 auto;padding:0 24px}
+.mono{font-family:var(--mono);font-size:12px;letter-spacing:.06em;color:var(--text-muted)}
+/* nav */
+.nav{position:sticky;top:0;z-index:5;background:rgba(17,18,23,.86);backdrop-filter:blur(10px);border-bottom:1px solid var(--line-sub)}
+.nav .wrap{display:flex;align-items:center;gap:28px;height:64px}
+.brand{display:flex;align-items:center;gap:10px;font:800 19px/1 var(--display);font-stretch:112%;color:var(--loud)}
+.mark{width:28px;height:28px;background:var(--copper);display:grid;place-items:center;border-radius:2px}
+.mark svg{width:16px;height:16px}
+.links{display:flex;gap:24px;font-size:14.5px;color:var(--text-muted)}
+.links a:hover{color:var(--loud)}
+.nav .right{margin-left:auto;display:flex;align-items:center;gap:20px;font-size:14.5px}
+.btn{display:inline-flex;align-items:center;justify-content:center;height:44px;padding:0 20px;font:600 15px/1 var(--body);border-radius:0;transition:background-color .16s ease-out,transform .12s ease-out}
+.btn:active{transform:scale(.97)}
+.btn-primary{background:var(--copper);color:#111217}
+.btn-primary:hover{background:#F3C09F}
+.btn-ghost{border:1px solid var(--line-strong);color:var(--text);border-radius:2px}
+.btn-ghost:hover{border-color:var(--copper);color:var(--loud)}
+.btn-sm{height:36px;padding:0 14px;font-size:14px}
+:focus-visible{outline:2px solid var(--copper);outline-offset:3px}
+/* hero */
+.hero{padding:88px 0 0;background:radial-gradient(60% 60% at 75% 10%,rgba(237,175,136,.10),transparent 70%)}
+.hero-grid{display:grid;grid-template-columns:minmax(0,5fr) minmax(0,6fr);gap:56px;align-items:center}
+.hero h1{font:800 clamp(38px,5.2vw,64px)/1.02 var(--display);font-stretch:112%;color:var(--loud);margin:18px 0 20px;letter-spacing:-.01em}
+.lead{font-size:18.5px;color:var(--text);max-width:34em;margin:0 0 28px}
+.ctas{display:flex;gap:12px;flex-wrap:wrap}
+.note{margin-top:16px;font-size:14px;color:var(--text-muted)}
+.founder{margin-top:36px;padding-top:20px;border-top:1px solid var(--line);font:400 22px/1.3 var(--serif);font-style:italic;color:var(--text)}
+.founder small{display:block;font:400 13px/1.5 var(--body);font-style:normal;color:var(--text-muted);margin-top:6px}
+/* product mock */
+.app{border:1px solid var(--line);background:var(--bg);border-radius:3px;box-shadow:0 40px 80px -30px rgba(0,0,0,.7);overflow:hidden;font-size:12px}
+.app-top{display:flex;align-items:center;gap:8px;padding:10px 14px;border-bottom:1px solid var(--line-sub);background:var(--bg-deep)}
+.app-top i{width:9px;height:9px;border-radius:50%;background:var(--line-strong)}
+.app-top span{margin-left:auto}
+.app-body{display:grid;grid-template-columns:128px 1fr}
+.side{background:var(--bg-deep);padding:14px 10px;display:flex;flex-direction:column;gap:3px;font-size:12px;color:var(--text-muted)}
+.side b{font:500 9.5px/1 var(--mono);letter-spacing:.1em;color:#7d7b84;margin:10px 6px 4px}
+.side div{padding:6px 8px;border-radius:2px}
+.side .on{background:#2a211c;color:var(--loud)}
+.main{padding:16px}
+.main h3{font:800 18px/1 var(--display);font-stretch:112%;color:var(--loud);margin:0 0 4px}
+.stats{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin:14px 0}
+.stat{border:1px solid var(--line);background:var(--surface);padding:10px 12px;border-radius:2px}
+.stat .mono{font-size:9.5px}
+.stat strong{display:block;font:800 19px/1.2 var(--display);font-stretch:112%;color:var(--loud);margin-top:4px}
+.stat small{color:var(--text-muted);font-size:11px}
+.panel{border:1px solid var(--line);background:var(--surface);border-radius:2px}
+.panel h4{margin:0;padding:10px 12px;border-bottom:1px solid var(--line-sub);font:700 13px/1 var(--display);font-stretch:112%;color:var(--loud);display:flex;justify-content:space-between}
+.row{display:flex;justify-content:space-between;align-items:center;padding:9px 12px;border-bottom:1px solid var(--line-sub)}
+.row:last-child{border:0}
+.row em{font-style:normal;color:var(--text-muted);display:block;font-size:11px}
+.amt{font:500 12px var(--mono)}
+.badge{font:500 10px/1 var(--mono);padding:4px 6px;border-radius:2px}
+.b-due{background:rgba(219,123,123,.14);color:var(--garnet)}
+.b-paid{background:rgba(98,186,158,.14);color:var(--jade)}
+.b-soon{background:rgba(217,180,91,.14);color:var(--citrine)}
+.example{display:block;text-align:right;margin-top:10px;font-size:11px}
+/* strata band */
+.strata{margin-top:88px;height:28px;background:linear-gradient(var(--bg) 0 25%,#14151a 25% 50%,#17181e 50% 75%,#1b1c23 75%)}
+section{padding:88px 0;border-bottom:1px solid var(--line-sub)}
+.sec-head{display:flex;justify-content:space-between;align-items:end;gap:24px;margin-bottom:40px}
+h2{font:800 clamp(28px,3.4vw,40px)/1.08 var(--display);font-stretch:112%;color:var(--loud);margin:10px 0 0}
+.steps{display:grid;grid-template-columns:repeat(3,1fr);gap:0;border-top:1px solid var(--line)}
+.step{padding:24px 24px 8px 0;border-right:1px solid var(--line-sub);margin-right:24px}
+.step:last-child{border-right:0;margin-right:0}
+.step .num{font:800 42px/1 var(--display);font-stretch:112%;color:var(--copper)}
+.step h3{font:700 18px/1.3 var(--display);font-stretch:112%;color:var(--loud);margin:16px 0 8px}
+.step p{margin:0;color:var(--text-muted)}
+.feats{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--line);border:1px solid var(--line)}
+.feat{background:var(--surface);padding:28px}
+.feat h3{font:700 17px/1.3 var(--display);font-stretch:112%;color:var(--loud);margin:14px 0 8px}
+.feat p{margin:0;color:var(--text-muted);font-size:15px}
+.feat svg{width:22px;height:22px;stroke:var(--copper)}
+.plans{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+.plan{border:1px solid var(--line);padding:24px;background:var(--surface);border-radius:2px}
+.plan.free{border-color:var(--copper)}
+.plan .price{font:800 34px/1 var(--display);font-stretch:112%;color:var(--loud);margin:14px 0 6px}
+.plan .price span{font:400 14px var(--body);color:var(--text-muted)}
+.plan p{margin:0 0 18px;color:var(--text-muted);font-size:15px}
+.soon{font:500 11px/1 var(--mono);color:var(--citrine);border:1px solid rgba(217,180,91,.4);padding:4px 6px;border-radius:2px;margin-left:8px}
+@media (max-width:900px){
+  .hero-grid{grid-template-columns:1fr;gap:40px}
+  .steps,.feats,.plans{grid-template-columns:1fr}
+  .step{border-right:0;margin-right:0;border-bottom:1px solid var(--line-sub);padding:24px 0}
+  .links{display:none}
+  .sec-head{display:block}
+}
+@media (max-width:480px){
+  .wrap{padding:0 16px}
+  .nav .right .signin{display:none}
+  .hero{padding-top:48px}
+  .lead{font-size:17px}
+  .ctas .btn{flex:1}
+  .app-body{grid-template-columns:1fr}
+  .side{display:none}
+  section{padding:64px 0}
+}
+@media (prefers-reduced-motion:no-preference){
+  .app{animation:rise .6s cubic-bezier(.2,.8,.2,1) both .1s}
+  @keyframes rise{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
+}
+</style>
+</head>
+<body>
+<header class="nav"><div class="wrap">
+  <a class="brand" href="#"><span class="mark"><svg viewBox="0 0 24 24" fill="none" stroke="#111217" stroke-width="2.2"><path d="M3 11l9-7 9 7v9H3z"/><path d="M10 20v-5h4v5"/></svg></span>Proppros</a>
+  <nav class="links"><a href="#">Features</a><a href="#">Pricing</a><a href="#">FAQ</a></nav>
+  <div class="right"><a class="signin" href="#">Sign in</a><a class="btn btn-primary btn-sm" href="#">Start free</a></div>
+</div></header>
+
+<main>
+<div class="hero"><div class="wrap hero-grid">
+  <div>
+    <span class="mono">For independent landlords with 1 to 20 units</span>
+    <h1>Leases, rent and repairs in one place.</h1>
+    <p class="lead">Proppros is property management software for small landlords. Track rent, sign leases online and handle repairs. Your tenants get their own portal.</p>
+    <div class="ctas"><a class="btn btn-primary" href="#">Start free</a><a class="btn btn-ghost" href="#">See pricing</a></div>
+    <p class="note">Free for up to 3 units. No card needed.</p>
+    <p class="founder">Built by a landlord with 3 rentals.<small>The founder uses Proppros to run those 3 rentals.</small></p>
+  </div>
+  <div>
+    <div class="app" role="img" aria-label="Proppros dashboard with example data: rent collected, balances due and leases ending soon">
+      <div class="app-top"><i></i><i></i><i></i><span class="mono">Dashboard</span></div>
+      <div class="app-body">
+        <div class="side"><b>PORTFOLIO</b><div class="on">Dashboard</div><div>Properties</div><div>Tenants</div><div>Leases</div><b>MONEY</b><div>Payments</div><div>Expenses</div><div>Reports</div><b>OPERATIONS</b><div>Maintenance</div></div>
+        <div class="main">
+          <h3>Dashboard</h3><span class="mono" style="font-size:10.5px">Maple Court Rentals</span>
+          <div class="stats">
+            <div class="stat"><span class="mono">COLLECTED THIS MONTH</span><strong>$4,850.00</strong><small>81% of $6,000.00 billed</small></div>
+            <div class="stat"><span class="mono">OUTSTANDING</span><strong>$1,150.00</strong><small>2 leases with a balance</small></div>
+            <div class="stat"><span class="mono">OCCUPANCY</span><strong>86%</strong><small>6 of 7 units</small></div>
+            <div class="stat"><span class="mono">OPEN WORK ORDERS</span><strong>2</strong><small>1 high priority</small></div>
+          </div>
+          <div class="panel"><h4>Balances due <span class="mono" style="color:var(--copper)">All</span></h4>
+            <div class="row"><div>J. Rivera<em>Maple Court, Unit 2</em></div><span class="amt" style="color:var(--garnet)">$650.00</span></div>
+            <div class="row"><div>A. Chen<em>Elm Street Duplex, B</em></div><span class="amt" style="color:var(--garnet)">$500.00</span></div>
+            <div class="row"><div>Lease renewal<em>Maple Court, Unit 4</em></div><span class="badge b-soon">ENDS IN 60 DAYS</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <span class="mono example">Example data</span>
+  </div>
+</div><div class="strata" aria-hidden="true"></div></div>
+
+<section id="how"><div class="wrap">
+  <div class="sec-head"><div><span class="mono">How it works</span><h2>Three steps to a calmer month.</h2></div></div>
+  <div class="steps">
+    <div class="step"><div class="num">1</div><h3>Add your properties</h3><p>Enter each property and its units. Add current tenants and lease dates.</p></div>
+    <div class="step"><div class="num">2</div><h3>Invite your tenants</h3><p>Tenants sign leases online and use their portal in the browser. They install nothing.</p></div>
+    <div class="step"><div class="num">3</div><h3>Run the month</h3><p>Rent charges post each month. Record payments, handle repairs and see who is behind.</p></div>
+  </div>
+</div></section>
+
+<section id="features"><div class="wrap">
+  <div class="sec-head"><div><span class="mono">Features</span><h2>Everything a small landlord does, in one place.</h2></div></div>
+  <div class="feats">
+    <div class="feat"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.6"><path d="M7 3h7l4 4v14H7z"/><path d="M10 13h5M10 17h5"/></svg><h3>Leases with e-signature</h3><p>Use templates, sign online and keep every term, date and document together.</p></div>
+    <div class="feat"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.6"><rect x="3" y="6" width="18" height="13" rx="1"/><path d="M3 10h18"/></svg><h3>Rent ledger</h3><p>Charges post each month. Record payments, send receipts and see who is behind.</p></div>
+    <div class="feat"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.6"><path d="M14 6a4 4 0 0 0-5 5l-6 6 2 2 6-6a4 4 0 0 0 5-5l-2 2-2-2z"/></svg><h3>Maintenance</h3><p>Tenants report issues with photos. Track work orders, vendors, quotes and invoices.</p></div>
+    <div class="feat"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.6"><path d="M3 11l9-7 9 7v9H3z"/></svg><h3>Vacancies</h3><p>Share a listing page and take rental applications online.</p></div>
+    <div class="feat"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.6"><circle cx="9" cy="8" r="3"/><path d="M3 20c0-3 3-5 6-5s6 2 6 5"/></svg><h3>Tenant portal</h3><p>Tenants see their lease, balance and documents, and send requests and messages.</p></div>
+    <div class="feat"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.6"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg><h3>Reports</h3><p>Profit and loss, rent roll and expenses by property. Export to CSV at tax time.</p></div>
+  </div>
+</div></section>
+
+<section id="pricing"><div class="wrap">
+  <div class="sec-head"><div><span class="mono">Pricing</span><h2>Start free. Pay per unit later.</h2></div><a class="btn btn-ghost" href="#">See pricing</a></div>
+  <div class="plans">
+    <div class="plan free"><span class="mono">Free</span><div class="price">$0</div><p>Up to 3 units and 2 team members. Leases, rent, repairs, portal and reports.</p><a class="btn btn-primary" href="#">Start free</a></div>
+    <div class="plan"><span class="mono">Pro</span><span class="soon">Coming soon</span><div class="price">$2 <span>per unit per month</span></div><p>For growing portfolios. Up to 10 team members.</p></div>
+    <div class="plan"><span class="mono">Business</span><span class="soon">Coming soon</span><div class="price">$3 <span>per unit per month</span></div><p>Unlimited team members.</p></div>
+  </div>
+</div></section>
+</main>
+</body>
+</html>

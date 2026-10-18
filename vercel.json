@@ -9,8 +9,28 @@
       "outputDirectory": "dist",
       "rewrites": [
         {
+          "source": "/pricing",
+          "destination": "/pricing.html"
+        },
+        {
+          "source": "/features",
+          "destination": "/features.html"
+        },
+        {
+          "source": "/features/:slug",
+          "destination": "/features/:slug.html"
+        },
+        {
+          "source": "/help",
+          "destination": "/help.html"
+        },
+        {
+          "source": "/help/:slug",
+          "destination": "/help/:slug.html"
+        },
+        {
           "source": "/(.*)",
-          "destination": "/index.html"
+          "destination": "/app.html"
         }
       ],
       "headers": [

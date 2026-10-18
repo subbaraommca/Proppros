@@ -1,0 +1,30 @@
+/* "Market this listing" kit (VacancyKit.tsx). Strata tokens only. */
+.vkit { display: grid; gap: var(--pp-space-5); }
+.vkit-section { display: grid; gap: var(--pp-space-3); padding-top: var(--pp-space-4); border-top: 1px solid var(--pp-border-subtle); }
+.vkit-heading {
+  margin: 0;
+  font-family: var(--pp-font-display);
+  font-size: var(--pp-text-section);
+  font-weight: 600;
+  color: var(--pp-text-loud);
+}
+.vkit-row { display: flex; gap: var(--pp-space-2); }
+.vkit-row .input { min-width: 0; flex: 1; }
+.vkit-buttons { display: flex; flex-wrap: wrap; gap: var(--pp-space-2); }
+.vkit-text { display: grid; gap: var(--pp-space-2); }
+.vkit-label { display: flex; align-items: center; justify-content: space-between; gap: var(--pp-space-2); }
+.vkit-textarea { width: 100%; resize: vertical; font-family: var(--pp-font-body); line-height: 1.5; white-space: pre-wrap; }
+.vkit-warn {
+  display: flex;
+  gap: var(--pp-space-2);
+  align-items: flex-start;
+  padding: var(--pp-space-2) var(--pp-space-3);
+  background: var(--pp-citrine-soft);
+  color: var(--pp-citrine);
+  border-radius: var(--pp-radius-sm);
+}
+.vkit-warn svg { flex: none; margin-top: 2px; }
+@media (max-width: 560px) {
+  .vkit-row { flex-direction: column; }
+  .vkit-buttons .btn { flex: 1 1 calc(50% - var(--pp-space-2)); justify-content: center; }
+}

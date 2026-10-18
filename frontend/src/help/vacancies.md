@@ -4,7 +4,18 @@ Fill a vacant unit from one place: advertise it, take applications online, check
 
 Go to **Vacancies → New listing** and pick the unit. Beds, baths and market rent are copied from the unit. Add a headline, description, photos (the first photo you upload is the cover), deposit, availability date, pet policy, your rental criteria and an optional application fee. Then **Publish**.
 
-Share the link from **Share your listing** on Facebook Marketplace, Craigslist, Nextdoor or by text. Link previews show the photo, price and location. The public page is mobile-friendly and readable by search engines.
+Share the link from **Market this listing** on Facebook Marketplace, Craigslist, Nextdoor or by text. Link previews show the photo, price and location. The public page is mobile-friendly and readable by search engines.
+
+### Market this listing
+
+Once a listing is published, its page shows a **Market this listing** kit:
+
+- **Share link.** Copy the link, or open Facebook, X, WhatsApp or email to share it from your own account. Proppros never posts for you.
+- **Ready-to-post ad text.** Proppros writes ad text from your listing: a title and body for listing sites such as Facebook Marketplace or Craigslist, a short social post with hashtags, and a message for friends or your waitlist. Each has a **Copy** button. The text describes the home only. If your own description uses words that describe people (for example "perfect for a couple"), the kit points them out so you can reword them.
+- **Flyer.** **Download flyer** gives you a one-page PDF with the rent, key facts, the first photo, a QR code to the listing and the "Equal Housing Opportunity" line. Print it for a window, a community board or a showing.
+- **Share image.** **Download share image** makes a 1080×1350 picture with the first photo, rent, beds and baths, ready for Instagram or Facebook.
+
+The kit uses what is saved on the listing. Edit the listing and the text updates. A draft or closed listing has no kit, because its link doesn't open.
 
 **Fair housing:** describe the home, not who should live there. Write down your rental criteria (for example income of 3× the rent) and apply them to every applicant the same way.
 

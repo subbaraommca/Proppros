@@ -8,7 +8,7 @@ import uuid
 from datetime import date
 
 from fastapi import APIRouter, Depends, File, HTTPException, Request, UploadFile
-from fastapi.responses import HTMLResponse
+from fastapi.responses import HTMLResponse, Response
 from sqlmodel import Session, func, select
 
 from app.core import audit, storage
@@ -32,6 +32,7 @@ from app.schemas import (
     ScreeningReportIn,
 )
 from app.services import leasing as L
+from app.services import listing_marketing as M
 from app.services import stripe_gateway as gateway
 from app.services.notify import notify, staff_recipients
 from app.services.online_payments import org_accepts_online
@@ -133,6 +134,40 @@ def create_listing(payload: ListingIn, ctx: Ctx = Depends(writer)):
 @router.get("/listings/{listing_id}")
 def get_listing(listing_id: uuid.UUID, ctx: Ctx = Depends(manager)):
     return _listing_out(ctx.session, get_owned(ctx, Listing, listing_id, "Listing"))
+
+
+# ── Staff: marketing kit (ad text and flyer) ─────────────────────────────────
+# Only for published listings: the share link of a draft or closed listing doesn't open, so
+# advertising it would send people to a dead page. Those get 409 with a clear message.
+
+
+def _marketing_listing(ctx: Ctx, listing_id: uuid.UUID) -> tuple[Listing, "M.Facts", str]:
+    listing = get_owned(ctx, Listing, listing_id, "Listing")
+    if listing.status != "published":
+        raise HTTPException(status_code=409, detail="Publish the listing before marketing it. Its link only works while it is published.")
+    prop, unit = _location(ctx.session, listing)
+    facts = M.Facts(listing, prop, unit, ctx.org, today_in(ctx.org.timezone))
+    return listing, facts, f"{settings.frontend_url}/l/{listing.slug}"
+
+
+@router.get("/listings/{listing_id}/marketing")
+def listing_marketing(listing_id: uuid.UUID, ctx: Ctx = Depends(manager)):
+    listing, facts, share_url = _marketing_listing(ctx, listing_id)
+    return {
+        "share_url": share_url,
+        "texts": M.marketing_texts(facts, share_url),
+        "fair_housing_note": M.FAIR_HOUSING_NOTE,
+        # Risky phrases in the landlord's own words, which the ad text repeats as written.
+        "fair_housing_flags": M.fair_housing_flags(listing.title, listing.description, listing.pet_policy),
+    }
+
+
+@router.get("/listings/{listing_id}/flyer.pdf")
+def listing_flyer(listing_id: uuid.UUID, ctx: Ctx = Depends(manager)):
+    listing, facts, share_url = _marketing_listing(ctx, listing_id)
+    photos = _photos(ctx.session, listing)
+    pdf = M.flyer_pdf(facts, ctx.org, share_url, M.photo_bytes(photos[0]) if photos else None)
+    return Response(pdf, media_type="application/pdf", headers={"Content-Disposition": f'inline; filename="flyer-{listing.slug}.pdf"'})
 
 
 @router.patch("/listings/{listing_id}")

@@ -6,6 +6,7 @@ import { AlertTriangle, Check, ExternalLink, FileText, Gavel, Megaphone, Plus, S
 import { api, fileUrl } from "../services/api";
 import type { Property } from "../types";
 import { PhotoGrid } from "../components/Documents";
+import { VacancyKit } from "../components/VacancyKit";
 import { Badge, Card, Empty, ErrorBox, Field, Input, InviteLink, Modal, MoneyInput, PageHeader, Select, Spinner, Stat, Textarea } from "../components/ui";
 import { date, dateTime, fromCents, money, toCents, todayISO } from "../utils/format";
 import { Stars } from "./VendorPages";
@@ -415,14 +416,7 @@ export function ListingManagePage() {
       />
       <div className="stack">
         <ErrorBox error={publish.error || close.error || remove.error} />
-        {l.status === "published" && (
-          <Card title={t("vacancy.share")}>
-            <p className="small muted" style={{ marginBottom: 10 }}>
-              {t("vacancy.share_hint")}
-            </p>
-            <InviteLink url={l.share_url} emailSent={false} email={null} hideNotice />
-          </Card>
-        )}
+        {l.status === "published" && <VacancyKit listing={l} />}
         <Card title={t("vacancy.applicants", { count: apps?.length ?? 0 })} pad={!apps?.length}>
           <ApplicantsTable apps={apps ?? []} />
         </Card>

@@ -1,0 +1,22 @@
+# Handoff 001 — from Positioning & Product Research to Product Manager — 2026-10-17
+
+- **Brief version read:** PROJECT-BRIEF v1
+- **Artifacts + version:** `docs/growth/RESEARCH.md` v1, 2026-10-17 (draft, not approved).
+- **Done (with evidence paths):**
+  - Compared 5 alternatives plus one upmarket reference: spreadsheets/DIY, TurboTenant, Avail, RentRedi, Baselane, Buildium. Prices come from their own pricing pages, accessed 2026-10-17. See RESEARCH.md section 3.
+  - Found 6 sourced landlord pains with short quotes and links. See section 4.
+  - Market size: about 70% of US rental properties (38% of units) are owned by individuals (HUD and Census, 2021 survey). See section 2, F1–F2.
+  - Recommended positioning: Option A for the hero, Option B as the proof section. See section 5.
+  - Pricing observations, 3 message angles, 8 FAQ questions, and one $0 validation test. See sections 6–9.
+- **Needed from you:**
+  - One owner decision: approve Option A ("the free, all-in-one place for your first rentals") as the hero position, with Option B (maintenance and records depth) as the proof section.
+  - Pass the 3 message angles and 8 FAQ questions to the Product Designer and the copy work.
+  - Make sure the FAQ answers "Can tenants pay rent online?" honestly: not yet.
+- **Open questions / unverified:**
+  - Innago prices: not shown on its pricing page.
+  - Avail: avail.co would not load; avail.com/pricing loaded and was used.
+  - Baselane and Buildium: the pages do not say whether prices are per unit or per account.
+  - No r/Landlord thread was found. One cost quote (P4) is from an Australian forum.
+  - Baselane statistics (35% cost barrier, 38% upkeep) have no stated survey year.
+  - The 3-unit free limit may look small next to free plans with unlimited units (HYPOTHESIS).
+- **Reply:** write `handoffs/002-from-pm-to-research.md` with "acknowledged" and the next step.

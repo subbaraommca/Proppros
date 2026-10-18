@@ -1,0 +1,191 @@
+<!doctype html>
+<!--
+  Proppros — Static A (Meta feed 4:5, 1440 x 1800)
+  Creative brief A, docs/growth/ADS-RESEARCH.md §8 · PROJECT-BRIEF v2
+  Screens: fictional showcase data only (frontend/public/screens/).
+  Render: node render-static-a.mjs (scratchpad shots folder) -> static-a-1440x1800.png
+  Safe areas: text kept inside 96 px side margins (6% = 86 px) and above y = 1620 (Meta CTA bar, bottom 10%).
+-->
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>Proppros — Static A — Fill your vacancy</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,100..900&family=DM+Sans:opsz,wght@9..40,400..700&family=JetBrains+Mono:wght@500&display=block" rel="stylesheet" />
+<style>
+  :root {
+    --bg: #111217;
+    --copper: #EDAF88;
+    --text: #E6DFD8;
+    --white: #FFFFFF;
+    --muted: #A9A29B;
+    --line: #2A2C34;
+    --screens: "../../../frontend/public/screens";
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { width: 1440px; height: 1800px; background: var(--bg); }
+  body {
+    position: relative; overflow: hidden;
+    font-family: "DM Sans", sans-serif; color: var(--text);
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* soft copper glow behind the product composition */
+  .glow {
+    position: absolute; left: 380px; top: 760px; width: 1100px; height: 820px;
+    background: radial-gradient(closest-side, rgba(237,175,136,0.20), rgba(237,175,136,0.06) 55%, rgba(237,175,136,0) 100%);
+    filter: blur(20px);
+  }
+
+  /* ---------- top 40%: hook, headline, supporting line ---------- */
+  .top { position: absolute; left: 96px; right: 96px; top: 112px; }
+  .hook {
+    font-family: "DM Sans", sans-serif; font-weight: 600; font-size: 38px;
+    color: var(--copper); letter-spacing: 0.005em;
+  }
+  .rule { width: 88px; height: 4px; background: var(--copper); margin: 30px 0 34px; }
+  h1 {
+    font-family: "Archivo", sans-serif; font-stretch: 112%; font-weight: 800;
+    font-size: 104px; line-height: 1.0; letter-spacing: -0.02em; color: var(--white);
+  }
+  .support {
+    margin-top: 36px; max-width: 1120px;
+    font-size: 36px; line-height: 1.38; color: var(--text);
+  }
+
+  /* ---------- middle 45%: product composition ---------- */
+  .label {
+    font-family: "JetBrains Mono", monospace; font-weight: 500; font-size: 17px;
+    letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted);
+  }
+
+  .browser {
+    position: absolute; left: 96px; top: 824px; width: 1000px;
+    border: 1px solid #34363F; border-radius: 16px; overflow: hidden;
+    background: #16171D;
+    box-shadow: 0 30px 80px rgba(0,0,0,0.55);
+  }
+  .browser .bar {
+    height: 42px; display: flex; align-items: center; gap: 9px; padding: 0 18px;
+    background: #1C1D24; border-bottom: 1px solid #2A2C34;
+  }
+  .browser .dot { width: 12px; height: 12px; border-radius: 50%; background: #3A3C46; }
+  .browser .url {
+    margin-left: 18px; flex: 1; height: 24px; border-radius: 6px; background: #121318;
+    font-family: "JetBrains Mono", monospace; font-size: 13px; color: #8E877F;
+    display: flex; align-items: center; padding-left: 12px;
+  }
+  /* crop: vacancy-dark.webp (2160x1350), x 380..2140, y 150..520, scale 1000/1760 (header row left out so the phone does not cut the "New listing" button) */
+  .crop-vacancy {
+    width: 1000px; height: 210px;
+    background: url("../../../frontend/public/screens/vacancy-dark.webp") no-repeat;
+    background-size: 1227.3px auto;
+    background-position: -215.9px -85.2px;
+  }
+
+  .card {
+    position: absolute; left: 96px; top: 1108px; width: 860px;
+    border: 1px solid #34363F; border-radius: 16px; overflow: hidden;
+    background: #16171D;
+    box-shadow: 0 30px 80px rgba(0,0,0,0.55);
+  }
+  /* crop: listing-manage-dark.webp, x 430..1510, y 925..1245, scale 860/1080 */
+  .crop-details {
+    width: 860px; height: 255px;
+    background: url("../../../frontend/public/screens/listing-manage-dark.webp") no-repeat;
+    background-size: 1720px auto;
+    background-position: -342.4px -736.6px;
+  }
+
+  .phone {
+    position: absolute; left: 1028px; top: 872px; width: 316px;
+    padding: 12px; border-radius: 44px;
+    background: #050508; border: 1px solid #3A3C46;
+    box-shadow: 0 40px 90px rgba(0,0,0,0.65), 0 0 0 6px rgba(237,175,136,0.05);
+    transform: rotate(2.5deg); transform-origin: 50% 50%;
+  }
+  .phone .screen { border-radius: 33px; overflow: hidden; }
+  /* crop: listing-public-phone-dark.webp (780x1688), y 0..1600, scale 292/780 */
+  .crop-phone {
+    width: 292px; height: 600px;
+    background: url("../../../frontend/public/screens/listing-public-phone-dark.webp") no-repeat;
+    background-size: 292px auto;
+    background-position: 0 0;
+  }
+
+  .tag {
+    position: absolute; display: inline-flex; align-items: center;
+    padding: 7px 12px; border-radius: 6px;
+    background: rgba(17,18,23,0.88); border: 1px solid #34363F;
+  }
+  .tag-browser { left: 96px; top: 774px; }
+  .tag-phone   { right: 96px; top: 774px; }
+
+  /* ---------- bottom: CTA, small print, wordmark (kept above y = 1620) ---------- */
+  .cta-row {
+    position: absolute; left: 96px; right: 96px; top: 1516px;
+    display: flex; align-items: center; gap: 30px;
+  }
+  .btn {
+    display: inline-flex; align-items: center; justify-content: center;
+    height: 88px; padding: 0 50px; border-radius: 12px;
+    background: var(--copper); color: #1A1410;
+    font-family: "DM Sans", sans-serif; font-weight: 700; font-size: 36px;
+  }
+  .small { font-size: 28px; color: var(--text); }
+  .brand { margin-left: auto; display: flex; align-items: center; gap: 14px; }
+  .brand .mark {
+    width: 50px; height: 50px; border-radius: 10px; background: var(--copper);
+    display: grid; place-items: center;
+  }
+  .brand .word {
+    font-family: "Archivo", sans-serif; font-stretch: 112%; font-weight: 800;
+    font-size: 36px; color: var(--white); letter-spacing: -0.01em;
+  }
+</style>
+</head>
+<body>
+  <div class="glow"></div>
+
+  <section class="top">
+    <p class="hook">Got a unit coming open?</p>
+    <div class="rule"></div>
+    <h1>One listing.<br />Everything you need<br />to fill it.</h1>
+    <p class="support">A listing page, ready-to-post ad text, a share image, a QR flyer and online applications.</p>
+  </section>
+
+  <span class="tag tag-browser label">Example data</span>
+
+  <div class="browser">
+    <div class="bar">
+      <span class="dot"></span><span class="dot"></span><span class="dot"></span>
+      <span class="url">proppros.vercel.app/vacancies</span>
+    </div>
+    <div class="crop-vacancy" role="img" aria-label="Proppros vacancies page with one published listing"></div>
+  </div>
+
+  <div class="card">
+    <div class="crop-details" role="img" aria-label="Listing headline and description text"></div>
+  </div>
+
+  <span class="tag tag-phone label">Example data</span>
+
+  <div class="phone">
+    <div class="screen">
+      <div class="crop-phone" role="img" aria-label="Public listing page on a phone with rent and an Apply now button"></div>
+    </div>
+  </div>
+
+  <div class="cta-row">
+    <span class="btn">Start free</span>
+    <span class="small">No card needed.</span>
+    <span class="brand">
+      <span class="mark">
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#1A1410" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 10.5 12 3l9 7.5V20a1 1 0 0 1-1 1h-5v-6h-6v6H4a1 1 0 0 1-1-1z"/></svg>
+      </span>
+      <span class="word">Proppros</span>
+    </span>
+  </div>
+</body>
+</html>

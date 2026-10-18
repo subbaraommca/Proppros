@@ -1,0 +1,18 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="Proppros — rent, leases, tenants, maintenance and finances in one place." />
+    <meta name="theme-color" content="#0d0e12" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <title>Proppros</title>
+    <script src="/theme-init.js"></script>
+    <script type="module" crossorigin src="/assets/index-NqghwVM_.js"></script>
+    <link rel="modulepreload" crossorigin href="/assets/format-DcFY2jqa.js">
+    <link rel="stylesheet" crossorigin href="/assets/index-B9LXrFrd.css">
+  </head>
+  <body>
+    <div id="root"></div>
+  </body>
+</html>

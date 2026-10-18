@@ -1,0 +1,20 @@
+{
+  "name": "proppros-video",
+  "private": true,
+  "version": "0.1.0",
+  "description": "Proppros 'One calm month' 9:16 video (Remotion source). Draft, pending owner approval.",
+  "scripts": {
+    "studio": "remotion studio",
+    "render": "remotion render OneCalmMonth out/one-calm-month-1080x1920.mp4 --codec h264"
+  },
+  "dependencies": {
+    "@remotion/cli": "4.0.536",
+    "react": "18.3.1",
+    "react-dom": "18.3.1",
+    "remotion": "4.0.536"
+  },
+  "devDependencies": {
+    "@types/react": "18.3.12",
+    "typescript": "5.6.3"
+  }
+}

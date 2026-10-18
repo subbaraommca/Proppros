@@ -1,0 +1,158 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Proppros: Front Porch</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600&family=Work+Sans:wght@400;500;600&family=Caveat:wght@500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --forest:#1F3A2E;--forest-2:#2A4A3B;--cream:#F3EEE4;--card:#FFFDF8;--sand:#E7DFD0;--line:#D8CEBB;
+  --ink:#22201C;--ink-muted:#5E5A52;--on-forest:#F3EEE4;--on-forest-muted:#C5D1C8;
+  --clay:#A9532F;--clay-light:#E9A27F;--sage:#3E7A5C;
+  --serif:"Fraunces",Georgia,serif;--sans:"Work Sans",system-ui,sans-serif;
+}
+*{box-sizing:border-box}html,body{margin:0}
+body{background:var(--cream);color:var(--ink);font:400 17px/1.6 var(--sans)}
+a{color:inherit;text-decoration:none}
+.wrap{max-width:1200px;margin:0 auto;padding:0 32px}
+:focus-visible{outline:3px solid var(--clay-light);outline-offset:3px}
+.top{background:var(--forest);color:var(--on-forest)}
+.nav{display:flex;align-items:center;gap:32px;height:76px}
+.brand{font:600 24px/1 var(--serif);display:flex;gap:10px;align-items:center}
+.brand svg{width:26px;height:26px}
+.links{display:flex;gap:26px;font-size:15.5px;color:var(--on-forest-muted)}
+.right{margin-left:auto;display:flex;gap:22px;align-items:center;font-size:15.5px}
+.btn{display:inline-flex;align-items:center;justify-content:center;height:50px;padding:0 26px;border-radius:999px;font:600 16px/1 var(--sans);transition:background-color .16s ease-out,transform .12s ease-out}
+.btn:active{transform:scale(.97)}
+.btn-primary{background:var(--clay-light);color:#22201C}.btn-primary:hover{background:#F0B494}
+.btn-out{border:1.5px solid rgba(243,238,228,.5);color:var(--on-forest)}
+.btn-out:hover{border-color:var(--on-forest)}
+.btn-sm{height:40px;padding:0 18px;font-size:15px}
+.btn-dark{background:var(--forest);color:var(--on-forest)}
+.hero{display:grid;grid-template-columns:1fr 1fr;gap:56px;align-items:center;padding:64px 0 96px}
+h1{font:500 clamp(40px,5.4vw,68px)/1.04 var(--serif);margin:0 0 22px;letter-spacing:-.015em}
+.lead{font-size:19px;color:var(--on-forest-muted);margin:0 0 30px;max-width:30em}
+.ctas{display:flex;gap:12px;flex-wrap:wrap}
+.note{font-size:15px;color:var(--on-forest-muted);margin:16px 0 0}
+/* stacked papers */
+.stack{position:relative;height:460px}
+.paper{position:absolute;background:var(--card);color:var(--ink);border-radius:14px;box-shadow:0 30px 60px -30px rgba(0,0,0,.55);padding:22px}
+.lease{left:0;top:0;width:58%;transform:rotate(-2deg)}
+.lease h3{font:600 20px/1.2 var(--serif);margin:0 0 12px}
+.l{height:8px;background:var(--sand);border-radius:4px;margin:9px 0}
+.sig{margin-top:22px;border-top:1.5px solid var(--ink);padding-top:6px;display:flex;justify-content:space-between;font-size:12.5px;color:var(--ink-muted)}
+.sig b{font:500 30px/1 "Caveat",cursive;color:#1F3A6B;position:absolute;margin-top:-40px}
+.signed{display:inline-block;margin-top:14px;font-size:12.5px;font-weight:600;color:var(--sage);background:#E4EFE7;padding:5px 10px;border-radius:999px}
+.order{right:0;top:80px;width:44%;transform:rotate(2.5deg);z-index:2}
+.photo{height:110px;border-radius:10px;background:linear-gradient(160deg,#C9D6CF 0 45%,#B7C6BE 45% 60%,#9FB1A7 60%);position:relative;margin-bottom:12px}
+.photo:after{content:"";position:absolute;left:40%;top:30%;width:22%;height:40%;border:6px solid #E6ECE8;border-bottom:0;border-radius:30px 30px 0 0}
+.order h4{font:600 17px/1.25 var(--serif);margin:0 0 4px}
+.order p{margin:0;font-size:13px;color:var(--ink-muted)}
+.chip{display:inline-block;margin-top:10px;font-size:12px;font-weight:600;background:#F6E6D9;color:#7E3A1D;padding:4px 10px;border-radius:999px}
+.portal{left:6%;bottom:0;width:46%;transform:rotate(-1deg)}
+.portal .mini{font-size:12.5px;color:var(--ink-muted)}
+.portal strong{display:block;font:600 30px/1.1 var(--serif);margin:4px 0 10px}
+.portal .row{display:flex;justify-content:space-between;font-size:13.5px;padding:7px 0;border-top:1px solid var(--line)}
+.cap{position:absolute;right:0;bottom:-34px;font-size:13px;color:var(--on-forest-muted)}
+section{padding:96px 0}
+.eyebrow{font-size:15px;font-weight:600;color:var(--clay)}
+h2{font:500 clamp(30px,3.6vw,46px)/1.1 var(--serif);margin:8px 0 40px;letter-spacing:-.01em;max-width:18em}
+.steps{display:grid;grid-template-columns:repeat(3,1fr);gap:20px}
+.step{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:28px}
+.step .n{width:40px;height:40px;border-radius:50%;background:var(--forest);color:var(--on-forest);display:grid;place-items:center;font:600 18px var(--serif)}
+.step h3{font:600 22px/1.25 var(--serif);margin:18px 0 8px}
+.step p{margin:0;color:var(--ink-muted)}
+.founder{background:var(--sand);border-radius:24px;padding:48px;display:grid;grid-template-columns:auto 1fr;gap:32px;align-items:center}
+.founder svg{width:88px;height:88px}
+.founder p{font:500 clamp(22px,2.6vw,30px)/1.3 var(--serif);margin:0}
+.founder small{display:block;font:400 16px/1.5 var(--sans);color:var(--ink-muted);margin-top:10px}
+.feats{display:grid;grid-template-columns:repeat(3,1fr);gap:36px 40px}
+.feats h3{font:600 21px/1.25 var(--serif);margin:0 0 6px}
+.feats p{margin:0;color:var(--ink-muted)}
+.feats div{border-top:2px solid var(--forest);padding-top:18px}
+@media (max-width:900px){
+  .hero{grid-template-columns:1fr;padding-bottom:110px}
+  .steps,.feats{grid-template-columns:1fr}
+  .links{display:none}
+  .stack{height:440px}
+}
+@media (max-width:520px){
+  .wrap{padding:0 16px}
+  .right .signin{display:none}
+  .nav{height:64px}
+  .hero{padding-top:36px;gap:40px}
+  .lead{font-size:17.5px}
+  .ctas .btn{flex:1}
+  .stack{height:auto;display:grid;gap:16px;padding-bottom:30px}
+  .paper{position:relative;left:auto;right:auto;top:auto;bottom:auto;width:auto}
+  .lease{margin-right:12%}
+  .order{margin-left:12%}
+  .photo{height:80px}
+  .portal{margin-right:18%}
+  .founder{grid-template-columns:1fr;padding:28px}
+  section{padding:64px 0}
+}
+@media (prefers-reduced-motion:no-preference){
+  .paper{animation:settle .7s cubic-bezier(.2,.8,.2,1) both}
+  .order{animation-delay:.12s}.portal{animation-delay:.24s}
+  @keyframes settle{from{opacity:0;translate:0 16px}to{opacity:1;translate:0 0}}
+}
+</style>
+</head>
+<body>
+<div class="top"><div class="wrap">
+  <header class="nav">
+    <a class="brand" href="#"><svg viewBox="0 0 26 26" fill="none" stroke="#E9A27F" stroke-width="2"><path d="M3 12L13 4l10 8"/><path d="M6 10v12h14V10"/><path d="M11 22v-6h4v6"/></svg>Proppros</a>
+    <nav class="links"><a href="#">Features</a><a href="#">Pricing</a><a href="#">FAQ</a></nav>
+    <div class="right"><a class="signin" href="#">Sign in</a><a class="btn btn-primary btn-sm" href="#">Start free</a></div>
+  </header>
+  <div class="hero">
+    <div>
+      <h1>Leases, rent and repairs in one place.</h1>
+      <p class="lead">Property management software for independent landlords with 1 to 20 units. Track rent, sign leases online and handle repairs. Your tenants get their own portal.</p>
+      <div class="ctas"><a class="btn btn-primary" href="#">Start free</a><a class="btn btn-out" href="#">See pricing</a></div>
+      <p class="note">Free for up to 3 units. No card needed.</p>
+    </div>
+    <div class="stack" role="img" aria-label="Example items in Proppros: a lease signed online, a repair request with a photo, and a tenant portal balance">
+      <div class="paper lease"><h3>Residential lease</h3><div class="l"></div><div class="l" style="width:86%"></div><div class="l" style="width:92%"></div><div class="l" style="width:60%"></div>
+        <div class="sig"><b>M. Okafor</b><span>Tenant signature</span><span>Oct 3</span></div><span class="signed">Signed online</span></div>
+      <div class="paper order"><div class="photo" aria-hidden="true"></div><h4>Kitchen faucet leaking</h4><p>Maple Court, Unit 3 · Photo from tenant</p><span class="chip">Assigned to plumber</span></div>
+      <div class="paper portal"><span class="mini">Tenant portal · Balance</span><strong>$0.00</strong><div class="row"><span>October rent</span><span>Paid</span></div><div class="row"><span>Lease documents</span><span>3 files</span></div></div>
+      <span class="cap">Example data</span>
+    </div>
+  </div>
+</div></div>
+<main>
+<section><div class="wrap">
+  <span class="eyebrow">How it works</span>
+  <h2>Three steps to a calmer month.</h2>
+  <div class="steps">
+    <div class="step"><span class="n">1</span><h3>Add your properties</h3><p>Enter each property and its units. Add current tenants and lease dates.</p></div>
+    <div class="step"><span class="n">2</span><h3>Invite your tenants</h3><p>Tenants sign leases online and use their portal in the browser. They install nothing.</p></div>
+    <div class="step"><span class="n">3</span><h3>Run the month</h3><p>Rent charges post each month. Record payments, handle repairs and see who is behind.</p></div>
+  </div>
+</div></section>
+<section style="padding-top:0"><div class="wrap">
+  <div class="founder">
+    <svg viewBox="0 0 88 88" fill="none" stroke="#1F3A2E" stroke-width="2.5" aria-hidden="true"><path d="M8 44L30 26l22 18"/><path d="M14 40v30h32V40"/><path d="M40 40l18-14 22 18"/><path d="M50 36v34h24V40"/><path d="M26 70V56h8v14M58 70V58h8v12"/></svg>
+    <p>Built by a landlord with 3 rentals.<small>The founder uses Proppros to run those 3 rentals.</small></p>
+  </div>
+</div></section>
+<section style="padding-top:0"><div class="wrap">
+  <span class="eyebrow">Features</span>
+  <h2>Everything a small landlord does, in one place.</h2>
+  <div class="feats">
+    <div><h3>Leases with e-signature</h3><p>Use templates, sign online and keep every term, date and document together.</p></div>
+    <div><h3>Rent ledger</h3><p>Charges post each month. Record payments, send receipts and see who is behind.</p></div>
+    <div><h3>Maintenance</h3><p>Tenants report issues with photos. Track work orders, vendors, quotes and invoices.</p></div>
+    <div><h3>Vacancies</h3><p>Share a listing page and take rental applications online.</p></div>
+    <div><h3>Tenant portal</h3><p>Tenants see their lease, balance and documents, and send requests and messages.</p></div>
+    <div><h3>Reports</h3><p>Profit and loss, rent roll and expenses by property. Export to CSV at tax time.</p></div>
+  </div>
+</div></section>
+</main>
+</body>
+</html>

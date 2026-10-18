@@ -1,0 +1,156 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Proppros: Unit Grid</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600;800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#FAFAF7;--panel:#FFFFFF;--ink:#0E0F12;--ink-muted:#555A63;--line:#E2E3DE;--line-strong:#0E0F12;
+  --signal:#2443C9;--signal-hover:#1C36A6;
+  --paid:#2E7D5B;--paid-bg:#E2F1E9;--due:#B3261E;--due-bg:#FBE5E3;--vacant:#8A6100;--vacant-bg:#FBEFCF;--repair:#2443C9;--repair-bg:#E3E8FB;
+  --sans:"Hanken Grotesk",system-ui,sans-serif;--mono:"DM Mono",ui-monospace,monospace;
+}
+*{box-sizing:border-box}html,body{margin:0}
+body{background:var(--bg);color:var(--ink);font:400 16.5px/1.55 var(--sans)}
+a{color:inherit;text-decoration:none}
+.wrap{max-width:1240px;margin:0 auto;padding:0 32px}
+:focus-visible{outline:2px solid var(--signal);outline-offset:3px}
+.nav{display:flex;align-items:center;gap:32px;height:68px;border-bottom:1px solid var(--line-strong)}
+.brand{font:800 21px/1 var(--sans);letter-spacing:-.03em;display:flex;align-items:center;gap:8px}
+.brand i{display:grid;grid-template-columns:repeat(2,7px);gap:2px}
+.brand i b{width:7px;height:7px;background:var(--ink)}
+.brand i b:nth-child(2){background:var(--signal)}
+.links{display:flex;gap:24px;font-size:15px;color:var(--ink-muted)}
+.right{margin-left:auto;display:flex;gap:20px;align-items:center;font-size:15px}
+.btn{display:inline-flex;align-items:center;justify-content:center;height:48px;padding:0 22px;font:600 16px/1 var(--sans);transition:background-color .16s ease-out,transform .12s ease-out}
+.btn:active{transform:scale(.97)}
+.btn-primary{background:var(--signal);color:#fff}.btn-primary:hover{background:var(--signal-hover)}
+.btn-out{border:1.5px solid var(--ink)}.btn-out:hover{background:var(--ink);color:var(--bg)}
+.btn-sm{height:38px;padding:0 16px;font-size:15px}
+.hero{padding:72px 0 0}
+h1{font:800 clamp(44px,7.4vw,112px)/.95 var(--sans);letter-spacing:-.045em;margin:0;max-width:11ch}
+.hero-row{display:grid;grid-template-columns:repeat(12,1fr);gap:24px;margin-top:40px;align-items:start}
+.lead{grid-column:1/6;font-size:19px;margin:0}
+.act{grid-column:7/13;display:flex;flex-direction:column;gap:12px;align-items:flex-start}
+.ctas{display:flex;gap:10px;flex-wrap:wrap}
+.note{font:400 13.5px var(--mono);color:var(--ink-muted);margin:0}
+/* portfolio grid */
+.board{margin-top:56px;border:1px solid var(--line-strong);background:var(--panel)}
+.board-head{display:flex;justify-content:space-between;align-items:center;padding:14px 20px;border-bottom:1px solid var(--line)}
+.board-head h2{font:600 16px/1 var(--sans);margin:0}
+.legend{display:flex;gap:16px;font:400 12.5px var(--mono);color:var(--ink-muted);flex-wrap:wrap}
+.legend span:before{content:"";display:inline-block;width:10px;height:10px;margin-right:6px;vertical-align:-1px}
+.lg-paid:before{background:var(--paid)}.lg-due:before{background:var(--due)}.lg-vac:before{background:var(--vacant)}.lg-rep:before{background:var(--repair)}
+.props{display:grid;grid-template-columns:2fr 1fr 1.4fr}
+.prop{padding:20px;border-right:1px solid var(--line)}
+.prop:last-child{border-right:0}
+.prop h3{font:600 15px/1.2 var(--sans);margin:0 0 4px}
+.prop .mono{font:400 12.5px var(--mono);color:var(--ink-muted)}
+.units{display:grid;grid-template-columns:repeat(auto-fill,minmax(92px,1fr));gap:8px;margin-top:14px}
+.u{padding:10px;min-height:84px;display:flex;flex-direction:column;justify-content:space-between;border-left:4px solid}
+.u b{font:600 14px var(--sans)}
+.u span{font:500 12px var(--mono)}
+.paid{background:var(--paid-bg);border-color:var(--paid);color:#1E5A40}
+.due{background:var(--due-bg);border-color:var(--due);color:#8E1D17}
+.vac{background:var(--vacant-bg);border-color:var(--vacant);color:#6B4B00}
+.rep{background:var(--repair-bg);border-color:var(--repair);color:#1C36A6}
+.cap{display:block;text-align:right;font:400 12.5px var(--mono);color:var(--ink-muted);margin-top:8px}
+section{padding:104px 0 0}
+.sec-h{display:grid;grid-template-columns:repeat(12,1fr);gap:24px;border-top:1px solid var(--line-strong);padding-top:20px;margin-bottom:40px}
+.sec-h .k{grid-column:1/4;font:500 13.5px var(--mono);color:var(--ink-muted)}
+.sec-h h2{grid-column:4/13;font:800 clamp(30px,4vw,52px)/1 var(--sans);letter-spacing:-.035em;margin:0}
+.steps{display:grid;grid-template-columns:repeat(3,1fr);gap:24px}
+.step .n{font:800 96px/.8 var(--sans);letter-spacing:-.05em;color:var(--signal)}
+.step h3{font:600 21px/1.25 var(--sans);margin:22px 0 6px}
+.step p{margin:0;color:var(--ink-muted)}
+.feats{display:grid;grid-template-columns:repeat(3,1fr);border-top:1px solid var(--line)}
+.feats div{padding:24px 24px 28px 0;border-bottom:1px solid var(--line)}
+.feats h3{font:600 20px/1.25 var(--sans);margin:0 0 6px}
+.feats p{margin:0;color:var(--ink-muted);font-size:15.5px;max-width:30ch}
+@media (max-width:900px){
+  .lead,.act{grid-column:1/13}
+  .props{grid-template-columns:1fr}
+  .prop{border-right:0;border-bottom:1px solid var(--line)}
+  .steps,.feats{grid-template-columns:1fr}
+  .sec-h .k,.sec-h h2{grid-column:1/13}
+  .links{display:none}
+}
+@media (max-width:520px){
+  .wrap{padding:0 16px}
+  .right .signin{display:none}
+  .hero{padding-top:44px}
+  .lead{font-size:17.5px}
+  .ctas,.ctas .btn{width:100%}
+  .ctas .btn{flex:1}
+  .board-head{flex-direction:column;align-items:flex-start;gap:10px;padding:14px 16px}
+  .prop{padding:16px}
+  .units{grid-template-columns:repeat(3,1fr)}
+  .step .n{font-size:72px}
+  section{padding-top:72px}
+}
+@media (prefers-reduced-motion:no-preference){
+  .u{animation:fill .35s ease-out both}
+  .u:nth-child(2){animation-delay:.05s}.u:nth-child(3){animation-delay:.1s}.u:nth-child(4){animation-delay:.15s}
+  @keyframes fill{from{opacity:0}to{opacity:1}}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header class="nav">
+  <a class="brand" href="#"><i aria-hidden="true"><b></b><b></b><b></b><b></b></i>Proppros</a>
+  <nav class="links"><a href="#">Features</a><a href="#">Pricing</a><a href="#">FAQ</a></nav>
+  <div class="right"><a class="signin" href="#">Sign in</a><a class="btn btn-primary btn-sm" href="#">Start free</a></div>
+</header>
+<main>
+<div class="hero">
+  <h1>Leases, rent and repairs in one place.</h1>
+  <div class="hero-row">
+    <p class="lead">Property management software for independent landlords with 1 to 20 units. Your tenants get their own portal.</p>
+    <div class="act">
+      <div class="ctas"><a class="btn btn-primary" href="#">Start free</a><a class="btn btn-out" href="#">See pricing</a></div>
+      <p class="note">Free for up to 3 units. No card needed. Built by a landlord with 3 rentals.</p>
+    </div>
+  </div>
+  <div class="board" role="img" aria-label="Every unit at a glance, with example data: paid, rent due, vacant and open repair">
+    <div class="board-head"><h2>Every unit at a glance</h2><div class="legend"><span class="lg-paid">Paid</span><span class="lg-due">Rent due</span><span class="lg-vac">Vacant</span><span class="lg-rep">Open repair</span></div></div>
+    <div class="props">
+      <div class="prop"><h3>Maple Court</h3><span class="mono">4 units</span>
+        <div class="units"><div class="u paid"><b>Unit 1</b><span>Paid</span></div><div class="u due"><b>Unit 2</b><span>$650 due</span></div><div class="u rep"><b>Unit 3</b><span>Faucet</span></div><div class="u paid"><b>Unit 4</b><span>Paid</span></div></div></div>
+      <div class="prop"><h3>Elm Street Duplex</h3><span class="mono">2 units</span>
+        <div class="units"><div class="u paid"><b>A</b><span>Paid</span></div><div class="u due"><b>B</b><span>$500 due</span></div></div></div>
+      <div class="prop"><h3>Cedar House</h3><span class="mono">1 unit</span>
+        <div class="units"><div class="u vac"><b>Main</b><span>Listed</span></div></div></div>
+    </div>
+  </div>
+  <span class="cap">Illustration built from example data. Not a screen in the product today.</span>
+</div>
+
+<section>
+  <div class="sec-h"><span class="k">How it works</span><h2>Three steps to a calmer month.</h2></div>
+  <div class="steps">
+    <div class="step"><div class="n">1</div><h3>Add your properties</h3><p>Enter each property and its units. Add current tenants and lease dates.</p></div>
+    <div class="step"><div class="n">2</div><h3>Invite your tenants</h3><p>Tenants sign leases online and use their portal in the browser. They install nothing.</p></div>
+    <div class="step"><div class="n">3</div><h3>Run the month</h3><p>Rent charges post each month. Record payments, handle repairs and see who is behind.</p></div>
+  </div>
+</section>
+
+<section>
+  <div class="sec-h"><span class="k">Features</span><h2>Everything a small landlord does, in one place.</h2></div>
+  <div class="feats">
+    <div><h3>Leases with e-signature</h3><p>Use templates, sign online and keep every term, date and document together.</p></div>
+    <div><h3>Rent ledger</h3><p>Charges post each month. Record payments, send receipts and see who is behind.</p></div>
+    <div><h3>Maintenance</h3><p>Tenants report issues with photos. Track work orders, vendors, quotes and invoices.</p></div>
+    <div><h3>Vacancies</h3><p>Share a listing page and take rental applications online.</p></div>
+    <div><h3>Tenant portal</h3><p>Tenants see their lease, balance and documents, and send requests and messages.</p></div>
+    <div><h3>Reports</h3><p>Profit and loss, rent roll and expenses by property. Export to CSV at tax time.</p></div>
+  </div>
+</section>
+</main>
+</div>
+</body>
+</html>

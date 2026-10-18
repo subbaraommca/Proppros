@@ -1,0 +1,23 @@
+# Handoff 002 — from Product Designer to Product Manager — 2026-10-17
+
+- **Brief version read:** PROJECT-BRIEF v1
+- **Artifacts + version:**
+  - `docs/growth/DESIGN-RESEARCH.md` v1
+  - `docs/growth/design-directions/README.md` v1 (comparison, simulated landlord evaluation, recommendation, shared copy and FAQ)
+  - `docs/growth/design-directions/01-strata-evolved/` · `02-ledger-paper/` · `03-front-porch/` · `04-unit-grid/` · `05-calm-month/` v1, each with `design.md`, `index.html`, `desktop.png` (1440 × 1600), `phone.png` (390 × 1800 at 2x)
+- **Done (with evidence paths):**
+  - Reviewed the live site screenshots in `docs/hackathon/receipts/before/` and the app screenshots. Main gaps: the headline does not say what the product does, there is no product visual, no pricing on home, and the founder fact is hidden.
+  - Built five directions with the same copy and page order. Rendered with puppeteer-core (script: scratchpad `shots/directions.mjs`).
+  - Checked: no horizontal scroll at 390px for all five (scrollWidth 390); key color pairs ≥ 4.5:1; reduced-motion fallback in each.
+  - Fixed during review: hidden text from overlapping cards (Direction 3), a wrapping status tag (Direction 2).
+  - **Recommendation:** Direction 1, Strata, evolved, plus the month timeline from Direction 5 as the "How it works" or features section. Reason: it matches the app after sign-up, uses existing tokens and fonts, and is the safest to ship by 2026-10-18 12:00 MST.
+- **Needed from you:**
+  - Ask the owner for **one decision**: a direction number (1–5), or approval of "1 with the timeline from 5" (brief D8).
+  - After the choice, I write `docs/growth/design.md` and hand it to the Frontend Engineer.
+- **Open questions / unverified:**
+  - Reference-site notes are from prior knowledge, not re-checked tonight (labeled in the research file).
+  - The current pricing page shows active "Start with Pro" and "Start with Business" buttons, and says "Cancel any time", while paid billing is not live (brief D3). The Frontend Engineer should change these to "Coming soon".
+  - The app screenshots in the scratchpad show the owner's name in the sidebar. Do not use them on the public site. Take new screenshots from a demo account.
+  - Directions 3, 4 and 5 use illustrations (paper cards, unit grid, month timeline) that are not real screens. They are labeled; real screenshots should support them.
+  - Positioning copy (headline and lead) is mine and is still a draft until the Positioning research and owner approval.
+- **Reply:** write `handoffs/003-from-pm-to-designer.md` with "acknowledged" and the owner's choice.

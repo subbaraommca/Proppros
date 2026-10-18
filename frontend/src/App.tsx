@@ -7,6 +7,7 @@ import { PortalLayout } from "./components/PortalLayout";
 import { Spinner } from "./components/ui";
 import { AcceptInvitePage, ForgotPasswordPage, LoginPage, RegisterPage, ResetPasswordPage, VerifyEmailPage } from "./pages/auth/AuthPages";
 import { ErrorBoundary } from "./components/ErrorBoundary";
+import { isPrerenderedPath } from "./marketing/paths";
 
 // Pages load on demand so the first screen downloads less JavaScript.
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -38,6 +39,8 @@ const HelpPage = page(() => import("./pages/HelpPages"), "HelpPage");
 const PublicHelpPage = page(() => import("./pages/MarketingPages"), "PublicHelpPage");
 const LandingPage = page(() => import("./pages/MarketingPages"), "LandingPage");
 const PricingPage = page(() => import("./pages/MarketingPages"), "PricingPage");
+const FeaturesPage = page(() => import("./pages/MarketingPages"), "FeaturesPage");
+const FeaturePage = page(() => import("./pages/MarketingPages"), "FeaturePage");
 const OnboardingPage = page(() => import("./pages/OnboardingPage"), "OnboardingPage");
 const AdminPage = page(() => import("./pages/AdminPage"), "AdminPage");
 const InspectionPage = page(() => import("./pages/InspectionPage"), "InspectionPage");
@@ -81,7 +84,8 @@ export default function App() {
   const { me, org, loading } = useAuth();
   const location = useLocation();
 
-  if (loading) return <Spinner />;
+  // Prerendered public pages keep their server HTML while the session check runs.
+  if (loading && !isPrerenderedPath(location.pathname)) return <Spinner />;
 
   // Routes that work signed in or out
   const publicRoutes = (
@@ -95,6 +99,8 @@ export default function App() {
       <Route path="/listings/:slug" element={<PublicListingPage />} />
       <Route path="/l/:slug" element={<ShareRedirect />} />
       <Route path="/application/:token" element={<ApplicationStatusPage />} />
+      <Route path="/features" element={<FeaturesPage />} />
+      <Route path="/features/:slug" element={<FeaturePage />} />
     </>
   );
 

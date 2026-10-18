@@ -1,0 +1,4 @@
+interface:
+  display_name: "YC Interface Craft"
+  short_description: "Research-led brand, UI, and motion direction"
+  default_prompt: "Use $yc-interface-craft to turn my business description into five distinct visual directions for my website or app, then wait for my selection."

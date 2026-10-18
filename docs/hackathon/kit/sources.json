@@ -1,0 +1,721 @@
+{
+  "checkedAt": "2026-10-16",
+  "skillSources": [
+    {
+      "repository": "https://github.com/emilkowalski/skills",
+      "commit": "2d228630ba1446365f614a108cb8252f1feda202",
+      "files": [
+        {
+          "file": "skills/_licenses/emilkowalski/LICENSE",
+          "source": "https://raw.githubusercontent.com/emilkowalski/skills/2d228630ba1446365f614a108cb8252f1feda202/LICENSE",
+          "sha256": "4ff5bdb7887ec1435c9cab0e8d1a7caee704d894d65c2a008ccc68b1cc2f260b"
+        },
+        {
+          "file": "skills/animate-expo/RECIPES.md",
+          "source": "https://raw.githubusercontent.com/emilkowalski/skills/2d228630ba1446365f614a108cb8252f1feda202/skills/animate-expo/RECIPES.md",
+          "sha256": "1193cb71334da2e2341778dd92bec9ac79d989cb07fd55d661f324ed5871e718"
+        },
+        {
+          "file": "skills/animate-expo/SKILL.md",
+          "source": "https://raw.githubusercontent.com/emilkowalski/skills/2d228630ba1446365f614a108cb8252f1feda202/skills/animate-expo/SKILL.md",
+          "sha256": "9a01a91701e6563c67677dde6b66ab30f066a5341d42c21a90ba51d99679274a"
+        },
+        {
+          "file": "skills/animate/RECIPES.md",
+          "source": "https://raw.githubusercontent.com/emilkowalski/skills/2d228630ba1446365f614a108cb8252f1feda202/skills/animate/RECIPES.md",
+          "sha256": "21ff63d84391db8d96ecdf9170095f55a42c836ccc36fd3269c4772bab031ba2"
+        },
+        {
+          "file": "skills/animate/SKILL.md",
+          "source": "https://raw.githubusercontent.com/emilkowalski/skills/2d228630ba1446365f614a108cb8252f1feda202/skills/animate/SKILL.md",
+          "sha256": "b8ede161270458e6ae2e45e8a1985373515d4c63de5568ddb0f9012d7634356c"
+        },
+        {
+          "file": "skills/animation-performance/SKILL.md",
+          "source": "https://raw.githubusercontent.com/emilkowalski/skills/2d228630ba1446365f614a108cb8252f1feda202/skills/animation-performance/SKILL.md",
+          "sha256": "ceb9dd3fe912615830f725a0120ccf8d012d15a6218001a5cd6c15d38e39a957"
+        },
+        {
+          "file": "skills/animation-vocabulary/SKILL.md",
+          "source": "https://raw.githubusercontent.com/emilkowalski/skills/2d228630ba1446365f614a108cb8252f1feda202/skills/animation-vocabulary/SKILL.md",
+          "sha256": "40d2b27adfdfeb0570a9f20e7d0255109d9233c50603878bcd0dcd04c923fd94"
+        },
+        {
+          "file": "skills/apple-design/SKILL.md",
+          "source": "https://raw.githubusercontent.com/emilkowalski/skills/2d228630ba1446365f614a108cb8252f1feda202/skills/apple-design/SKILL.md",
+          "sha256": "77bb63b7043bb93aca2ff4ab040c249484eef35682bb6ff7163433c31d30adc7"
+        },
+        {
+          "file": "skills/ask-sonner/API.md",
+          "source": "https://raw.githubusercontent.com/emilkowalski/skills/2d228630ba1446365f614a108cb8252f1feda202/skills/ask-sonner/API.md",
+          "sha256": "4bb06f482c5757529e3d7a672a30fbeed42d24919a63e2571384a9ce1549aa7f"
+        },
+        {
+          "file": "skills/ask-sonner/SKILL.md",
+          "source": "https://raw.githubusercontent.com/emilkowalski/skills/2d228630ba1446365f614a108cb8252f1feda202/skills/ask-sonner/SKILL.md",
+          "sha256": "39f3ee185b3aa2cf70a689052ff078953ce7ba5915ed7a9391d232e9d4dcf57f"
+        },
+        {
+          "file": "skills/break-ui/CATALOG.md",
+          "source": "https://raw.githubusercontent.com/emilkowalski/skills/2d228630ba1446365f614a108cb8252f1feda202/skills/break-ui/CATALOG.md",
+          "sha256": "7358efcc6bb48e35187be1c064cf60022dcb18c72c18fab58b606dfc5f421f15"
+        },
+        {
+          "file": "skills/break-ui/SKILL.md",
+          "source": "https://raw.githubusercontent.com/emilkowalski/skills/2d228630ba1446365f614a108cb8252f1feda202/skills/break-ui/SKILL.md",
+          "sha256": "e7eec1d70ac56a04255e9c0dbe98084ea3d544cc04aaad34f32c95d6fa9dff5e"
+        },
+        {
+          "file": "skills/emil-design-eng/SKILL.md",
+          "source": "https://raw.githubusercontent.com/emilkowalski/skills/2d228630ba1446365f614a108cb8252f1feda202/skills/emil-design-eng/SKILL.md",
+          "sha256": "ffbe68e6007fb42cb8149f089b400a1ca007d59ba23e8948e2be4476f3175939"
+        },
+        {
+          "file": "skills/find-animation-opportunities/SKILL.md",
+          "source": "https://raw.githubusercontent.com/emilkowalski/skills/2d228630ba1446365f614a108cb8252f1feda202/skills/find-animation-opportunities/SKILL.md",
+          "sha256": "d52a377819b84a71930f0c822cfe2849f40301605a2d5c7eccbfa3b257700df2"
+        },
+        {
+          "file": "skills/improve-animations/AUDIT.md",
+          "source": "https://raw.githubusercontent.com/emilkowalski/skills/2d228630ba1446365f614a108cb8252f1feda202/skills/improve-animations/AUDIT.md",
+          "sha256": "551c8473e20e5f4774680bc24d45e1c68e50992582720905c6b077756b7b5a55"
+        },
+        {
+          "file": "skills/improve-animations/PLAN-TEMPLATE.md",
+          "source": "https://raw.githubusercontent.com/emilkowalski/skills/2d228630ba1446365f614a108cb8252f1feda202/skills/improve-animations/PLAN-TEMPLATE.md",
+          "sha256": "0a08ac8e23fd2082d7ffb86aeed7b789de77328c3cf874b16f1a755f2ef0a6ad"
+        },
+        {
+          "file": "skills/improve-animations/SKILL.md",
+          "source": "https://raw.githubusercontent.com/emilkowalski/skills/2d228630ba1446365f614a108cb8252f1feda202/skills/improve-animations/SKILL.md",
+          "sha256": "73962447464433476343e2c12cd08ab39cc99a9e5f3c118c5fb54ed897574ef6"
+        },
+        {
+          "file": "skills/mobile-native/SKILL.md",
+          "source": "https://raw.githubusercontent.com/emilkowalski/skills/2d228630ba1446365f614a108cb8252f1feda202/skills/mobile-native/SKILL.md",
+          "sha256": "888b7651d66d66dbac4e72b7c554638eb19bd971d686d6cbdf030a5ef3788f55"
+        },
+        {
+          "file": "skills/pick-ui-library/SKILL.md",
+          "source": "https://raw.githubusercontent.com/emilkowalski/skills/2d228630ba1446365f614a108cb8252f1feda202/skills/pick-ui-library/SKILL.md",
+          "sha256": "675fdce308683256ed617351a9b74d23457a5fbd0a562d9831b9c764b8c5e682"
+        },
+        {
+          "file": "skills/prototype/PICKER.md",
+          "source": "https://raw.githubusercontent.com/emilkowalski/skills/2d228630ba1446365f614a108cb8252f1feda202/skills/prototype/PICKER.md",
+          "sha256": "31a55eec94715cc79942e91e172e539e3031dcd5e2e5ee7c1446cf2caee960a6"
+        },
+        {
+          "file": "skills/prototype/SKILL.md",
+          "source": "https://raw.githubusercontent.com/emilkowalski/skills/2d228630ba1446365f614a108cb8252f1feda202/skills/prototype/SKILL.md",
+          "sha256": "bba39c955eb1871c5a02733976ceec5d0324198e0812e667604756489c89f7b9"
+        },
+        {
+          "file": "skills/review-animations/SKILL.md",
+          "source": "https://raw.githubusercontent.com/emilkowalski/skills/2d228630ba1446365f614a108cb8252f1feda202/skills/review-animations/SKILL.md",
+          "sha256": "6ff590d29e436766135aa3d137be1fac2a867165c7257fc315b189361f1873af"
+        },
+        {
+          "file": "skills/review-animations/STANDARDS.md",
+          "source": "https://raw.githubusercontent.com/emilkowalski/skills/2d228630ba1446365f614a108cb8252f1feda202/skills/review-animations/STANDARDS.md",
+          "sha256": "e7d3605034acda54ca13e43aec9e64d65b53de20f75b11b8d694e373012fbe07"
+        },
+        {
+          "file": "skills/write-swift/SKILL.md",
+          "source": "https://raw.githubusercontent.com/emilkowalski/skills/2d228630ba1446365f614a108cb8252f1feda202/skills/write-swift/SKILL.md",
+          "sha256": "16a4b6adb74e338e55e704ce5753ad54d825438b8a63930eeaede9f3c04c9447"
+        }
+      ]
+    },
+    {
+      "repository": "https://github.com/anthropics/skills",
+      "commit": "dbd4588f9e1033efb41dad4bef2f7947c8993d44",
+      "files": [
+        {
+          "file": "skills/_licenses/anthropics/THIRD_PARTY_NOTICES.md",
+          "source": "https://raw.githubusercontent.com/anthropics/skills/dbd4588f9e1033efb41dad4bef2f7947c8993d44/THIRD_PARTY_NOTICES.md",
+          "sha256": "a8ff7a84dee9dfb42ab448de281784387ceafdf63881b7c070ee2de7f6ed865c"
+        },
+        {
+          "file": "skills/frontend-design/LICENSE.txt",
+          "source": "https://raw.githubusercontent.com/anthropics/skills/dbd4588f9e1033efb41dad4bef2f7947c8993d44/skills/frontend-design/LICENSE.txt",
+          "sha256": "0d542e0c8804e39aa7f37eb00da5a762149dc682d7829451287e11b938e94594"
+        },
+        {
+          "file": "skills/frontend-design/SKILL.md",
+          "source": "https://raw.githubusercontent.com/anthropics/skills/dbd4588f9e1033efb41dad4bef2f7947c8993d44/skills/frontend-design/SKILL.md",
+          "sha256": "d91970639e9f5c37682ac7ab60094d35f1c7c1f38d731bd56396563aee10c1d3"
+        }
+      ]
+    },
+    {
+      "repository": "https://github.com/coreyhaines31/marketingskills",
+      "commit": "365b412152b9542499ca1439426f7fc3cc92bb65",
+      "files": [
+        {
+          "file": "skills/_licenses/coreyhaines31/LICENSE",
+          "source": "https://raw.githubusercontent.com/coreyhaines31/marketingskills/365b412152b9542499ca1439426f7fc3cc92bb65/LICENSE",
+          "sha256": "b70d71e24e40fce5da8f4b6f9cd862096a048e433db7f3c8cac5e348e6d34591"
+        },
+        {
+          "file": "skills/ad-creative/SKILL.md",
+          "source": "https://raw.githubusercontent.com/coreyhaines31/marketingskills/365b412152b9542499ca1439426f7fc3cc92bb65/skills/ad-creative/SKILL.md",
+          "sha256": "973244b10730f514ea1ec2c0a4f132d570e55cd3298392b4fc15f8227e5228ba"
+        },
+        {
+          "file": "skills/ad-creative/evals/evals.json",
+          "source": "https://raw.githubusercontent.com/coreyhaines31/marketingskills/365b412152b9542499ca1439426f7fc3cc92bb65/skills/ad-creative/evals/evals.json",
+          "sha256": "10bf9d717c3605aeea348aa1cdd42c46e20585d7f0a7a0220c2125e7d5d8f892"
+        },
+        {
+          "file": "skills/ad-creative/references/awareness-headlines.md",
+          "source": "https://raw.githubusercontent.com/coreyhaines31/marketingskills/365b412152b9542499ca1439426f7fc3cc92bb65/skills/ad-creative/references/awareness-headlines.md",
+          "sha256": "0f9b2408e402ad03956ff84bf31e5c594371dd3e2974c5390c42af4e3c60ed4d"
+        },
+        {
+          "file": "skills/ad-creative/references/creative-review-page.md",
+          "source": "https://raw.githubusercontent.com/coreyhaines31/marketingskills/365b412152b9542499ca1439426f7fc3cc92bb65/skills/ad-creative/references/creative-review-page.md",
+          "sha256": "03518911b1648bce12a3d579c5979b97442af50de24ff74809a43ba3395dcb3a"
+        },
+        {
+          "file": "skills/ad-creative/references/creative-roadmap.md",
+          "source": "https://raw.githubusercontent.com/coreyhaines31/marketingskills/365b412152b9542499ca1439426f7fc3cc92bb65/skills/ad-creative/references/creative-roadmap.md",
+          "sha256": "a0be737841d8a73f0cf02094c9ed1e3f7c050e1c6f867794b1fa8b64dbf3b50e"
+        },
+        {
+          "file": "skills/ad-creative/references/generative-tools.md",
+          "source": "https://raw.githubusercontent.com/coreyhaines31/marketingskills/365b412152b9542499ca1439426f7fc3cc92bb65/skills/ad-creative/references/generative-tools.md",
+          "sha256": "f4dc366913c5d20d45442d7df91cfbfedd746946d2a51d20977db7e938ab652f"
+        },
+        {
+          "file": "skills/ad-creative/references/hook-system.md",
+          "source": "https://raw.githubusercontent.com/coreyhaines31/marketingskills/365b412152b9542499ca1439426f7fc3cc92bb65/skills/ad-creative/references/hook-system.md",
+          "sha256": "2967ecbf32423bbb70ca9587b0af8d257466c852106fe909f6447bbab9a18002"
+        },
+        {
+          "file": "skills/ad-creative/references/imessage-video-ads.md",
+          "source": "https://raw.githubusercontent.com/coreyhaines31/marketingskills/365b412152b9542499ca1439426f7fc3cc92bb65/skills/ad-creative/references/imessage-video-ads.md",
+          "sha256": "8b798cc2249188a4c1679eea33a2bd7736b2eb02fe5de41e3fc8eb6fa2de16f4"
+        },
+        {
+          "file": "skills/ad-creative/references/meta-creative-formats.md",
+          "source": "https://raw.githubusercontent.com/coreyhaines31/marketingskills/365b412152b9542499ca1439426f7fc3cc92bb65/skills/ad-creative/references/meta-creative-formats.md",
+          "sha256": "09720c4550761365a8c93c8587fe629c87718dbb331677312d93e5b2faa9761f"
+        },
+        {
+          "file": "skills/ad-creative/references/motion-video-ads.md",
+          "source": "https://raw.githubusercontent.com/coreyhaines31/marketingskills/365b412152b9542499ca1439426f7fc3cc92bb65/skills/ad-creative/references/motion-video-ads.md",
+          "sha256": "c64e83199f0316e12e7811667f09a6475a34044c8eec2e3ba549faf9c33fc28c"
+        },
+        {
+          "file": "skills/ad-creative/references/platform-specs.md",
+          "source": "https://raw.githubusercontent.com/coreyhaines31/marketingskills/365b412152b9542499ca1439426f7fc3cc92bb65/skills/ad-creative/references/platform-specs.md",
+          "sha256": "de69753161071a8d3e4d244280562810a6c4d6ae2696c5a21940f983abd0aa8e"
+        },
+        {
+          "file": "skills/ad-creative/references/short-form-video-specs.md",
+          "source": "https://raw.githubusercontent.com/coreyhaines31/marketingskills/365b412152b9542499ca1439426f7fc3cc92bb65/skills/ad-creative/references/short-form-video-specs.md",
+          "sha256": "1aa1cc498e350ed00ec4783b60d2eddee5bc98f25750761f6086742d0758f953"
+        },
+        {
+          "file": "skills/ad-creative/references/static-ad-templates.md",
+          "source": "https://raw.githubusercontent.com/coreyhaines31/marketingskills/365b412152b9542499ca1439426f7fc3cc92bb65/skills/ad-creative/references/static-ad-templates.md",
+          "sha256": "fc93d3f5fa6b3442cc1c6785eda05979da0d299c640d5f0a277033209d68e651"
+        },
+        {
+          "file": "skills/ads/SKILL.md",
+          "source": "https://raw.githubusercontent.com/coreyhaines31/marketingskills/365b412152b9542499ca1439426f7fc3cc92bb65/skills/ads/SKILL.md",
+          "sha256": "420447524c5b2fa36c0c2636f57b84fd999c288057fb738c5e0a845c7c96c0e0"
+        },
+        {
+          "file": "skills/ads/evals/evals.json",
+          "source": "https://raw.githubusercontent.com/coreyhaines31/marketingskills/365b412152b9542499ca1439426f7fc3cc92bb65/skills/ads/evals/evals.json",
+          "sha256": "8fa9ca67780a2d30865f8a3531148df16f3f0bd296862ff75c116c83ba6e5764"
+        },
+        {
+          "file": "skills/ads/references/abm-playbook.md",
+          "source": "https://raw.githubusercontent.com/coreyhaines31/marketingskills/365b412152b9542499ca1439426f7fc3cc92bb65/skills/ads/references/abm-playbook.md",
+          "sha256": "acb5c89ced4497674d012d015504a5c8e17c619bd2fc1f0191d833a9957eb44a"
+        },
+        {
+          "file": "skills/ads/references/ad-copy-templates.md",
+          "source": "https://raw.githubusercontent.com/coreyhaines31/marketingskills/365b412152b9542499ca1439426f7fc3cc92bb65/skills/ads/references/ad-copy-templates.md",
+          "sha256": "853ab37e23b75aa3355bdbed9a1357948e635dbdf737be5a1a7aa0126d701206"
+        },
+        {
+          "file": "skills/ads/references/audience-targeting.md",
+          "source": "https://raw.githubusercontent.com/coreyhaines31/marketingskills/365b412152b9542499ca1439426f7fc3cc92bb65/skills/ads/references/audience-targeting.md",
+          "sha256": "21ed7c99fb1124ca38635d6f313cc2f3ca49a192f390cd55293b7bd5a028e1b1"
+        },
+        {
+          "file": "skills/ads/references/audit-guardrails.md",
+          "source": "https://raw.githubusercontent.com/coreyhaines31/marketingskills/365b412152b9542499ca1439426f7fc3cc92bb65/skills/ads/references/audit-guardrails.md",
+          "sha256": "ffcbbda4cabd919bce93c11699fac49059dde7d96c64dbf34f77c482420e6667"
+        },
+        {
+          "file": "skills/ads/references/b2b-paid-playbook.md",
+          "source": "https://raw.githubusercontent.com/coreyhaines31/marketingskills/365b412152b9542499ca1439426f7fc3cc92bb65/skills/ads/references/b2b-paid-playbook.md",
+          "sha256": "21dc1125905f8d985763996afb24a2bf54539330535b7b2b45c052901c5b2006"
+        },
+        {
+          "file": "skills/ads/references/conversion-tracking.md",
+          "source": "https://raw.githubusercontent.com/coreyhaines31/marketingskills/365b412152b9542499ca1439426f7fc3cc92bb65/skills/ads/references/conversion-tracking.md",
+          "sha256": "33da4f9bb1042c5b226459cf420b21954705fd8c1d885e67326b1e57492561d8"
+        },
+        {
+          "file": "skills/ads/references/creative-research-automation.md",
+          "source": "https://raw.githubusercontent.com/coreyhaines31/marketingskills/365b412152b9542499ca1439426f7fc3cc92bb65/skills/ads/references/creative-research-automation.md",
+          "sha256": "c2894a19eff596412f52c4a8aceea1b8f390e7f1821e9c13cb3e6c693e625cfd"
+        },
+        {
+          "file": "skills/ads/references/google-ads-audit-checklist.md",
+          "source": "https://raw.githubusercontent.com/coreyhaines31/marketingskills/365b412152b9542499ca1439426f7fc3cc92bb65/skills/ads/references/google-ads-audit-checklist.md",
+          "sha256": "7faaecaf89d0f9b094fd027295c95824b3b8f0dfa89e51a00663d83e0017b93d"
+        },
+        {
+          "file": "skills/ads/references/google-search-playbook.md",
+          "source": "https://raw.githubusercontent.com/coreyhaines31/marketingskills/365b412152b9542499ca1439426f7fc3cc92bb65/skills/ads/references/google-search-playbook.md",
+          "sha256": "5771d6c876ddd2b3cbaa28190884eebd698112febcf0ea83aeb0c8016e04e097"
+        },
+        {
+          "file": "skills/ads/references/linkedin-b2b-playbook.md",
+          "source": "https://raw.githubusercontent.com/coreyhaines31/marketingskills/365b412152b9542499ca1439426f7fc3cc92bb65/skills/ads/references/linkedin-b2b-playbook.md",
+          "sha256": "8f38aadbf24c1a554fbaa47bf2f24bac0c4773fa16f65d34c1c600e5e3d8a6ee"
+        },
+        {
+          "file": "skills/ads/references/meta-andromeda-playbook.md",
+          "source": "https://raw.githubusercontent.com/coreyhaines31/marketingskills/365b412152b9542499ca1439426f7fc3cc92bb65/skills/ads/references/meta-andromeda-playbook.md",
+          "sha256": "8da58633c3866b9a4aa07b234a9a7e96eeb19a9497bb85bae09f1aac36e27268"
+        },
+        {
+          "file": "skills/ads/references/meta-decision-system.md",
+          "source": "https://raw.githubusercontent.com/coreyhaines31/marketingskills/365b412152b9542499ca1439426f7fc3cc92bb65/skills/ads/references/meta-decision-system.md",
+          "sha256": "861709bcc4e7467eac7d4de63f0bdd6709eb3c12a1d72b3855dce313ca15407f"
+        },
+        {
+          "file": "skills/ads/references/operating-check.md",
+          "source": "https://raw.githubusercontent.com/coreyhaines31/marketingskills/365b412152b9542499ca1439426f7fc3cc92bb65/skills/ads/references/operating-check.md",
+          "sha256": "0039550a0867dc5f80595b824f8d6a6a298c5777ef2d0e54d225c1405f900de3"
+        },
+        {
+          "file": "skills/ads/references/payback-period.md",
+          "source": "https://raw.githubusercontent.com/coreyhaines31/marketingskills/365b412152b9542499ca1439426f7fc3cc92bb65/skills/ads/references/payback-period.md",
+          "sha256": "77b0f35b65b35cdee53881105a16498e3e4538b657923a176b99a19b807daba1"
+        },
+        {
+          "file": "skills/ads/references/platform-setup-checklists.md",
+          "source": "https://raw.githubusercontent.com/coreyhaines31/marketingskills/365b412152b9542499ca1439426f7fc3cc92bb65/skills/ads/references/platform-setup-checklists.md",
+          "sha256": "b86e206f8c7233c235d7d385a69e17fac16ac001ab130242b7700fe650752f69"
+        },
+        {
+          "file": "skills/ads/references/reading-google-ads-data.md",
+          "source": "https://raw.githubusercontent.com/coreyhaines31/marketingskills/365b412152b9542499ca1439426f7fc3cc92bb65/skills/ads/references/reading-google-ads-data.md",
+          "sha256": "e5bb10f5bd81eabaae63c005a9be8c3f70d63df60e192dcd37faf3718ff0fd09"
+        },
+        {
+          "file": "skills/ads/references/rsa-output-spec.md",
+          "source": "https://raw.githubusercontent.com/coreyhaines31/marketingskills/365b412152b9542499ca1439426f7fc3cc92bb65/skills/ads/references/rsa-output-spec.md",
+          "sha256": "285fec5c1671c9cc1a4cdfbcf06d8a54a022cbad52693941457d90e1f2c5f503"
+        },
+        {
+          "file": "skills/content-strategy/SKILL.md",
+          "source": "https://raw.githubusercontent.com/coreyhaines31/marketingskills/365b412152b9542499ca1439426f7fc3cc92bb65/skills/content-strategy/SKILL.md",
+          "sha256": "dce9f4027ae129691e92623541a360bee9356137a7eecf68afa95674af118e68"
+        },
+        {
+          "file": "skills/content-strategy/evals/evals.json",
+          "source": "https://raw.githubusercontent.com/coreyhaines31/marketingskills/365b412152b9542499ca1439426f7fc3cc92bb65/skills/content-strategy/evals/evals.json",
+          "sha256": "10167e7125ee77cbabe4f03953750dd99ea147f7461027fdbb0cf8e089e5506d"
+        },
+        {
+          "file": "skills/content-strategy/references/content-distribution.md",
+          "source": "https://raw.githubusercontent.com/coreyhaines31/marketingskills/365b412152b9542499ca1439426f7fc3cc92bb65/skills/content-strategy/references/content-distribution.md",
+          "sha256": "1861a1aab0627ab29c279000879a9889242da1ba85e677acdc759c66a6241778"
+        },
+        {
+          "file": "skills/content-strategy/references/headless-cms.md",
+          "source": "https://raw.githubusercontent.com/coreyhaines31/marketingskills/365b412152b9542499ca1439426f7fc3cc92bb65/skills/content-strategy/references/headless-cms.md",
+          "sha256": "efc796ae9596d1efcb876683db2d9b7c10c83e76e1cb69e527097907d5b4fc3f"
+        },
+        {
+          "file": "skills/copy-editing/SKILL.md",
+          "source": "https://raw.githubusercontent.com/coreyhaines31/marketingskills/365b412152b9542499ca1439426f7fc3cc92bb65/skills/copy-editing/SKILL.md",
+          "sha256": "2a072606d9d5662509ea6ef62c65719487dcb68876acab9286bde4d1af5c030f"
+        },
+        {
+          "file": "skills/copy-editing/evals/evals.json",
+          "source": "https://raw.githubusercontent.com/coreyhaines31/marketingskills/365b412152b9542499ca1439426f7fc3cc92bb65/skills/copy-editing/evals/evals.json",
+          "sha256": "cc18c9f51094058759267d465cfcc50da65f248f66b923326781aa642d622ca7"
+        },
+        {
+          "file": "skills/copy-editing/references/checklist.md",
+          "source": "https://raw.githubusercontent.com/coreyhaines31/marketingskills/365b412152b9542499ca1439426f7fc3cc92bb65/skills/copy-editing/references/checklist.md",
+          "sha256": "4cf94c922286223681fc53721fcc65ae7299f1e36e797e7397d369d674580c60"
+        },
+        {
+          "file": "skills/copy-editing/references/content-refresh.md",
+          "source": "https://raw.githubusercontent.com/coreyhaines31/marketingskills/365b412152b9542499ca1439426f7fc3cc92bb65/skills/copy-editing/references/content-refresh.md",
+          "sha256": "ba73cdf278fe6b552eee27eb1452494f11f9d17ef67d720657e0982f76fb961b"
+        },
+        {
+          "file": "skills/copy-editing/references/plain-english-alternatives.md",
+          "source": "https://raw.githubusercontent.com/coreyhaines31/marketingskills/365b412152b9542499ca1439426f7fc3cc92bb65/skills/copy-editing/references/plain-english-alternatives.md",
+          "sha256": "df4f820d4c63ae8a517c64a243c101658352cd07d002355bf3c97de0a00f3775"
+        },
+        {
+          "file": "skills/copywriting/SKILL.md",
+          "source": "https://raw.githubusercontent.com/coreyhaines31/marketingskills/365b412152b9542499ca1439426f7fc3cc92bb65/skills/copywriting/SKILL.md",
+          "sha256": "13c580c2432a4499e9dfdcf5d553df7aa6589e90cf5bd869fb4fbde5caf9f567"
+        },
+        {
+          "file": "skills/copywriting/evals/evals.json",
+          "source": "https://raw.githubusercontent.com/coreyhaines31/marketingskills/365b412152b9542499ca1439426f7fc3cc92bb65/skills/copywriting/evals/evals.json",
+          "sha256": "ccec86052a0edd8646d0e50e63c08e0e971f443d8f6e9178843a1629f79efdb0"
+        },
+        {
+          "file": "skills/copywriting/references/ai-tells.md",
+          "source": "https://raw.githubusercontent.com/coreyhaines31/marketingskills/365b412152b9542499ca1439426f7fc3cc92bb65/skills/copywriting/references/ai-tells.md",
+          "sha256": "b98c3a19b3a75c714d69e80a0076e4c07244b0e833c2ce81ff2631224fb7f7b2"
+        },
+        {
+          "file": "skills/copywriting/references/copy-frameworks.md",
+          "source": "https://raw.githubusercontent.com/coreyhaines31/marketingskills/365b412152b9542499ca1439426f7fc3cc92bb65/skills/copywriting/references/copy-frameworks.md",
+          "sha256": "352122944bf9e891ceb0e003adce41591d111e9d97057700626249919dfe430d"
+        },
+        {
+          "file": "skills/copywriting/references/natural-transitions.md",
+          "source": "https://raw.githubusercontent.com/coreyhaines31/marketingskills/365b412152b9542499ca1439426f7fc3cc92bb65/skills/copywriting/references/natural-transitions.md",
+          "sha256": "9bd61b0de5be2c4de4ce130c68236b4f290b12737823827a458bb2b4c8584683"
+        },
+        {
+          "file": "skills/cro/SKILL.md",
+          "source": "https://raw.githubusercontent.com/coreyhaines31/marketingskills/365b412152b9542499ca1439426f7fc3cc92bb65/skills/cro/SKILL.md",
+          "sha256": "6e172cc38178c800ff41ceb097f36c6a1db8035fb88a1fee53043f8ec38a6f35"
+        },
+        {
+          "file": "skills/cro/evals/evals.json",
+          "source": "https://raw.githubusercontent.com/coreyhaines31/marketingskills/365b412152b9542499ca1439426f7fc3cc92bb65/skills/cro/evals/evals.json",
+          "sha256": "62f3003602836e2b49d797ca582e7703629a6b07b131eb77b51b2bb39fe65775"
+        },
+        {
+          "file": "skills/cro/references/experiments.md",
+          "source": "https://raw.githubusercontent.com/coreyhaines31/marketingskills/365b412152b9542499ca1439426f7fc3cc92bb65/skills/cro/references/experiments.md",
+          "sha256": "bbcc356c0af36cfaa4556bf9e929deac30c65cafb37f909d7c51d4777fe254ca"
+        },
+        {
+          "file": "skills/cro/references/form.md",
+          "source": "https://raw.githubusercontent.com/coreyhaines31/marketingskills/365b412152b9542499ca1439426f7fc3cc92bb65/skills/cro/references/form.md",
+          "sha256": "49b8f29b3da1ae6510572288cad3eb1f3d43a969373443be98b38639746587e6"
+        },
+        {
+          "file": "skills/emails/SKILL.md",
+          "source": "https://raw.githubusercontent.com/coreyhaines31/marketingskills/365b412152b9542499ca1439426f7fc3cc92bb65/skills/emails/SKILL.md",
+          "sha256": "8709631cc21717d17db9bb7e787ea44768d77182daf9846de8718a2ae7433b91"
+        },
+        {
+          "file": "skills/emails/evals/evals.json",
+          "source": "https://raw.githubusercontent.com/coreyhaines31/marketingskills/365b412152b9542499ca1439426f7fc3cc92bb65/skills/emails/evals/evals.json",
+          "sha256": "b90182c8b6edbb866ef82ad022db3d2fe8598e7329469117fb39edd9ab069f67"
+        },
+        {
+          "file": "skills/emails/references/copy-guidelines.md",
+          "source": "https://raw.githubusercontent.com/coreyhaines31/marketingskills/365b412152b9542499ca1439426f7fc3cc92bb65/skills/emails/references/copy-guidelines.md",
+          "sha256": "02f08897e4aa99ecc4ec1893d61d0c26d0c5e62e09af26f175087455e9b68e01"
+        },
+        {
+          "file": "skills/emails/references/email-types.md",
+          "source": "https://raw.githubusercontent.com/coreyhaines31/marketingskills/365b412152b9542499ca1439426f7fc3cc92bb65/skills/emails/references/email-types.md",
+          "sha256": "a5dd4f0555a7b21d2ff426948d15657825b9d16265652563f5e272d2e1879bfd"
+        },
+        {
+          "file": "skills/emails/references/sequence-templates.md",
+          "source": "https://raw.githubusercontent.com/coreyhaines31/marketingskills/365b412152b9542499ca1439426f7fc3cc92bb65/skills/emails/references/sequence-templates.md",
+          "sha256": "f8f318f10e29abcd009cbee29e2bd178981d96c973099b508d30af6c10ab8d79"
+        },
+        {
+          "file": "skills/lead-magnets/SKILL.md",
+          "source": "https://raw.githubusercontent.com/coreyhaines31/marketingskills/365b412152b9542499ca1439426f7fc3cc92bb65/skills/lead-magnets/SKILL.md",
+          "sha256": "190a64c72a9a36fdde3a6b0888798e1bb9dd4e7406b00a6bbf90dba5e64c047b"
+        },
+        {
+          "file": "skills/lead-magnets/evals/evals.json",
+          "source": "https://raw.githubusercontent.com/coreyhaines31/marketingskills/365b412152b9542499ca1439426f7fc3cc92bb65/skills/lead-magnets/evals/evals.json",
+          "sha256": "459b4b4f69f5717f23f3029597026c07f1201978e0bc1923f918501da3fe7a6f"
+        },
+        {
+          "file": "skills/lead-magnets/references/benchmarks.md",
+          "source": "https://raw.githubusercontent.com/coreyhaines31/marketingskills/365b412152b9542499ca1439426f7fc3cc92bb65/skills/lead-magnets/references/benchmarks.md",
+          "sha256": "becdf4bcde17e788ead10794c797294548c712ea1074e042336da93433a61187"
+        },
+        {
+          "file": "skills/lead-magnets/references/content-to-skill-corpus-design.md",
+          "source": "https://raw.githubusercontent.com/coreyhaines31/marketingskills/365b412152b9542499ca1439426f7fc3cc92bb65/skills/lead-magnets/references/content-to-skill-corpus-design.md",
+          "sha256": "a6db00a8298b2ce52965c40b57c01120a0f9ff4caf5ca55ede81bc2f242bae56"
+        },
+        {
+          "file": "skills/lead-magnets/references/content-to-skill-release.md",
+          "source": "https://raw.githubusercontent.com/coreyhaines31/marketingskills/365b412152b9542499ca1439426f7fc3cc92bb65/skills/lead-magnets/references/content-to-skill-release.md",
+          "sha256": "87bcc9218232b73b824e8cebac1e64deacffa755779ce2cc0db799c92873c891"
+        },
+        {
+          "file": "skills/lead-magnets/references/content-to-skill.md",
+          "source": "https://raw.githubusercontent.com/coreyhaines31/marketingskills/365b412152b9542499ca1439426f7fc3cc92bb65/skills/lead-magnets/references/content-to-skill.md",
+          "sha256": "dacbfff6d538ee37167f20034165dbf3a273d8bd1607def6450c649e40ebafa9"
+        },
+        {
+          "file": "skills/lead-magnets/references/format-guide.md",
+          "source": "https://raw.githubusercontent.com/coreyhaines31/marketingskills/365b412152b9542499ca1439426f7fc3cc92bb65/skills/lead-magnets/references/format-guide.md",
+          "sha256": "401f65d709cefbd7ee2df11273e0b616ec50e37e71d914556c800067fdcdef8e"
+        },
+        {
+          "file": "skills/product-marketing/SKILL.md",
+          "source": "https://raw.githubusercontent.com/coreyhaines31/marketingskills/365b412152b9542499ca1439426f7fc3cc92bb65/skills/product-marketing/SKILL.md",
+          "sha256": "19ece0fa75c72a5a8b6e90db80f506586f54cc93bae6bffbb1bd2ef4ae7d603c"
+        },
+        {
+          "file": "skills/product-marketing/evals/evals.json",
+          "source": "https://raw.githubusercontent.com/coreyhaines31/marketingskills/365b412152b9542499ca1439426f7fc3cc92bb65/skills/product-marketing/evals/evals.json",
+          "sha256": "0c6599b88f50ec1be91096a36ba6c5a15cf8312151394e3469e5ddb991b19afb"
+        },
+        {
+          "file": "skills/product-marketing/references/brand-voice.md",
+          "source": "https://raw.githubusercontent.com/coreyhaines31/marketingskills/365b412152b9542499ca1439426f7fc3cc92bb65/skills/product-marketing/references/brand-voice.md",
+          "sha256": "932f3453db2761f03050792e39800150495dab449750b40913a4314ea97e7672"
+        },
+        {
+          "file": "skills/programmatic-seo/SKILL.md",
+          "source": "https://raw.githubusercontent.com/coreyhaines31/marketingskills/365b412152b9542499ca1439426f7fc3cc92bb65/skills/programmatic-seo/SKILL.md",
+          "sha256": "b31208c88e2b018214f61f514bce9bbc7724ceef794c0bcf6a9f762cb91cf254"
+        },
+        {
+          "file": "skills/programmatic-seo/evals/evals.json",
+          "source": "https://raw.githubusercontent.com/coreyhaines31/marketingskills/365b412152b9542499ca1439426f7fc3cc92bb65/skills/programmatic-seo/evals/evals.json",
+          "sha256": "d336e380eee0217b0be6e472703434b9e6ac4a424957c6b4a080440646c8e285"
+        },
+        {
+          "file": "skills/programmatic-seo/references/implementation-platforms.md",
+          "source": "https://raw.githubusercontent.com/coreyhaines31/marketingskills/365b412152b9542499ca1439426f7fc3cc92bb65/skills/programmatic-seo/references/implementation-platforms.md",
+          "sha256": "27d86221387e0880768164d4d03513c85a594d11d12c7a6dd93ac17881c131e2"
+        },
+        {
+          "file": "skills/programmatic-seo/references/playbooks.md",
+          "source": "https://raw.githubusercontent.com/coreyhaines31/marketingskills/365b412152b9542499ca1439426f7fc3cc92bb65/skills/programmatic-seo/references/playbooks.md",
+          "sha256": "b2b3fd7c58c686f0670b94cf7192ff79436ccf0d602650b33a83a9d01102f11d"
+        },
+        {
+          "file": "skills/schema/SKILL.md",
+          "source": "https://raw.githubusercontent.com/coreyhaines31/marketingskills/365b412152b9542499ca1439426f7fc3cc92bb65/skills/schema/SKILL.md",
+          "sha256": "d298f5d6e1b33b6825f38ecaa05c4d33ba9e45e346b224bd86f9834e46f67a94"
+        },
+        {
+          "file": "skills/schema/evals/evals.json",
+          "source": "https://raw.githubusercontent.com/coreyhaines31/marketingskills/365b412152b9542499ca1439426f7fc3cc92bb65/skills/schema/evals/evals.json",
+          "sha256": "508d08d55abd5f1b71795f07be0330cbd4ab92d20ddfb77964d053962d6f8f16"
+        },
+        {
+          "file": "skills/schema/references/schema-examples.md",
+          "source": "https://raw.githubusercontent.com/coreyhaines31/marketingskills/365b412152b9542499ca1439426f7fc3cc92bb65/skills/schema/references/schema-examples.md",
+          "sha256": "9b093bce816fac8494c8ccfd588eeb0c00e1308fe99bb46388ff222664ed94be"
+        },
+        {
+          "file": "skills/seo-audit/SKILL.md",
+          "source": "https://raw.githubusercontent.com/coreyhaines31/marketingskills/365b412152b9542499ca1439426f7fc3cc92bb65/skills/seo-audit/SKILL.md",
+          "sha256": "bd5f6fca1334fc960d54403f7142e6d9da066eac7eb2b1ae194b7304bcf76d67"
+        },
+        {
+          "file": "skills/seo-audit/evals/evals.json",
+          "source": "https://raw.githubusercontent.com/coreyhaines31/marketingskills/365b412152b9542499ca1439426f7fc3cc92bb65/skills/seo-audit/evals/evals.json",
+          "sha256": "1524e98916ab53abb894fb80827a8d0e1815041adca2ee2023b89916d68f22b2"
+        },
+        {
+          "file": "skills/seo-audit/references/ai-writing-detection.md",
+          "source": "https://raw.githubusercontent.com/coreyhaines31/marketingskills/365b412152b9542499ca1439426f7fc3cc92bb65/skills/seo-audit/references/ai-writing-detection.md",
+          "sha256": "f1e273f56ce7e2215ff218bf903680ddcec0fd026ab90c3ebfb3439ed0edfaa4"
+        },
+        {
+          "file": "skills/seo-audit/references/international-seo.md",
+          "source": "https://raw.githubusercontent.com/coreyhaines31/marketingskills/365b412152b9542499ca1439426f7fc3cc92bb65/skills/seo-audit/references/international-seo.md",
+          "sha256": "0603022cca968acf7889fc224221aa0e70955ba64355bc18b06f7e86b32f45e5"
+        },
+        {
+          "file": "skills/seo-audit/references/local-seo-pages-and-measurement.md",
+          "source": "https://raw.githubusercontent.com/coreyhaines31/marketingskills/365b412152b9542499ca1439426f7fc3cc92bb65/skills/seo-audit/references/local-seo-pages-and-measurement.md",
+          "sha256": "20607ef91c4b8b37346f42130a6f51ed4ce64dc2731b6e1328b5b14f16917fe3"
+        },
+        {
+          "file": "skills/seo-audit/references/local-seo-profile-and-citations.md",
+          "source": "https://raw.githubusercontent.com/coreyhaines31/marketingskills/365b412152b9542499ca1439426f7fc3cc92bb65/skills/seo-audit/references/local-seo-profile-and-citations.md",
+          "sha256": "83b1b63eb6083e7aab1f56c4928335ea2a235e837861a9e9e8043b6af162a1f3"
+        },
+        {
+          "file": "skills/seo-audit/references/local-seo.md",
+          "source": "https://raw.githubusercontent.com/coreyhaines31/marketingskills/365b412152b9542499ca1439426f7fc3cc92bb65/skills/seo-audit/references/local-seo.md",
+          "sha256": "d2666d9c225bc36f9737ce612894abbe7e263b5974e2db7c1efc50f6010bb376"
+        },
+        {
+          "file": "skills/seo-audit/references/rankings-push.md",
+          "source": "https://raw.githubusercontent.com/coreyhaines31/marketingskills/365b412152b9542499ca1439426f7fc3cc92bb65/skills/seo-audit/references/rankings-push.md",
+          "sha256": "2a51fa3569e00c10353526bfa98ca1faccccf9c37be78f5f229c72116f5d2154"
+        },
+        {
+          "file": "skills/seo-audit/references/title-tags.md",
+          "source": "https://raw.githubusercontent.com/coreyhaines31/marketingskills/365b412152b9542499ca1439426f7fc3cc92bb65/skills/seo-audit/references/title-tags.md",
+          "sha256": "c40b3c6af3600ca15670db8eb81000c7ca6fa25265a6550ccc630f53db3fcf51"
+        },
+        {
+          "file": "skills/signup/SKILL.md",
+          "source": "https://raw.githubusercontent.com/coreyhaines31/marketingskills/365b412152b9542499ca1439426f7fc3cc92bb65/skills/signup/SKILL.md",
+          "sha256": "d50b1183be692ba5ce1db31afbbd0aa2a5ec06940b22105f85ea1764b15ca930"
+        },
+        {
+          "file": "skills/signup/evals/evals.json",
+          "source": "https://raw.githubusercontent.com/coreyhaines31/marketingskills/365b412152b9542499ca1439426f7fc3cc92bb65/skills/signup/evals/evals.json",
+          "sha256": "ce012fff8e559b5f622826826e7b137c650c96f8193a7e10add60f75c2417edd"
+        },
+        {
+          "file": "skills/site-architecture/SKILL.md",
+          "source": "https://raw.githubusercontent.com/coreyhaines31/marketingskills/365b412152b9542499ca1439426f7fc3cc92bb65/skills/site-architecture/SKILL.md",
+          "sha256": "55c0128ac29f628944444f8850b97913517f57131673824ebcad4d5ffb26ddd2"
+        },
+        {
+          "file": "skills/site-architecture/evals/evals.json",
+          "source": "https://raw.githubusercontent.com/coreyhaines31/marketingskills/365b412152b9542499ca1439426f7fc3cc92bb65/skills/site-architecture/evals/evals.json",
+          "sha256": "ed6f68ba0f8355efe26d89eae51d64c381d644cc7e942e80539a660cb52c9b02"
+        },
+        {
+          "file": "skills/site-architecture/references/mermaid-templates.md",
+          "source": "https://raw.githubusercontent.com/coreyhaines31/marketingskills/365b412152b9542499ca1439426f7fc3cc92bb65/skills/site-architecture/references/mermaid-templates.md",
+          "sha256": "362190c7d3f419d5f445170f1fb17beecc163937d2068922893b7a69eeb25f0f"
+        },
+        {
+          "file": "skills/site-architecture/references/navigation-patterns.md",
+          "source": "https://raw.githubusercontent.com/coreyhaines31/marketingskills/365b412152b9542499ca1439426f7fc3cc92bb65/skills/site-architecture/references/navigation-patterns.md",
+          "sha256": "2efa772709b753e33d5018c007147ca30aaa95a04b04dc0df6227ea5a053078b"
+        },
+        {
+          "file": "skills/site-architecture/references/platforms-and-migration.md",
+          "source": "https://raw.githubusercontent.com/coreyhaines31/marketingskills/365b412152b9542499ca1439426f7fc3cc92bb65/skills/site-architecture/references/platforms-and-migration.md",
+          "sha256": "391f12c5994e1e577db75cd6044e038a276f14eda1c2ebc7f6a92293fbc59448"
+        },
+        {
+          "file": "skills/site-architecture/references/site-type-templates.md",
+          "source": "https://raw.githubusercontent.com/coreyhaines31/marketingskills/365b412152b9542499ca1439426f7fc3cc92bb65/skills/site-architecture/references/site-type-templates.md",
+          "sha256": "3c3cd7ce5e31c502dc071baf82bb58cb30f5edf4a2fd8ca052fbc8f3777db140"
+        },
+        {
+          "file": "skills/social/SKILL.md",
+          "source": "https://raw.githubusercontent.com/coreyhaines31/marketingskills/365b412152b9542499ca1439426f7fc3cc92bb65/skills/social/SKILL.md",
+          "sha256": "dd4c01d0925f571562d4e8dea4af6b60bd9d491149187d94927e65280fad1bee"
+        },
+        {
+          "file": "skills/social/evals/evals.json",
+          "source": "https://raw.githubusercontent.com/coreyhaines31/marketingskills/365b412152b9542499ca1439426f7fc3cc92bb65/skills/social/evals/evals.json",
+          "sha256": "1d2592a0cfc6378ba8742ce6e19f5974663b1d8018c4f136e5f529373bf17198"
+        },
+        {
+          "file": "skills/social/references/carousel-frameworks.md",
+          "source": "https://raw.githubusercontent.com/coreyhaines31/marketingskills/365b412152b9542499ca1439426f7fc3cc92bb65/skills/social/references/carousel-frameworks.md",
+          "sha256": "e703aa530ec9f68cdf5b58e8e0d4d1a5cc3f22b9e2d3e3222f16a9763d423247"
+        },
+        {
+          "file": "skills/social/references/listening-sources-template.md",
+          "source": "https://raw.githubusercontent.com/coreyhaines31/marketingskills/365b412152b9542499ca1439426f7fc3cc92bb65/skills/social/references/listening-sources-template.md",
+          "sha256": "c68bc6f57b0a48c432b1ce72c9324d41a04d0e7784d0bab91afb4a6065a43e38"
+        },
+        {
+          "file": "skills/social/references/listening.md",
+          "source": "https://raw.githubusercontent.com/coreyhaines31/marketingskills/365b412152b9542499ca1439426f7fc3cc92bb65/skills/social/references/listening.md",
+          "sha256": "52cf68aaaa57a69b69b3587ffd9b848a6f1ca7e0d51378f566339ad7f2b730e0"
+        },
+        {
+          "file": "skills/social/references/platform-limits.md",
+          "source": "https://raw.githubusercontent.com/coreyhaines31/marketingskills/365b412152b9542499ca1439426f7fc3cc92bb65/skills/social/references/platform-limits.md",
+          "sha256": "6ecc6b40ff82b95c48906341f7d3c58337671d4d94f624c858764f1ed5a77c3c"
+        },
+        {
+          "file": "skills/social/references/platforms.md",
+          "source": "https://raw.githubusercontent.com/coreyhaines31/marketingskills/365b412152b9542499ca1439426f7fc3cc92bb65/skills/social/references/platforms.md",
+          "sha256": "a070eda1f54bdba103a9c89613d83331fc5c53c9e8a48543e0198f1a2995cb0c"
+        },
+        {
+          "file": "skills/social/references/post-templates.md",
+          "source": "https://raw.githubusercontent.com/coreyhaines31/marketingskills/365b412152b9542499ca1439426f7fc3cc92bb65/skills/social/references/post-templates.md",
+          "sha256": "9cca4680c95801daedfd8acadf9089d0083784c2567784888807569896f71d9b"
+        },
+        {
+          "file": "skills/social/references/reverse-engineering.md",
+          "source": "https://raw.githubusercontent.com/coreyhaines31/marketingskills/365b412152b9542499ca1439426f7fc3cc92bb65/skills/social/references/reverse-engineering.md",
+          "sha256": "c27bef59d463b3b11331c1770f4a23e9e6bbce7d7c8db1e7f7f4f14ba206243f"
+        },
+        {
+          "file": "skills/social/references/short-form-video.md",
+          "source": "https://raw.githubusercontent.com/coreyhaines31/marketingskills/365b412152b9542499ca1439426f7fc3cc92bb65/skills/social/references/short-form-video.md",
+          "sha256": "ed0976bd7ac1f85b7b8c162087e346118f2cf0ef46b3ccafc6a7a329118987d1"
+        },
+        {
+          "file": "skills/social/references/x-algorithm.md",
+          "source": "https://raw.githubusercontent.com/coreyhaines31/marketingskills/365b412152b9542499ca1439426f7fc3cc92bb65/skills/social/references/x-algorithm.md",
+          "sha256": "943b2c5a819aad53ebf62a1652adc47956d6fdf738e18cd98eeb609819a66180"
+        }
+      ]
+    },
+    {
+      "name": "YC Interface Craft",
+      "source": "user-provided yc-interface-craft.zip",
+      "snapshotDate": "2026-10-16",
+      "archiveSha256": "ff6fc8935ee1313f54b13bb0901826305d3fcbd46e109aa382d3a64ce1ec408b",
+      "files": [
+        {
+          "file": "skills/yc-interface-craft/SKILL.md",
+          "sha256": "8cf5e799a359faf9c63f466622e55571cd3067c67126879e95775565aac9944e"
+        },
+        {
+          "file": "skills/yc-interface-craft/agents/openai.yaml",
+          "sha256": "6097e47d53640867b64aa4fe9617aca3db9157149eabbd27485dc271fb3b2e85"
+        },
+        {
+          "file": "skills/yc-interface-craft/references/company-index.json",
+          "sha256": "4c239ff4cdb3af706eb4b7cb700bd3162fbf64bf732453504f1657bbfead6eb6"
+        },
+        {
+          "file": "skills/yc-interface-craft/references/direction-workshop.md",
+          "sha256": "dbe414216e26b2429ca10f5725d7021b4c36b1e4ed07e93dabd52e6dac4aa45f"
+        },
+        {
+          "file": "skills/yc-interface-craft/references/motion-and-quality.md",
+          "sha256": "d92a49dadf7d29bdc285a64dc9c77d86f1f3e00d39ae7cfc8670bdaff1302b3a"
+        },
+        {
+          "file": "skills/yc-interface-craft/references/research-and-examples.md",
+          "sha256": "7bf70bb40a363551161416764909b1ff7fbf7f7a2bfb597525569854d7200a1d"
+        },
+        {
+          "file": "skills/yc-interface-craft/references/system-and-surfaces.md",
+          "sha256": "355c2a9265d30e941b48976fc25ae5da7ee1e6d07769e0e92e2d53705aade804"
+        }
+      ]
+    }
+  ],
+  "templateMethods": [
+    [
+      "Dr Eggbot \u00b7 Lauren Tan",
+      "https://x.ai/bot/marketplace/bots/dr-eggbot-v2"
+    ],
+    [
+      "PM Bot \u00b7 Ulysses Ng",
+      "https://x.ai/bot/marketplace/bots/pm-bot"
+    ],
+    [
+      "Lingxi\u2019s Engineer Bot",
+      "https://x.ai/bot/marketplace/bots/engineer-bot"
+    ],
+    [
+      "Critiquito \u00b7 Manuel Mu\u00f1oz Solera",
+      "https://x.ai/bot/marketplace/bots/critiquito"
+    ],
+    [
+      "Grok Bot templates",
+      "https://x.ai/bot/guides/templates-for-grok-bot"
+    ]
+  ]
+}

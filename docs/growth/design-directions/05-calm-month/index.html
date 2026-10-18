@@ -1,0 +1,143 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Proppros: Calm Month</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Albert+Sans:wght@400;500;600;700&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&family=Spline+Sans+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --mist:#EEF2F6;--panel:#FFFFFF;--navy:#13294B;--navy-2:#1D3963;--ink:#13294B;--ink-muted:#4F5F75;--line:#D5DDE7;
+  --teal:#0E6B66;--teal-hover:#0A5753;--teal-soft:#DDEFEC;
+  --amber:#8A5A00;--amber-soft:#FBEBCB;--rose:#A63A32;--rose-soft:#F8E1DE;--sky:#2F5DA8;--sky-soft:#E1EAF8;
+  --sans:"Albert Sans",system-ui,sans-serif;--serif:"Source Serif 4",Georgia,serif;--mono:"Spline Sans Mono",ui-monospace,monospace;
+}
+*{box-sizing:border-box}html,body{margin:0}
+body{background:var(--mist);color:var(--ink);font:400 17px/1.6 var(--serif)}
+a{color:inherit;text-decoration:none}
+.wrap{max-width:1200px;margin:0 auto;padding:0 32px}
+:focus-visible{outline:2px solid var(--teal);outline-offset:3px}
+.nav{display:flex;align-items:center;gap:32px;height:72px;font-family:var(--sans)}
+.brand{font:700 21px/1 var(--sans);display:flex;gap:10px;align-items:center;letter-spacing:-.01em}
+.brand i{width:22px;height:22px;border-radius:50%;border:2px solid var(--navy);position:relative}
+.brand i:after{content:"";position:absolute;left:8px;top:2px;width:2px;height:8px;background:var(--teal)}
+.links{display:flex;gap:26px;font-size:15px;color:var(--ink-muted)}
+.right{margin-left:auto;display:flex;gap:20px;align-items:center;font-size:15px}
+.btn{display:inline-flex;align-items:center;justify-content:center;height:48px;padding:0 24px;border-radius:10px;font:600 16px/1 var(--sans);transition:background-color .16s ease-out,transform .12s ease-out}
+.btn:active{transform:scale(.97)}
+.btn-primary{background:var(--teal);color:#fff}.btn-primary:hover{background:var(--teal-hover)}
+.btn-out{background:var(--panel);border:1px solid var(--line);color:var(--ink)}.btn-out:hover{border-color:var(--ink)}
+.btn-sm{height:38px;padding:0 16px;font-size:15px;border-radius:8px}
+.hero{text-align:center;padding:64px 0 0}
+h1{font:700 clamp(40px,5.6vw,74px)/1.02 var(--sans);letter-spacing:-.03em;margin:0 auto 20px;max-width:14ch}
+.lead{font-size:20px;color:var(--ink-muted);margin:0 auto 30px;max-width:34em}
+.ctas{display:flex;gap:12px;justify-content:center;flex-wrap:wrap}
+.note{font:400 13.5px var(--mono);color:var(--ink-muted);margin:16px 0 0}
+/* month strip */
+.month{margin-top:56px;background:var(--panel);border:1px solid var(--line);border-radius:20px;padding:28px 28px 32px;text-align:left;box-shadow:0 30px 60px -40px rgba(19,41,75,.45)}
+.month-h{display:flex;justify-content:space-between;align-items:baseline;font-family:var(--sans)}
+.month-h h2{font:700 20px/1 var(--sans);margin:0}
+.mono{font:400 12.5px var(--mono);color:var(--ink-muted)}
+.track{position:relative;margin-top:28px;display:grid;grid-template-columns:repeat(6,1fr);gap:14px}
+.track:before{content:"";position:absolute;left:0;right:0;top:15px;height:2px;background:var(--line)}
+.ev{position:relative;padding-top:40px;font-family:var(--sans)}
+.ev:before{content:"";position:absolute;top:8px;left:0;width:16px;height:16px;border-radius:50%;background:var(--panel);border:3px solid var(--teal)}
+.ev .d{font:500 12.5px var(--mono);color:var(--ink-muted)}
+.ev h3{font:600 15.5px/1.3 var(--sans);margin:4px 0 8px}
+.tag{display:inline-block;font:500 11.5px/1 var(--mono);padding:5px 8px;border-radius:6px}
+.t-teal{background:var(--teal-soft);color:#0A5753}.t-rose{background:var(--rose-soft);color:var(--rose)}.t-amber{background:var(--amber-soft);color:var(--amber)}.t-sky{background:var(--sky-soft);color:#24498A}
+.ev.r:before{border-color:var(--rose)}.ev.a:before{border-color:#B57A0A}.ev.s:before{border-color:var(--sky)}
+.cap{display:block;text-align:right;margin-top:10px}
+section{padding:104px 0 0}
+.eyebrow{font:600 15px var(--sans);color:var(--teal)}
+h2.t{font:700 clamp(30px,3.6vw,46px)/1.08 var(--sans);letter-spacing:-.025em;margin:8px 0 40px;max-width:18em}
+.steps{display:grid;grid-template-columns:repeat(3,1fr);gap:20px}
+.step{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:28px}
+.step .n{font:500 14px var(--mono);color:var(--teal)}
+.step h3{font:700 21px/1.25 var(--sans);margin:10px 0 8px}
+.step p{margin:0;color:var(--ink-muted)}
+.band{background:var(--navy);color:#E9EEF5;border-radius:24px;padding:56px;display:grid;grid-template-columns:1fr 1fr;gap:48px}
+.band h2{font:700 clamp(28px,3.2vw,40px)/1.1 var(--sans);letter-spacing:-.02em;margin:0 0 14px}
+.band p{margin:0;color:#BAC6D6}
+.band ul{list-style:none;margin:0;padding:0;font-family:var(--sans)}
+.band li{padding:14px 0;border-bottom:1px solid #2E4A74;display:flex;justify-content:space-between;gap:16px}
+.band li span:last-child{font:400 14px var(--mono);color:#BAC6D6;text-align:right}
+@media (max-width:900px){
+  .track{grid-template-columns:1fr;gap:0}
+  .track:before{left:7px;right:auto;top:0;bottom:0;width:2px;height:auto}
+  .ev{padding:0 0 22px 36px}
+  .ev:before{top:3px}
+  .steps,.band{grid-template-columns:1fr}
+  .links{display:none}
+}
+@media (max-width:520px){
+  .wrap{padding:0 16px}
+  .right .signin{display:none}
+  .hero{padding-top:40px}
+  .lead{font-size:18px}
+  .ctas .btn{flex:1}
+  .month{padding:20px;border-radius:16px}
+  .month-h{flex-direction:column;gap:6px}
+  .band{padding:28px}
+  section{padding-top:72px}
+}
+@media (prefers-reduced-motion:no-preference){
+  .ev{animation:pin .45s cubic-bezier(.2,.8,.2,1) both}
+  .ev:nth-child(2){animation-delay:.08s}.ev:nth-child(3){animation-delay:.16s}.ev:nth-child(4){animation-delay:.24s}.ev:nth-child(5){animation-delay:.32s}.ev:nth-child(6){animation-delay:.4s}
+  @keyframes pin{from{opacity:0;translate:0 6px}to{opacity:1;translate:0 0}}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header class="nav">
+  <a class="brand" href="#"><i aria-hidden="true"></i>Proppros</a>
+  <nav class="links"><a href="#">Features</a><a href="#">Pricing</a><a href="#">FAQ</a></nav>
+  <div class="right"><a class="signin" href="#">Sign in</a><a class="btn btn-primary btn-sm" href="#">Start free</a></div>
+</header>
+<main>
+<div class="hero">
+  <h1>Leases, rent and repairs in one place.</h1>
+  <p class="lead">Property management software for independent landlords with 1 to 20 units. Track rent, sign leases online and handle repairs. Your tenants get their own portal.</p>
+  <div class="ctas"><a class="btn btn-primary" href="#">Start free</a><a class="btn btn-out" href="#">See pricing</a></div>
+  <p class="note">Free for up to 3 units. No card needed.</p>
+  <div class="month" role="img" aria-label="A month in Proppros, with example data: rent posts, a lease is signed, a balance is behind, a repair is reported, a listing is shared, a report is exported">
+    <div class="month-h"><h2>October at Maple Court</h2><span class="mono">7 units · Example data</span></div>
+    <div class="track">
+      <div class="ev"><span class="d">Oct 1</span><h3>Rent charges post for 7 units</h3><span class="tag t-teal">Automatic</span></div>
+      <div class="ev"><span class="d">Oct 3</span><h3>New lease signed online</h3><span class="tag t-teal">E-signature</span></div>
+      <div class="ev r"><span class="d">Oct 6</span><h3>J. Rivera is behind by $650</h3><span class="tag t-rose">Balance due</span></div>
+      <div class="ev a"><span class="d">Oct 12</span><h3>Tenant reports a leak with a photo</h3><span class="tag t-amber">Work order</span></div>
+      <div class="ev s"><span class="d">Oct 20</span><h3>Cedar House listing shared</h3><span class="tag t-sky">Applications</span></div>
+      <div class="ev"><span class="d">Oct 31</span><h3>Profit and loss ready to export</h3><span class="tag t-teal">CSV</span></div>
+    </div>
+  </div>
+</div>
+
+<section>
+  <span class="eyebrow">How it works</span>
+  <h2 class="t">Three steps to a calmer month.</h2>
+  <div class="steps">
+    <div class="step"><span class="n">Step 1</span><h3>Add your properties</h3><p>Enter each property and its units. Add current tenants and lease dates.</p></div>
+    <div class="step"><span class="n">Step 2</span><h3>Invite your tenants</h3><p>Tenants sign leases online and use their portal in the browser. They install nothing.</p></div>
+    <div class="step"><span class="n">Step 3</span><h3>Run the month</h3><p>Rent charges post each month. Record payments, handle repairs and see who is behind.</p></div>
+  </div>
+</section>
+
+<section>
+  <div class="band">
+    <div><h2>Start free. Pay per unit later.</h2><p>Built by a landlord with 3 rentals. The free plan covers leases, rent, repairs, the tenant portal and reports.</p><div style="margin-top:24px"><a class="btn btn-primary" href="#">Start free</a></div></div>
+    <ul>
+      <li><span>Free</span><span>$0 · up to 3 units</span></li>
+      <li><span>Pro (coming soon)</span><span>$2 per unit per month</span></li>
+      <li><span>Business (coming soon)</span><span>$3 per unit per month</span></li>
+    </ul>
+  </div>
+</section>
+</main>
+</div>
+<div style="height:80px"></div>
+</body>
+</html>
