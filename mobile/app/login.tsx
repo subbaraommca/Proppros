@@ -1,4 +1,4 @@
-import { Redirect } from "expo-router";
+import { Redirect, router } from "expo-router";
 import { useRef, useState } from "react";
 import { TextInput, View } from "react-native";
 import { errorMessage } from "../src/api/client";
@@ -96,8 +96,9 @@ export default function Login() {
             onSubmitEditing={submit}
           />
           <T v="small" muted>
-            New to Proppros? Create your account at proppros.vercel.app, or use the invitation your landlord sent you.
+            Tenants: use the invitation your landlord sent you.
           </T>
+          <Button title="New to Proppros? Start free" kind="ghost" onPress={() => router.replace("/register")} />
         </>
       )}
       {mfaToken && <Button title="Back" kind="ghost" onPress={() => setMfaToken(null)} />}

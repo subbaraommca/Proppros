@@ -3,6 +3,6 @@ import { isStaff, useAuth } from "../src/auth/AuthContext";
 
 export default function Index() {
   const { me, org } = useAuth();
-  if (!me) return <Redirect href="/login" />;
+  if (!me) return <Redirect href="/welcome" />;
   return <Redirect href={isStaff(org) ? "/(staff)" : "/(tenant)"} />;
 }

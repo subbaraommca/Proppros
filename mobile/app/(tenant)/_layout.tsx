@@ -9,7 +9,7 @@ import { TabBar } from "../../src/tabs";
 export default function TenantLayout() {
   const { me, org } = useAuth();
   const threads = useQuery({ queryKey: ["portal-threads"], queryFn: () => api.get<ThreadRow[]>("/portal/messages"), enabled: !!me && !isStaff(org), refetchInterval: 60_000 });
-  if (!me) return <Redirect href="/login" />;
+  if (!me) return <Redirect href="/welcome" />;
   if (isStaff(org)) return <Redirect href="/(staff)" />;
   const unread = threads.data?.filter((t) => t.unread).length;
   return (

@@ -9,7 +9,7 @@ export default function StaffLayout() {
   const { me, org } = useAuth();
   const writer = org?.role === "owner" || org?.role === "manager";
   const unread = useQuery({ queryKey: ["unread-count"], queryFn: () => api.get<{ count: number }>("/messages/unread-count"), enabled: !!me && writer, refetchInterval: 60_000 });
-  if (!me) return <Redirect href="/login" />;
+  if (!me) return <Redirect href="/welcome" />;
   if (!isStaff(org)) return <Redirect href="/(tenant)" />;
   const finance = org?.role !== "maintenance";
   return (
