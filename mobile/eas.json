@@ -1,9 +1,33 @@
 {
-  "cli": { "version": ">= 12.0.0", "appVersionSource": "remote" },
-  "build": {
-    "development": { "developmentClient": true, "distribution": "internal", "env": { "EXPO_PUBLIC_API_BASE": "https://proppros.vercel.app/api" } },
-    "preview": { "distribution": "internal", "env": { "EXPO_PUBLIC_API_BASE": "https://proppros.vercel.app/api" } },
-    "production": { "autoIncrement": true, "env": { "EXPO_PUBLIC_API_BASE": "https://proppros.vercel.app/api" } }
+  "cli": {
+    "version": ">= 12.0.0",
+    "appVersionSource": "remote"
   },
-  "submit": { "production": {} }
+  "build": {
+    "development": {
+      "developmentClient": true,
+      "distribution": "internal",
+      "env": {
+        "EXPO_PUBLIC_API_BASE": "https://proppros.vercel.app/api"
+      },
+      "node": "24.11.1"
+    },
+    "preview": {
+      "distribution": "internal",
+      "env": {
+        "EXPO_PUBLIC_API_BASE": "https://proppros.vercel.app/api"
+      },
+      "node": "24.11.1"
+    },
+    "production": {
+      "autoIncrement": true,
+      "env": {
+        "EXPO_PUBLIC_API_BASE": "https://proppros.vercel.app/api"
+      },
+      "node": "24.11.1"
+    }
+  },
+  "submit": {
+    "production": {}
+  }
 }

@@ -12,6 +12,8 @@ Sign-in uses a bearer token kept in the phone's secure storage (Keychain / Keyst
 
 ## Run it on your phone (no accounts needed)
 
+Use **Node 24** (see `.nvmrc`). Expo SDK 57's dependency tree only installs cleanly with npm 11, which ships with Node 24; CI and EAS builds are pinned to the same version.
+
 1. Install **Expo Go** from the App Store or Play Store.
 2. On your computer:
    ```bash
