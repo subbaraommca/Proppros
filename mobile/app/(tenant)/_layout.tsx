@@ -14,7 +14,6 @@ export default function TenantLayout() {
   const unread = threads.data?.filter((t) => t.unread).length;
   return (
     <TabBar
-      homeTitle={org?.name}
       tabs={[
         { name: "index", title: "Home", icon: Home },
         { name: "maintenance", title: "Repairs", icon: Wrench },

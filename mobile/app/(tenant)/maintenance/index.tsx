@@ -5,7 +5,7 @@ import { api, errorMessage } from "../../../src/api/client";
 import type { WorkOrder } from "../../../src/api/types";
 import { date, label } from "../../../src/format";
 import { useTheme } from "../../../src/theme/useTheme";
-import { Badge, Button, Card, Empty, Loading, Notice, Row, Screen } from "../../../src/ui";
+import { Badge, Button, Card, Empty, Loading, Notice, Row, Screen, PageTitle } from "../../../src/ui";
 
 export default function TenantRequests() {
   const t = useTheme();
@@ -13,6 +13,7 @@ export default function TenantRequests() {
   const q = useQuery({ queryKey: ["portal-requests"], queryFn: () => api.get<WorkOrder[]>("/portal/work-orders") });
   return (
     <Screen onRefresh={() => q.refetch()} refreshing={q.isRefetching} footer={<Button title="Report a problem" icon={<Plus size={18} color={t.onAccent} />} onPress={() => router.push("/(tenant)/maintenance/new")} />}>
+      <PageTitle title="Maintenance" subtitle="Report a problem and follow its progress." />
       {sent && <Notice tone="jade">Request sent. Your landlord has been notified.</Notice>}
       {q.error && <Notice>{errorMessage(q.error)}</Notice>}
       {q.isLoading ? (

@@ -1,4 +1,3 @@
-import { Archivo_600SemiBold, Archivo_700Bold } from "@expo-google-fonts/archivo";
 import { DMSans_400Regular, DMSans_500Medium, DMSans_600SemiBold } from "@expo-google-fonts/dm-sans";
 import { JetBrainsMono_500Medium } from "@expo-google-fonts/jetbrains-mono";
 import { QueryClientProvider } from "@tanstack/react-query";
@@ -7,12 +6,11 @@ import { router, Stack } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
 import { StatusBar } from "expo-status-bar";
 import { useCallback, useEffect } from "react";
-import { useColorScheme } from "react-native";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import { AuthProvider, isStaff, useAuth } from "../src/auth/AuthContext";
 import { usePush } from "../src/push/usePush";
 import { queryClient } from "../src/queryClient";
-import { useTheme } from "../src/theme/useTheme";
+import { ThemeProvider, useAppearance } from "../src/theme/useTheme";
 
 SplashScreen.preventAutoHideAsync().catch(() => undefined);
 
@@ -46,17 +44,24 @@ function PushRouting() {
 }
 
 function Shell() {
-  const t = useTheme();
-  const scheme = useColorScheme();
+  const { theme: t } = useAppearance();
   const { loading } = useAuth();
-  const [fontsLoaded] = useFonts({ Archivo_600SemiBold, Archivo_700Bold, DMSans_400Regular, DMSans_500Medium, DMSans_600SemiBold, JetBrainsMono_500Medium });
+  const [fontsLoaded] = useFonts({
+    // Archivo at the web's 112% width (assets/fonts, generated from the web's variable font; OFL).
+    "ArchivoSE-Bold": require("../assets/fonts/Archivo-SemiExpanded-Bold.ttf"),
+    "ArchivoSE-SemiBold": require("../assets/fonts/Archivo-SemiExpanded-SemiBold.ttf"),
+    DMSans_400Regular,
+    DMSans_500Medium,
+    DMSans_600SemiBold,
+    JetBrainsMono_500Medium,
+  });
   useEffect(() => {
     if (fontsLoaded && !loading) SplashScreen.hideAsync().catch(() => undefined);
   }, [fontsLoaded, loading]);
   if (!fontsLoaded || loading) return null; // splash stays up (§10.2, §10.12)
   return (
     <>
-      <StatusBar style={scheme === "light" ? "dark" : "light"} />
+      <StatusBar style="light" />
       <PushRouting />
       <Stack screenOptions={{ headerShown: false, contentStyle: { backgroundColor: t.bg } }} />
     </>
@@ -67,9 +72,11 @@ export default function RootLayout() {
   return (
     <SafeAreaProvider>
       <QueryClientProvider client={queryClient}>
-        <AuthProvider>
-          <Shell />
-        </AuthProvider>
+        <ThemeProvider>
+          <AuthProvider>
+            <Shell />
+          </AuthProvider>
+        </ThemeProvider>
       </QueryClientProvider>
     </SafeAreaProvider>
   );

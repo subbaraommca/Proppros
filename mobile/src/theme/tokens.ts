@@ -2,11 +2,18 @@
 // Use these, never raw hex values, in components.
 
 export const dark = {
+  bar: "#0d0e12", // web --pp-bg-sidebar: brand bar, same in both themes
+  barLine: "#1f2028",
+  barText: "#a7a5ad",
+  barTextActive: "#ffffff",
+  barAccent: "#edaf88",
   bg: "#111217",
   surface: "#16171d",
   surfaceMuted: "#1b1d24",
   border: "#2c2e37",
   borderSubtle: "#22242c",
+  borderStrong: "#454753",
+  glow: "rgba(237, 175, 136, 0.35)",
   text: "#e6dfd8",
   textMuted: "#9c9aa3",
   textLoud: "#ffffff",
@@ -24,11 +31,18 @@ export const dark = {
 };
 
 export const light: typeof dark = {
+  bar: "#0d0e12",
+  barLine: "#1f2028",
+  barText: "#a7a5ad",
+  barTextActive: "#ffffff",
+  barAccent: "#edaf88",
   bg: "#f6f4f0",
   surface: "#ffffff",
   surfaceMuted: "#f1eee9",
   border: "#e1dcd4",
   borderSubtle: "#ece8e2",
+  borderStrong: "#c9c2b8",
+  glow: "rgba(164, 80, 42, 0.28)",
   text: "#2b2724",
   textMuted: "#6b6560",
   textLoud: "#14110f",
@@ -52,8 +66,9 @@ export const radius = { none: 0, xs: 2, sm: 3, md: 6, pill: 999 };
 
 // Families loaded in app/_layout.tsx (DESIGN_GUIDELINES §10.2).
 export const fonts = {
-  display: "Archivo_700Bold",
-  displaySemi: "Archivo_600SemiBold",
+  // Archivo at 112% width — the same cut as the web (`font-stretch: 112%`), generated from the web's variable font.
+  display: "ArchivoSE-Bold",
+  displaySemi: "ArchivoSE-SemiBold",
   body: "DMSans_400Regular",
   bodyMedium: "DMSans_500Medium",
   bodySemi: "DMSans_600SemiBold",
@@ -61,14 +76,15 @@ export const fonts = {
 };
 
 export const type = {
-  title: { fontFamily: fonts.display, fontSize: 24, lineHeight: 30 },
-  hero: { fontFamily: fonts.display, fontSize: 36, lineHeight: 40 },
-  stat: { fontFamily: fonts.display, fontSize: 22, lineHeight: 26 },
+  title: { fontFamily: fonts.display, fontSize: 26, lineHeight: 32, letterSpacing: -0.4 },
+  hero: { fontFamily: fonts.display, fontSize: 36, lineHeight: 42, letterSpacing: -0.7 },
+  stat: { fontFamily: fonts.display, fontSize: 26, lineHeight: 30 },
   section: { fontFamily: fonts.displaySemi, fontSize: 16, lineHeight: 22 },
   body: { fontFamily: fonts.body, fontSize: 16, lineHeight: 22 },
   small: { fontFamily: fonts.body, fontSize: 14, lineHeight: 20 },
   label: { fontFamily: fonts.bodyMedium, fontSize: 14, lineHeight: 20 },
   eyebrow: { fontFamily: fonts.mono, fontSize: 11, lineHeight: 14, letterSpacing: 0.9, textTransform: "uppercase" as const },
+  wordmark: { fontFamily: fonts.display, fontSize: 18, lineHeight: 22, letterSpacing: -0.2 },
   money: { fontFamily: fonts.mono, fontSize: 16, lineHeight: 22 },
 };
 

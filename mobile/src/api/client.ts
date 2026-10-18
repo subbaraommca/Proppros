@@ -31,6 +31,10 @@ const store = {
   },
 };
 
+/** Small non-secret preferences (e.g. appearance). */
+export const readPref = (key: string) => store.get(key);
+export const writePref = (key: string, value: string | null) => store.set(key, value);
+
 let token: string | null = null;
 let orgId: string | null = null;
 let onUnauthorized: (() => void) | null = null;

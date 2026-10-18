@@ -5,13 +5,14 @@ import { api, errorMessage } from "../../../src/api/client";
 import type { ThreadRow } from "../../../src/api/types";
 import { dateTime } from "../../../src/format";
 import { useTheme } from "../../../src/theme/useTheme";
-import { Badge, Button, Card, Empty, Loading, Notice, Row, Screen } from "../../../src/ui";
+import { Badge, Button, Card, Empty, Loading, Notice, Row, Screen, PageTitle } from "../../../src/ui";
 
 export default function TenantThreads() {
   const t = useTheme();
   const q = useQuery({ queryKey: ["portal-threads"], queryFn: () => api.get<ThreadRow[]>("/portal/messages") });
   return (
     <Screen onRefresh={() => q.refetch()} refreshing={q.isRefetching} footer={<Button title="Message your landlord" icon={<MessageSquarePlus size={18} color={t.onAccent} />} onPress={() => router.push("/(tenant)/messages/new")} />}>
+      <PageTitle title="Messages" subtitle="Questions for your landlord." />
       {q.error && <Notice>{errorMessage(q.error)}</Notice>}
       {q.isLoading ? (
         <Loading />

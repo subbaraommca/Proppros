@@ -9,7 +9,7 @@ import { useAuth } from "../../src/auth/AuthContext";
 import { date, money, toCents } from "../../src/format";
 import { space } from "../../src/theme/tokens";
 import { useTheme } from "../../src/theme/useTheme";
-import { Button, Card, Chips, Field, Loading, Notice, Screen, T } from "../../src/ui";
+import { Button, Card, Chips, Field, Loading, Notice, PageTitle, Screen, T } from "../../src/ui";
 
 interface PortalLease {
   id: string;
@@ -92,12 +92,12 @@ export default function TenantHome() {
         home.isLoading && <Loading />
       ) : (
         <>
-          <T v="title">Hi {d.tenant_name}</T>
+          <PageTitle title={`Welcome, ${d.tenant_name}`} subtitle={d.organization} />
           {d.leases
             .filter((l) => l.status === "active")
             .map((l) => (
               <Card key={l.id} glow>
-                <T v="eyebrow">Balance · {l.property?.name}</T>
+                <T v="eyebrow">Current balance · {l.property?.name}</T>
                 <T v="hero" color={l.balance_cents > 0 ? t.garnet : t.textLoud}>
                   {l.balance_cents < 0 ? `${money(-l.balance_cents, org?.currency)} credit` : money(l.balance_cents, org?.currency)}
                 </T>
@@ -105,7 +105,7 @@ export default function TenantHome() {
                   <View style={{ flexDirection: "row", gap: 6, alignItems: "center" }}>
                     <CalendarDays size={14} color={t.textMuted} />
                     <T v="small" muted>
-                      {money(l.monthly_total_cents, org?.currency)} due {date(l.next_due_date)}
+                      Next rent due: {money(l.monthly_total_cents, org?.currency)} on {date(l.next_due_date)}
                     </T>
                   </View>
                 ) : null}

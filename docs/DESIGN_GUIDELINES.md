@@ -1,6 +1,6 @@
 # Proppros Design Guidelines — "Strata"
 
-> **Version:** 1.1 · **Date:** 2026-10-18 (added §10 Mobile app)
+> **Version:** 1.2 · **Date:** 2026-10-18 (§10 Mobile app; 1.2 aligns the app with the web: dark-first, brand bar, 112% Archivo, page titles)
 > **Implements:** `frontend/src/styles.css` (web tokens) and `mobile/src/theme/tokens.ts` (app tokens)
 > **Inspired by:** the principles of an external design-system reference ("HEX_DESIGN_SYSTEM.md", not kept in this repo). Proppros uses its own palette, names and freely licensed fonts. Never copy Hex's brand colors or typefaces.
 
@@ -198,24 +198,25 @@ Plain, short, landlord-friendly words: "Record payment", "End lease", "Balance d
 
 ## 10. Mobile app (Expo)
 
-The app (`mobile/`) is the same product in a pocket: the same minerals, type and voice, adapted to thumbs, small screens and the iOS/Android conventions people already know. Rules from §1–§9 apply unless this section says otherwise.
+The app (`mobile/`) is the same product in a pocket: the same minerals, type, voice **and look as the website at phone width**, adapted only where thumbs, small screens and iOS/Android conventions require it. Rules from §1–§9 apply unless this section says otherwise. When in doubt, put the web page (390px wide, dark) next to the app screen; anything that differs without a reason listed here is a bug.
 
 ### 10.1 Tokens and themes
 
-- All colors come from `mobile/src/theme/tokens.ts`, a copy of the web `--pp-*` values (Basalt `dark`, Limestone `light`). When a web token changes, change it there too.
-- The app **follows the phone's appearance setting** (dark or light). If the system gives no answer, use Basalt.
+- All colors come from `mobile/src/theme/tokens.ts`, a copy of the web `--pp-*` values (Basalt `dark`, Limestone `light`, plus `bar` = `--pp-bg-sidebar`). When a web token changes, change it there too.
+- **Dark-first, like the web** (§1 principle 1). The app opens in Basalt. Users can choose **Dark (default) / Light / Match phone** under More → Appearance; the choice is remembered on the device.
+- **Brand anchor:** the top bar (copper house tile + "Proppros" wordmark) and the bottom tab bar use `bar` (`#0D0E12`) in **both** themes, exactly like the web sidebar and mobile top bar. The status bar is therefore always light content (except on the sign-in screen, which has no bar).
 - No paper texture on mobile: flat `bg` keeps scrolling smooth and saves battery.
-- Status bar: light content on Basalt, dark content on Limestone.
 
 ### 10.2 Type
 
-Same families, loaded with `@expo-google-fonts` (Archivo, DM Sans, JetBrains Mono, all OFL). Until the fonts have loaded, keep the splash screen up. Never flash system fonts.
+Same families as the web. DM Sans and JetBrains Mono load from `@expo-google-fonts`. **Archivo is bundled at the web's exact 112% width** (`mobile/assets/fonts/Archivo-SemiExpanded-*.ttf`, generated from the web's variable font with fontTools — phones can't stretch a variable font the way CSS `font-stretch` does). Using normal-width Archivo makes titles and figures look like a different brand. Until the fonts have loaded, keep the splash screen up. Never flash system fonts.
 
 | Role | Size / line-height | Family |
 |---|---|---|
-| Screen title | 24 / 30 | Archivo 700 |
-| Hero figure (balance due) | 36 / 40 | Archivo 700 |
-| Stat value | 22 / 26 | Archivo 700 |
+| Page title (in content, like the web `h1`) | 26 / 32 | Archivo 112% 700 |
+| Hero figure (balance due) | 36 / 42 | Archivo 112% 700 |
+| Stat value | 26 / 30 | Archivo 112% 700 |
+| Top-bar wordmark / drill-down header title | 18 / 17 | Archivo 112% 700 |
 | Section title | 16 / 22 | Archivo 600 |
 | Body, list rows, inputs | **16 / 22** | DM Sans 400 |
 | Secondary | 14 / 20 | DM Sans 400 |
@@ -237,15 +238,17 @@ Same families, loaded with `@expo-google-fonts` (Archivo, DM Sans, JetBrains Mon
 ### 10.4 Navigation
 
 - **Bottom tab bar** with at most 5 tabs, always icon (Lucide, 22px, stroke 1.75) **plus label**. Active tab: carnelian icon and label. Inactive: `textMuted`. Tab bar uses `surface` with a 1px `border` top line.
-- Owner tabs: **Home · Repairs · Messages · Money · More**. Tenant tabs: **Home · Repairs · Messages · More**. Tab labels stay one short word ("Repairs" rather than "Maintenance") so five fit on a 360pt-wide phone without truncation; screens inside keep the full wording.
-- The Home tab's header shows the portfolio name, not "Home".
-- Drill-down uses native stack navigation with a back button and the iOS swipe-back gesture; Android hardware back must always work.
+- Owner tabs: **Home · Repairs · Messages · Money · More**. Tenant tabs: **Home · Repairs · Messages · More**. Tab labels stay one short word ("Repairs" rather than "Maintenance") so five fit on a 360pt-wide phone without truncation; screens inside keep the full wording ("Maintenance").
+- **Page headers match the web:** the first screen of every tab shows the brand bar on top and a page title + muted subtitle in the content ("Dashboard / Rao Rentals · Oct 18, 2026", "Welcome, Tina / Rao Rentals"), the same wording as the web page.
+- Drill-down screens use native stack navigation: a `bar`-colored header with a back arrow and the screen title in Archivo; the iOS swipe-back gesture and Android hardware back must always work.
+- Dashboard stats are one card each with the web's mono label + Lucide icon, big figure and muted sub-line — not squeezed side by side.
 - Unread messages show a small carnelian count badge on the tab icon.
 
 ### 10.5 Actions and forms
 
 - **One primary action per screen**, in the thumb zone: a full-width primary button (48 tall, 0 radius) pinned above the home indicator on forms, or at the bottom of the content on detail screens.
-- Forms are one column. Labels sit above fields, in DM Sans 500 14. Inputs are 48 tall, with radius 6 and a 1px `border`. The focused field gets a carnelian border.
+- Forms are one column. Labels sit above fields, in DM Sans 500 14. Inputs are 48 tall, radius 6, with a 1px `borderStrong` edge like the web's input ring; the focused field gets a carnelian border.
+- The single most important card on a screen (the tenant's balance) gets the web's soft carnelian glow (`glow` border + faint shadow), never a solid copper border.
 - Use the right keyboard: `decimal-pad` for money (with a `$` prefix), `email-address`, `phone-pad`, `number-pad` for 2FA codes (with `textContentType="oneTimeCode"` so iOS can autofill).
 - Forms stay above the keyboard (`KeyboardAvoidingView`), and the keyboard's return key moves to the next field.
 - Destructive actions use a native confirmation dialog (`Alert`) with the destructive button styled as such.
@@ -291,9 +294,10 @@ Same families, loaded with `@expo-google-fonts` (Archivo, DM Sans, JetBrains Mon
 
 - Icon: the carnelian house mark on Basalt (`#111217`), with no text and no gradient. Android adaptive icon uses the same mark with safe-zone padding.
 - Splash: Basalt background with the mark centered, held until fonts and the session check finish.
+- Sign-in mirrors the web sign-in: brand tile, mono "PROPPROS" eyebrow, "Sign in", "Welcome back to Proppros."
 
 ### 10.13 Mobile do / don't
 
 **Do:** keep screens to one job. Put the main action under the thumb. Show money in mono. Follow the phone's dark/light setting. Request permissions in context.
 
-**Don't:** shrink web tables onto a phone. Hide labels under icons. Ask for every permission at launch. Put sensitive data in notifications. Lock font scaling.
+**Don't:** shrink web tables onto a phone. Hide labels under icons. Ask for every permission at launch. Put sensitive data in notifications. Lock font scaling. Default to the light theme or drop the dark brand bar — that's what made the first build look like a different product.

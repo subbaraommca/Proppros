@@ -7,7 +7,7 @@ import { useAuth } from "../../../src/auth/AuthContext";
 import { date, label, money } from "../../../src/format";
 import { space } from "../../../src/theme/tokens";
 import { useTheme } from "../../../src/theme/useTheme";
-import { Button, Card, Loading, Notice, Row, Screen, T } from "../../../src/ui";
+import { Button, Card, Loading, Notice, Row, Screen, T, PageTitle } from "../../../src/ui";
 
 interface PaymentRow {
   id: string;
@@ -28,6 +28,7 @@ export default function Money() {
   const q = useQuery({ queryKey: ["payments"], queryFn: () => api.get<PaymentRow[]>("/payments") });
   return (
     <Screen onRefresh={() => q.refetch()} refreshing={q.isRefetching}>
+      <PageTitle title="Money" subtitle="Record rent payments and expenses." />
       {done === "payment" && <Notice tone="jade">Payment recorded. The receipt was emailed to the tenant.</Notice>}
       {done === "expense" && <Notice tone="jade">Expense saved.</Notice>}
       <View style={{ gap: space.sm }}>

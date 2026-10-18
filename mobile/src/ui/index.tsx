@@ -1,6 +1,6 @@
 /** Strata components for the app (DESIGN_GUIDELINES §10). Colors come from tokens via useTheme — never hard-coded. */
 import NetInfo from "@react-native-community/netinfo";
-import { ChevronRight, WifiOff } from "lucide-react-native";
+import { ChevronRight, Home, WifiOff } from "lucide-react-native";
 import { useEffect, useState, type ReactNode, type Ref } from "react";
 import {
   ActivityIndicator,
@@ -17,18 +17,18 @@ import {
   type TextStyle,
   type ViewStyle,
 } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
+import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
 import { MAX_FONT_SCALE, radius, space, touch, type as typeScale, type Theme } from "../theme/tokens";
 import { useTheme } from "../theme/useTheme";
 
 type TextVariant = keyof typeof typeScale;
 
-export function T({ v = "body", muted, loud, color, style, children, numberOfLines }: { v?: TextVariant; muted?: boolean; loud?: boolean; color?: string; style?: TextStyle; children: ReactNode; numberOfLines?: number }) {
+export function T({ v = "body", muted, loud, color, style, children, numberOfLines, accessibilityRole }: { v?: TextVariant; muted?: boolean; loud?: boolean; color?: string; style?: TextStyle; children: ReactNode; numberOfLines?: number; accessibilityRole?: "header" }) {
   const t = useTheme();
   const base = typeScale[v];
   const c = color ?? (muted ? t.textMuted : loud || v === "title" || v === "hero" || v === "stat" ? t.textLoud : v === "eyebrow" ? t.textMuted : t.text);
   return (
-    <Text maxFontSizeMultiplier={MAX_FONT_SCALE} numberOfLines={numberOfLines} style={[base, { color: c }, style]}>
+    <Text maxFontSizeMultiplier={MAX_FONT_SCALE} numberOfLines={numberOfLines} accessibilityRole={accessibilityRole} style={[base, { color: c }, style]}>
       {children}
     </Text>
   );
@@ -77,7 +77,12 @@ export function Screen({ children, onRefresh, refreshing = false, footer, scroll
 export function Card({ title, right, children, padded = true, glow = false }: { title?: string; right?: ReactNode; children: ReactNode; padded?: boolean; glow?: boolean }) {
   const t = useTheme();
   return (
-    <View style={{ backgroundColor: t.surface, borderWidth: 1, borderColor: glow ? t.accent : t.border, borderRadius: radius.xs }}>
+    <View
+      style={[
+        { backgroundColor: t.surface, borderWidth: 1, borderColor: glow ? t.glow : t.border, borderRadius: radius.xs },
+        glow ? { shadowColor: t.accent, shadowOpacity: 0.18, shadowRadius: 14, shadowOffset: { width: 0, height: 0 }, elevation: 0 } : null,
+      ]}
+    >
       {title && (
         <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center", paddingHorizontal: space.lg, paddingVertical: space.md, borderBottomWidth: 1, borderBottomColor: t.borderSubtle }}>
           <T v="section">{title}</T>
@@ -124,7 +129,7 @@ export function Field({ label, hint, error, prefix, ref, ...props }: TextInputPr
   return (
     <View style={{ gap: 6 }}>
       <T v="label">{label}</T>
-      <View style={{ flexDirection: "row", alignItems: "center", minHeight: touch.button, borderWidth: 1, borderColor: error ? t.garnet : focused ? t.accent : t.border, borderRadius: radius.md, paddingHorizontal: space.md, backgroundColor: t.surface }}>
+      <View style={{ flexDirection: "row", alignItems: "center", minHeight: touch.button, borderWidth: 1, borderColor: error ? t.garnet : focused ? t.accent : t.borderStrong, borderRadius: radius.md, paddingHorizontal: space.md, backgroundColor: t.surface }}>
         {prefix && (
           <T v="money" muted style={{ marginRight: 4 }}>
             {prefix}
@@ -231,10 +236,13 @@ export function Loading() {
   );
 }
 
-export function Stat({ label, value, sub }: { label: string; value: string; sub?: string }) {
+export function Stat({ label, value, sub, icon }: { label: string; value: string; sub?: string; icon?: ReactNode }) {
   return (
-    <View style={{ flex: 1, gap: 4 }}>
-      <T v="eyebrow">{label}</T>
+    <View style={{ flex: 1, gap: 6 }}>
+      <View style={{ flexDirection: "row", alignItems: "center", gap: 6 }}>
+        {icon}
+        <T v="eyebrow">{label}</T>
+      </View>
       <T v="stat">{value}</T>
       {sub ? (
         <T v="small" muted>
@@ -269,6 +277,46 @@ export function Chips<V extends string>({ options, value, onChange, label }: { o
           );
         })}
       </View>
+    </View>
+  );
+}
+
+/** Copper house tile — the brand mark from the web top bar. */
+export function BrandMark({ size = 28 }: { size?: number }) {
+  const t = useTheme();
+  return (
+    <View style={{ width: size, height: size, borderRadius: radius.xs, backgroundColor: t.barAccent, alignItems: "center", justifyContent: "center" }}>
+      <Home size={size * 0.6} color={t.bar} strokeWidth={2} />
+    </View>
+  );
+}
+
+/** Dark brand bar shown at the top of every tab (the web's sidebar / mobile top bar), same in both themes. */
+export function BrandBar({ right }: { right?: ReactNode }) {
+  const t = useTheme();
+  const insets = useSafeAreaInsets();
+  return (
+    <View style={{ backgroundColor: t.bar, paddingTop: insets.top, borderBottomWidth: 1, borderBottomColor: t.barLine }}>
+      <View style={{ height: 52, paddingHorizontal: space.lg, flexDirection: "row", alignItems: "center", gap: 10 }} accessibilityRole="header">
+        <BrandMark />
+        <T v="wordmark" color={t.barTextActive} style={{ flex: 1 }}>
+          Proppros
+        </T>
+        {right}
+      </View>
+    </View>
+  );
+}
+
+/** Page title in the content area, like the web's page header (title + muted subtitle). */
+export function PageTitle({ title, subtitle, eyebrow }: { title: string; subtitle?: string; eyebrow?: string }) {
+  return (
+    <View style={{ gap: 4, marginBottom: space.xs }}>
+      {eyebrow ? <T v="eyebrow">{eyebrow}</T> : null}
+      <T v="title" accessibilityRole="header">
+        {title}
+      </T>
+      {subtitle ? <T muted>{subtitle}</T> : null}
     </View>
   );
 }

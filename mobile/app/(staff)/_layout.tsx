@@ -14,7 +14,6 @@ export default function StaffLayout() {
   const finance = org?.role !== "maintenance";
   return (
     <TabBar
-      homeTitle={org?.name}
       tabs={[
         { name: "index", title: "Home", icon: LayoutDashboard, href: finance ? undefined : null },
         { name: "maintenance", title: "Repairs", icon: Wrench },

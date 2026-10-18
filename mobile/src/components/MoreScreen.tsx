@@ -3,14 +3,15 @@ import * as WebBrowser from "expo-web-browser";
 import { Alert, Platform } from "react-native";
 import { useAuth } from "../auth/AuthContext";
 import { label } from "../format";
-import { useTheme } from "../theme/useTheme";
-import { Badge, Button, Card, Row, Screen, T } from "../ui";
+import { useAppearance, useTheme, type Appearance } from "../theme/useTheme";
+import { Badge, Button, Card, Chips, PageTitle, Row, Screen, T } from "../ui";
 
 const WEB = "https://proppros.vercel.app";
 
 export function MoreScreen() {
   const t = useTheme();
   const { me, org, switchOrg, signOut } = useAuth();
+  const { appearance, setAppearance } = useAppearance();
   const confirmSignOut = () => {
     if (Platform.OS === "web") return void signOut();
     Alert.alert("Sign out?", "You'll stop getting notifications on this phone.", [
@@ -20,8 +21,21 @@ export function MoreScreen() {
   };
   return (
     <Screen>
+      <PageTitle title="Account" subtitle={org ? `${org.name} · ${label(org.role)}` : undefined} />
       <Card padded={false}>
         <Row first title={me?.name ?? ""} meta={me?.email} />
+      </Card>
+      <Card title="Appearance">
+        <Chips<Appearance>
+          label="Theme"
+          value={appearance}
+          onChange={setAppearance}
+          options={[
+            { value: "dark", label: "Dark" },
+            { value: "light", label: "Light" },
+            { value: "system", label: "Match phone" },
+          ]}
+        />
       </Card>
       {(me?.organizations.length ?? 0) > 1 && (
         <Card title="Switch portfolio" padded={false}>
@@ -38,9 +52,6 @@ export function MoreScreen() {
       <Button kind="danger" title="Sign out" onPress={confirmSignOut} />
       <T v="small" muted style={{ textAlign: "center" }}>
         Proppros {Constants.expoConfig?.version ?? ""}
-      </T>
-      <T v="small" color={t.textMuted} style={{ textAlign: "center" }}>
-        {org ? `${org.name} · ${label(org.role)}` : ""}
       </T>
     </Screen>
   );

@@ -6,7 +6,7 @@ import { api, errorMessage } from "../../../src/api/client";
 import type { WorkOrder } from "../../../src/api/types";
 import { label } from "../../../src/format";
 import { useTheme } from "../../../src/theme/useTheme";
-import { Badge, Button, Card, Chips, Empty, Loading, Notice, Row, Screen } from "../../../src/ui";
+import { Badge, Button, Card, Chips, Empty, Loading, Notice, Row, Screen, PageTitle } from "../../../src/ui";
 
 type Filter = "open" | "mine" | "all";
 
@@ -17,6 +17,7 @@ export default function WorkOrders() {
   const q = useQuery({ queryKey: ["work-orders", filter], queryFn: () => api.get<WorkOrder[]>(`/work-orders${qs}`) });
   return (
     <Screen onRefresh={() => q.refetch()} refreshing={q.isRefetching}>
+      <PageTitle title="Maintenance" />
       <Chips
         label="Show"
         value={filter}

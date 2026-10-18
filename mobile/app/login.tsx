@@ -1,15 +1,15 @@
 import { Redirect } from "expo-router";
-import { Home } from "lucide-react-native";
 import { useRef, useState } from "react";
 import { TextInput, View } from "react-native";
 import { errorMessage } from "../src/api/client";
 import { useAuth } from "../src/auth/AuthContext";
 import { space } from "../src/theme/tokens";
-import { useTheme } from "../src/theme/useTheme";
-import { Button, Field, Notice, Screen, T } from "../src/ui";
+import { StatusBar } from "expo-status-bar";
+import { useAppearance } from "../src/theme/useTheme";
+import { BrandMark, Button, Field, Notice, Screen, T } from "../src/ui";
 
 export default function Login() {
-  const t = useTheme();
+  const { scheme } = useAppearance();
   const { me, signIn, verifyMfa } = useAuth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -47,14 +47,16 @@ export default function Login() {
         />
       }
     >
-      <View style={{ paddingTop: space.xxl * 1.5, gap: space.sm, marginBottom: space.lg }}>
-        <View style={{ flexDirection: "row", alignItems: "center", gap: space.sm }}>
-          <View style={{ backgroundColor: t.accent, padding: 6, borderRadius: 2 }}>
-            <Home size={18} color={t.onAccent} />
-          </View>
-          <T v="title">Proppros</T>
-        </View>
-        <T muted>{mfaToken ? "Enter the 6-digit code from your authenticator app." : "Sign in to manage your rentals or your home."}</T>
+      <StatusBar style={scheme === "light" ? "dark" : "light"} />
+      <View style={{ paddingTop: space.xxl * 2, gap: space.sm, marginBottom: space.lg }}>
+        <BrandMark size={36} />
+        <T v="eyebrow" style={{ marginTop: space.lg }}>
+          Proppros
+        </T>
+        <T v="title" accessibilityRole="header">
+          {mfaToken ? "Two-step verification" : "Sign in"}
+        </T>
+        <T muted>{mfaToken ? "Enter the 6-digit code from your authenticator app." : "Welcome back to Proppros."}</T>
       </View>
       {error && <Notice>{error}</Notice>}
       {mfaToken ? (

@@ -5,13 +5,14 @@ import { api, errorMessage } from "../../../src/api/client";
 import type { ThreadRow } from "../../../src/api/types";
 import { dateTime } from "../../../src/format";
 import { useTheme } from "../../../src/theme/useTheme";
-import { Badge, Button, Card, Empty, Loading, Notice, Row, Screen } from "../../../src/ui";
+import { Badge, Button, Card, Empty, Loading, Notice, Row, Screen, PageTitle } from "../../../src/ui";
 
 export default function StaffThreads() {
   const t = useTheme();
   const q = useQuery({ queryKey: ["threads"], queryFn: () => api.get<ThreadRow[]>("/messages/threads"), refetchInterval: 60_000 });
   return (
     <Screen onRefresh={() => q.refetch()} refreshing={q.isRefetching}>
+      <PageTitle title="Messages" subtitle="Conversations with your tenants." />
       {q.error && <Notice action={<Button kind="secondary" title="Try again" onPress={() => q.refetch()} />}>{errorMessage(q.error)}</Notice>}
       {q.isLoading ? (
         <Loading />
