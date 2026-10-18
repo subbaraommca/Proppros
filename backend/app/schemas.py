@@ -19,7 +19,7 @@ ExpenseCategory = Literal[
 WorkOrderCategory = Literal["plumbing", "electrical", "hvac", "appliance", "pest", "roof", "landscaping", "general", "other"]
 WorkOrderPriority = Literal["low", "medium", "high", "emergency"]
 WorkOrderStatus = Literal["new", "assigned", "scheduled", "in_progress", "completed", "closed"]
-DocumentOwnerType = Literal["organization", "property", "unit", "tenant", "lease", "expense", "work_order", "vendor", "asset"]
+DocumentOwnerType = Literal["organization", "property", "unit", "tenant", "lease", "expense", "work_order", "vendor", "asset", "listing", "application"]
 DocumentKind = Literal["photo", "lease", "insurance", "deed", "hoa", "inspection", "receipt", "invoice", "license", "id", "notice", "w9", "quote", "warranty", "manual", "other"]
 
 
@@ -597,3 +597,152 @@ class AccessItemUpdate(AccessItemIn):
     kind: AccessKind | None = None
     label: str | None = Field(default=None, min_length=1, max_length=120)
     quantity: int | None = Field(default=None, ge=0, le=999)
+
+
+# ── Listings & applications ──────────────────────────────────────────────────
+
+
+class ListingIn(Base):
+    unit_id: uuid.UUID
+    title: str | None = Field(default=None, max_length=160)  # default: property + unit name
+
+
+class ListingUpdate(Base):
+    title: str | None = Field(default=None, min_length=1, max_length=160)
+    description: str | None = Field(default=None, max_length=10_000)
+    rent_cents: int | None = Field(default=None, gt=0, le=100_000_000)
+    deposit_cents: int | None = Field(default=None, ge=0, le=100_000_000)
+    available_on: date | None = None
+    lease_term_months: int | None = Field(default=None, ge=1, le=60)
+    beds: float | None = Field(default=None, ge=0, le=50)
+    baths: float | None = Field(default=None, ge=0, le=50)
+    sqft: int | None = Field(default=None, ge=0, le=1_000_000)
+    amenities: list[str] | None = Field(default=None, max_length=40)
+    pet_policy: str | None = Field(default=None, max_length=300)
+    utilities_included: str | None = Field(default=None, max_length=300)
+    requirements: str | None = Field(default=None, max_length=2000)
+    application_fee_cents: int | None = Field(default=None, ge=0, le=20_000)
+    screening_url: str | None = Field(default=None, max_length=500)
+    contact_email: EmailStr | None = None
+    contact_phone: str | None = Field(default=None, max_length=40)
+    photo_order: list[str] | None = Field(default=None, max_length=40)
+
+    @field_validator("screening_url")
+    @classmethod
+    def https_only(cls, v: str | None) -> str | None:
+        if v and not v.startswith("https://"):
+            raise ValueError("Use a link that starts with https://")
+        return v or None
+
+    @field_validator("contact_email", mode="before")
+    @classmethod
+    def blank_email(cls, v):
+        return v or None
+
+
+class CoApplicantIn(Base):
+    name: str = Field(min_length=1, max_length=120)
+    email: EmailStr | None = None
+
+
+class ApplicationIn(Base):
+    first_name: str = Field(min_length=1, max_length=80)
+    last_name: str = Field(min_length=1, max_length=80)
+    email: EmailStr
+    phone: str = Field(min_length=7, max_length=40)
+    desired_move_in: date | None = None
+    current_address: str = Field(min_length=3, max_length=300)
+    current_rent_cents: int | None = Field(default=None, ge=0, le=100_000_000)
+    current_landlord_name: str | None = Field(default=None, max_length=120)
+    current_landlord_phone: str | None = Field(default=None, max_length=40)
+    years_at_address: float | None = Field(default=None, ge=0, le=80)
+    employer: str | None = Field(default=None, max_length=160)
+    job_title: str | None = Field(default=None, max_length=120)
+    monthly_income_cents: int | None = Field(default=None, ge=0, le=100_000_000)
+    occupants: int = Field(default=1, ge=1, le=20)
+    co_applicants: list[CoApplicantIn] = Field(default_factory=list, max_length=5)
+    pets: str | None = Field(default=None, max_length=500)
+    vehicles: str | None = Field(default=None, max_length=300)
+    prior_eviction: bool = False
+    message: str | None = Field(default=None, max_length=3000)
+    signature_name: str = Field(min_length=2, max_length=160)
+    consent: bool
+    website: str | None = Field(default=None, max_length=200)  # honeypot: humans leave it empty
+
+    @field_validator("consent")
+    @classmethod
+    def must_consent(cls, v: bool) -> bool:
+        if not v:
+            raise ValueError("Please confirm the information is accurate and agree to screening.")
+        return v
+
+
+class ApplicationUpdate(Base):
+    status: Literal["submitted", "screening", "approved", "declined", "withdrawn"] | None = None
+    staff_notes: str | None = Field(default=None, max_length=5000)
+    rating: int | None = Field(default=None, ge=1, le=5)
+    fee_status: Literal["none", "unpaid", "paid", "waived"] | None = None
+
+
+class ApplicationDecisionIn(Base):
+    message: str | None = Field(default=None, max_length=2000)
+    notify: bool = True
+
+
+class ConvertApplicationIn(Base):
+    start_date: date
+    end_date: date | None = None
+    rent_cents: int = Field(gt=0, le=100_000_000)
+    deposit_cents: int = Field(default=0, ge=0, le=100_000_000)
+    due_day: int = Field(default=1, ge=1, le=28)
+    include_co_applicants: bool = True
+    close_listing: bool = True
+    invite_to_portal: bool = True
+
+
+class CreditSummaryIn(Base):
+    total_debt_cents: int | None = Field(default=None, ge=0, le=10_000_000_000)
+    open_accounts: int | None = Field(default=None, ge=0, le=500)
+    late_payments: int | None = Field(default=None, ge=0, le=500)
+    collections_count: int | None = Field(default=None, ge=0, le=500)
+    collections_cents: int | None = Field(default=None, ge=0, le=10_000_000_000)
+    bankruptcies: int | None = Field(default=None, ge=0, le=50)
+    notes: str | None = Field(default=None, max_length=2000)
+
+
+class CriminalRecordIn(Base):
+    offense: str = Field(min_length=1, max_length=200)
+    severity: Literal["felony", "misdemeanor", "infraction", "other"] = "other"
+    offense_date: date | None = None
+    jurisdiction: str | None = Field(default=None, max_length=120)
+    disposition: str | None = Field(default=None, max_length=200)  # e.g. convicted, dismissed
+
+
+class EvictionRecordIn(Base):
+    filed_on: date | None = None
+    court: str | None = Field(default=None, max_length=160)
+    plaintiff: str | None = Field(default=None, max_length=160)
+    outcome: Literal["judgment", "dismissed", "settled", "pending", "unknown"] = "unknown"
+    amount_cents: int | None = Field(default=None, ge=0, le=100_000_000)
+
+
+class ScreeningReportIn(Base):
+    provider: str | None = Field(default=None, max_length=80)
+    report_date: date | None = None
+    credit_score: int | None = Field(default=None, ge=300, le=850)
+    credit_summary: CreditSummaryIn = Field(default_factory=CreditSummaryIn)
+    criminal_records: list[CriminalRecordIn] = Field(default_factory=list, max_length=50)
+    eviction_records: list[EvictionRecordIn] = Field(default_factory=list, max_length=50)
+    document_id: uuid.UUID | None = None
+    result: Literal["pass", "review", "fail"] | None = None
+    notes: str | None = Field(default=None, max_length=3000)
+
+
+class AdverseActionIn(Base):
+    """FCRA adverse action notice details (sent when declining based on a consumer report)."""
+
+    reasons: list[str] = Field(min_length=1, max_length=8)
+    agency_name: str = Field(min_length=2, max_length=160)
+    agency_address: str = Field(min_length=5, max_length=300)
+    agency_phone: str = Field(min_length=7, max_length=40)
+    credit_score_used: bool = False

@@ -55,7 +55,7 @@ EXPENSE_CATEGORIES = (
 WORK_ORDER_CATEGORIES = ("plumbing", "electrical", "hvac", "appliance", "pest", "roof", "landscaping", "general", "other")
 WORK_ORDER_PRIORITIES = ("low", "medium", "high", "emergency")
 WORK_ORDER_STATUSES = ("new", "assigned", "scheduled", "in_progress", "completed", "closed")
-DOCUMENT_OWNER_TYPES = ("organization", "property", "unit", "tenant", "lease", "expense", "work_order", "vendor", "asset")
+DOCUMENT_OWNER_TYPES = ("organization", "property", "unit", "tenant", "lease", "expense", "work_order", "vendor", "asset", "listing", "application")
 DOCUMENT_KINDS = ("photo", "lease", "insurance", "deed", "hoa", "inspection", "receipt", "invoice", "license", "id", "notice", "w9", "quote", "warranty", "manual", "other")
 SIGNATURE_STATUSES = ("sent", "completed", "voided")
 RENEWAL_STATUSES = ("sent", "accepted", "declined", "withdrawn", "expired")
@@ -65,6 +65,9 @@ QUOTE_STATUSES = ("pending", "approved", "declined")
 INVOICE_STATUSES = ("unpaid", "paid")
 ASSET_CATEGORIES = ("appliance", "hvac", "water_heater", "plumbing", "electrical", "roof", "safety", "exterior", "other")
 ACCESS_KINDS = ("key", "fob", "remote", "code", "lockbox", "mailbox", "other")
+LISTING_STATUSES = ("draft", "published", "closed")
+APPLICATION_STATUSES = ("submitted", "screening", "approved", "declined", "withdrawn", "converted")
+APPLICATION_FEE_STATUSES = ("none", "unpaid", "paid", "waived")
 
 
 class TimestampMixin(SQLModel):
@@ -620,6 +623,99 @@ class DepositDisposition(TimestampMixin, table=True):
     notes: str | None = Field(default=None, max_length=5000)
     sent_at: datetime | None = None
     document_id: uuid.UUID | None = Field(default=None, foreign_key="documents.id")
+
+
+# ── Vacancy, listings & applications ─────────────────────────────────────────
+
+
+class Listing(TimestampMixin, table=True):
+    """A public listing for a vacant (or soon vacant) unit. Photos are listing documents of kind photo."""
+
+    __tablename__ = "listings"
+    __table_args__ = (UniqueConstraint("slug", name="uq_listings_slug"),)
+    id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
+    org_id: uuid.UUID = Field(foreign_key="organizations.id", index=True)
+    property_id: uuid.UUID = Field(foreign_key="properties.id", index=True)
+    unit_id: uuid.UUID = Field(foreign_key="units.id", index=True)
+    slug: str = Field(max_length=80)
+    status: str = Field(default="draft", max_length=10, index=True)
+    title: str = Field(max_length=160)
+    description: str | None = Field(default=None, max_length=10_000)
+    rent_cents: int
+    deposit_cents: int = 0
+    available_on: date | None = None
+    lease_term_months: int | None = 12
+    beds: float | None = None
+    baths: float | None = None
+    sqft: int | None = None
+    amenities: list[str] = Field(default_factory=list, sa_column=Column(JSON, nullable=False))
+    pet_policy: str | None = Field(default=None, max_length=300)
+    utilities_included: str | None = Field(default=None, max_length=300)
+    requirements: str | None = Field(default=None, max_length=2000)  # e.g. income 3x rent, no evictions
+    application_fee_cents: int = 0
+    screening_url: str | None = Field(default=None, max_length=500)  # where applicants complete screening
+    contact_email: str | None = Field(default=None, max_length=255)
+    contact_phone: str | None = Field(default=None, max_length=40)
+    photo_order: list[str] = Field(default_factory=list, sa_column=Column(JSON, nullable=False))
+    views: int = 0
+    published_at: datetime | None = None
+    closed_at: datetime | None = None
+
+
+class Application(TimestampMixin, table=True):
+    """A rental application. No SSNs are collected here — screening providers collect those directly."""
+
+    __tablename__ = "applications"
+    id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
+    org_id: uuid.UUID = Field(foreign_key="organizations.id", index=True)
+    listing_id: uuid.UUID = Field(foreign_key="listings.id", index=True)
+    status: str = Field(default="submitted", max_length=12, index=True)
+    first_name: str = Field(max_length=80)
+    last_name: str = Field(max_length=80)
+    email: str = Field(max_length=255)
+    phone: str | None = Field(default=None, max_length=40)
+    desired_move_in: date | None = None
+    current_address: str | None = Field(default=None, max_length=300)
+    current_rent_cents: int | None = None
+    current_landlord_name: str | None = Field(default=None, max_length=120)
+    current_landlord_phone: str | None = Field(default=None, max_length=40)
+    years_at_address: float | None = None
+    employer: str | None = Field(default=None, max_length=160)
+    job_title: str | None = Field(default=None, max_length=120)
+    monthly_income_cents: int | None = None
+    occupants: int = 1
+    co_applicants: list[dict[str, Any]] = Field(default_factory=list, sa_column=Column(JSON, nullable=False))  # [{name, email}]
+    pets: str | None = Field(default=None, max_length=500)
+    vehicles: str | None = Field(default=None, max_length=300)
+    prior_eviction: bool = False
+    message: str | None = Field(default=None, max_length=3000)
+    signature_name: str = Field(max_length=160)
+    consent_at: datetime
+    ip_address: str | None = Field(default=None, max_length=64)
+    status_token_hash: str = Field(max_length=64, index=True)
+    fee_cents: int = 0
+    fee_status: str = Field(default="none", max_length=8)
+    fee_paid_at: datetime | None = None
+    stripe_session_id: str | None = Field(default=None, max_length=120)
+    screening_status: str = Field(default="not_started", max_length=12)  # not_started | requested | completed
+    screening_requested_at: datetime | None = None
+    # Screening report (entered from the provider's report, or filled by a provider integration).
+    screening_provider: str | None = Field(default=None, max_length=80)
+    screening_report_date: date | None = None
+    credit_score: int | None = None
+    credit_summary: dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSON, nullable=False))  # debt, collections, bankruptcies...
+    criminal_records: list[dict[str, Any]] = Field(default_factory=list, sa_column=Column(JSON, nullable=False))
+    eviction_records: list[dict[str, Any]] = Field(default_factory=list, sa_column=Column(JSON, nullable=False))
+    screening_document_id: uuid.UUID | None = Field(default=None, foreign_key="documents.id")
+    screening_result: str | None = Field(default=None, max_length=10)  # pass | review | fail
+    screening_notes: str | None = Field(default=None, max_length=3000)
+    adverse_action_sent_at: datetime | None = None
+    staff_notes: str | None = Field(default=None, max_length=5000)
+    rating: int | None = None
+    decided_at: datetime | None = None
+    decided_by_user_id: uuid.UUID | None = Field(default=None, foreign_key="users.id")
+    tenant_id: uuid.UUID | None = Field(default=None, foreign_key="tenants.id")
+    lease_id: uuid.UUID | None = Field(default=None, foreign_key="leases.id")
 
 
 class Feedback(SQLModel, table=True):

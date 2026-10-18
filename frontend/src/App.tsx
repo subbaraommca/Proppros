@@ -44,6 +44,16 @@ const InspectionPage = page(() => import("./pages/InspectionPage"), "InspectionP
 const VendorsPage = page(() => import("./pages/VendorPages"), "VendorsPage");
 const VendorDetailPage = page(() => import("./pages/VendorPages"), "VendorDetailPage");
 const SchedulesPage = page(() => import("./pages/VendorPages"), "SchedulesPage");
+const VacancyPage = page(() => import("./pages/VacancyPages"), "VacancyPage");
+const ListingManagePage = page(() => import("./pages/VacancyPages"), "ListingManagePage");
+const ApplicationPage = page(() => import("./pages/VacancyPages"), "ApplicationPage");
+const PublicListingPage = page(() => import("./pages/ListingPublicPages"), "PublicListingPage");
+const ApplicationStatusPage = page(() => import("./pages/ListingPublicPages"), "ApplicationStatusPage");
+
+function ShareRedirect() {
+  const slug = useLocation().pathname.split("/").pop() ?? "";
+  return <Navigate to={`/listings/${slug}`} replace />;
+}
 const SignPage = page(() => import("./components/Signing"), "SignPage");
 const PortalSignPage = page(() => import("./components/Signing"), "PortalSignPage");
 
@@ -80,6 +90,9 @@ export default function App() {
       <Route path="/privacy" element={<LegalPage doc="privacy" />} />
       <Route path="/terms" element={<LegalPage doc="terms" />} />
       <Route path="/sign/:token" element={<SignPage />} />
+      <Route path="/listings/:slug" element={<PublicListingPage />} />
+      <Route path="/l/:slug" element={<ShareRedirect />} />
+      <Route path="/application/:token" element={<ApplicationStatusPage />} />
     </>
   );
 
@@ -143,6 +156,9 @@ export default function App() {
         <Route path="maintenance/schedules" element={<SchedulesPage />} />
         <Route path="maintenance/:id" element={<WorkOrderDetailPage />} />
         <Route path="vendors" element={<VendorsPage />} />
+        <Route path="vacancy" element={<VacancyPage />} />
+        <Route path="vacancy/applications/:id" element={<ApplicationPage />} />
+        <Route path="vacancy/:id" element={<ListingManagePage />} />
         <Route path="vendors/:id" element={<VendorDetailPage />} />
         <Route path="documents" element={<DocumentsPage />} />
         <Route path="reports" element={<ReportsPage />} />

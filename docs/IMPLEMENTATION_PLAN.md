@@ -36,7 +36,7 @@ This is the step-by-step execution plan. Work is split into **iterations**. Each
 | 11 | SaaS: subscriptions, onboarding, admin | v2 | 🟦 Code done — billing & Google sign-in dormant until configured |
 | 12 | Leasing workflows (templates, e-sign, renewals) | v2 | 🟦 Code done — try it on one of your leases |
 | 13 | Vendors & preventive maintenance | v2 | 🟦 Code done — add your vendors, appliances and recurring tasks |
-| 14 | Vacancy, listings & screening | v2 | ⬜ |
+| 14 | Vacancy, listings & screening | v2 | 🟦 Code done — screening reports entered from your provider; automatic feed needs a provider partnership |
 | 15 | Communication (messaging, SMS, notices) | v2 | ⬜ |
 | 16 | Advanced finance (Plaid, tax, exports) | v2 | ⬜ |
 | 17 | AI features | v2 | ⬜ |
@@ -303,10 +303,11 @@ Legend: ⬜ Not started · 🟨 In progress · 🟦 Code complete, waiting on a 
 
 **Requirements:** VAC-01 – VAC-04
 
-- [ ] Listing builder + public listing page (SEO-friendly)
-- [ ] Online application form + application fee (Stripe)
-- [ ] Screening integration
-- [ ] Applicant pipeline → convert to tenant + lease
+- [x] Listing builder + public listing page (SEO-friendly) — *Vacancies; photos, criteria, fair-housing notice; `/listings/<slug>` page plus `/l/<slug>` server-rendered share page with Open Graph tags and JSON-LD*
+- [x] Online application form + application fee (Stripe) — *no account needed, no SSN collected, honeypot + rate limits, applicant status page with document upload; fee via Stripe Checkout to the owner's connected account when online payments are on, otherwise mark paid/waived*
+- [~] Screening integration — *structured screening report per applicant: credit (score, debt, collections, bankruptcies), criminal records, eviction records, provider PDF; owners/managers only; "Request screening" emails the provider link; FCRA adverse action notice letter. **Not yet:** an automatic feed from a screening provider (TransUnion ShareAble/SmartMove API needs a partner agreement)*
+- [x] Applicant pipeline → convert to tenant + lease — *side-by-side comparison (income ÷ rent, credit, records, rating), approve/decline emails, convert creates tenants + lease, closes the listing, invites to the portal*
+- [ ] **Your part:** open a screening account (e.g. TransUnion SmartMove) and put its link on your listing
 
 ## Iteration 15 — Communication
 
@@ -375,3 +376,4 @@ Record notes when each iteration closes.
 | 2026-10-17 | 11 | SaaS layer: plans + Stripe Billing (per-unit, quantity synced daily, limits only when billing is on), property-scoped memberships enforced in every list/detail route, TOTP 2FA with hashed recovery codes and a short-lived `mfa` token, Google OIDC sign-in, super-admin console with audited impersonation, help center (Markdown) + feedback, onboarding wizard, landing and pricing pages. Migration `0003` (server defaults). 13 new tests (83 total). Checked in a browser: landing/pricing/help signed out, onboarding, admin, team access, 2FA setup and the 2FA sign-in step. |
 | 2026-10-18 | 12 | Leasing workflows: lease templates with merge fields, built-in e-signature (signing links work without an account; portal signing for tenants with accounts; landlord signs in-app), renewal offers with portal accept/decline and automatic successor lease, move-in/move-out inspections with photos and PDF reports, itemized security-deposit statements. Decision: built-in e-signature instead of Dropbox Sign/DocuSign (no cost or account; records consent, IP, device, time and a SHA-256 fingerprint of the text). Migration `0004` (new tables + one nullable column). 10 new tests (93 total). Checked in a browser: template editor, send → public link signing → landlord signing → signed PDF, renewal offer → tenant portal card, inspection checklist (desktop + phone). |
 | 2026-10-18 | 13 | Vendors & preventive maintenance: vendor directory with insurance/W-9 tracking and ratings, vendor assignment with job-details email, quotes with approve/decline, vendor invoices that create expenses automatically, preventive schedules run by the daily job, appliance/system register with warranty reminders, keys & access codes per property/unit. Migration `0005` (new tables + nullable work-order columns). 7 new tests (100 total). Checked in a browser: add vendor, quotes → approve → invoice → expense, schedule from a preset, assets and keys tabs, phone width. |
+| 2026-10-18 | 14 | Vacancy & screening: listings with public page + share page (OG/JSON-LD), public application form with status page and uploads, application fee via Stripe (reusing Connect), screening reports with credit/criminal/eviction sections (user request: landlords must see these histories), FCRA adverse action notice PDF, applicant comparison, approve/decline, convert to tenants + lease. Decisions: no SSNs or report pulls inside Proppros — reports come from a consumer reporting agency and are entered (or later fed) into a structured report; applicant files and reports are owners/managers only and excluded from the documents library; HUD criminal-history guidance shown next to reports. Also fixed: `/properties` list now includes units (schedule/listing unit pickers were empty). Migration `0006`. 6 new tests (106 total). |

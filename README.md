@@ -76,6 +76,10 @@ Online payments stay hidden until these are set.
 3. In Stripe → Developers → Webhooks, add the endpoint `https://<your-domain>/api/stripe/webhook` with these events: `payment_intent.processing`, `payment_intent.succeeded`, `payment_intent.payment_failed`, `charge.refunded`, `charge.dispute.created`, `checkout.session.completed`, `account.updated`. Copy its signing secret into `STRIPE_WEBHOOK_SECRET`, then redeploy.
 4. In Proppros, go to **Settings → Payments → Connect with Stripe**, finish onboarding, and turn on **Accept online payments**. Test with card `4242 4242 4242 4242` or Stripe's test bank account.
 
+### Tenant screening
+
+Credit, criminal and eviction reports come from a consumer reporting agency such as TransUnion SmartMove (applicant-pay, no business API needed). Put your SmartMove (or other provider) link in each listing's **Screening provider link**; Proppros emails it to applicants and you record the report's results on the application. An automatic feed requires a partner agreement with the provider (e.g. TransUnion ShareAble API) — the data model is ready for it.
+
 ### Platform admin
 
 Set `SUPERADMIN_EMAILS=you@example.com` (comma-separated) and redeploy. Those users see **Admin** in the sidebar: usage overview, organizations (change plan, comp), users (sign in as a user for support — 60 minutes, written to that organization's audit log) and in-app feedback. Set `FEEDBACK_NOTIFY_EMAIL` to get new feedback by email.

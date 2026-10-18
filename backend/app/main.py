@@ -8,7 +8,7 @@ from app import models  # noqa: F401 — registers SQLModel metadata
 from app.core.config import settings
 from app.core import storage
 from app.core.database import init_db
-from app.routers import admin, auth, billing, documents, finance, leases, leasing, vendors, online_payments, orgs, portal, properties, system, tenants, work_orders
+from app.routers import admin, auth, billing, documents, finance, leases, leasing, listings, vendors, online_payments, orgs, portal, properties, system, tenants, work_orders
 
 logging.basicConfig(
     level=logging.DEBUG if settings.environment == "development" else logging.INFO,
@@ -64,6 +64,7 @@ async def security_headers(request: Request, call_next):
 
 # Frontend and API share one origin on Vercel (/api/* → this function), so no CORS is needed.
 api = APIRouter(prefix="/api")
-for module in (system, auth, orgs, properties, tenants, leases, finance, work_orders, documents, portal, online_payments, billing, admin, leasing, vendors):
+for module in (system, auth, orgs, properties, tenants, leases, finance, work_orders, documents, portal, online_payments, billing, admin, leasing, vendors, listings):
     api.include_router(module.router)
 app.include_router(api)
+app.include_router(listings.share_router)  # /l/{slug} share pages (rewritten to the backend on Vercel)

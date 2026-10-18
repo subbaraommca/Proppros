@@ -145,8 +145,13 @@ def property_id_of(session: Session, obj) -> uuid.UUID | None:
 
     if isinstance(obj, Property):
         return obj.id
-    if hasattr(obj, "property_id"):  # Unit, Expense, WorkOrder
+    if hasattr(obj, "property_id"):  # Unit, Expense, WorkOrder, Listing, Asset...
         return obj.property_id
+    if getattr(obj, "listing_id", None):  # Application
+        from app.models import Listing
+
+        listing = session.get(Listing, obj.listing_id)
+        return listing.property_id if listing else None
     lease_id = getattr(obj, "lease_id", None) or (obj.id if isinstance(obj, Lease) else None)
     if lease_id:  # Lease, Payment, LedgerEntry, RecurringCharge
         lease = obj if isinstance(obj, Lease) else session.get(Lease, lease_id)

@@ -30,7 +30,10 @@ def list_properties(include_archived: bool = False, ctx: Ctx = Depends(staff)):
     by_prop: dict[uuid.UUID, list[Unit]] = {}
     for u in units:
         by_prop.setdefault(u.property_id, []).append(u)
-    return [{**p.model_dump(), **_unit_summary(by_prop.get(p.id, []))} for p in props]
+    return [
+        {**p.model_dump(), **_unit_summary(by_prop.get(p.id, [])), "units": sorted(by_prop.get(p.id, []), key=lambda u: u.name)}
+        for p in props
+    ]
 
 
 @router.post("/properties", status_code=201)

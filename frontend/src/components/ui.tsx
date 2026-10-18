@@ -252,7 +252,7 @@ export function BalanceText({ cents, currency }: { cents: number; currency?: str
 }
 
 /** Invitation link with copy button — shareable by text/WhatsApp when email isn't set up. */
-export function InviteLink({ url, emailSent, email }: { url: string; emailSent: boolean; email?: string | null }) {
+export function InviteLink({ url, emailSent, email, hideNotice = false }: { url: string; emailSent: boolean; email?: string | null; hideNotice?: boolean }) {
   const { t } = useTranslation();
   const [copied, setCopied] = useState(false);
   const copy = async () => {
@@ -266,16 +266,14 @@ export function InviteLink({ url, emailSent, email }: { url: string; emailSent: 
   };
   return (
     <div className="stack" style={{ gap: 8 }}>
-      <div className={emailSent ? "success-box" : "info-box"}>
-        {emailSent ? t("invite.emailed", { email }) : t("invite.not_emailed")}
-      </div>
+      {!hideNotice && <div className={emailSent ? "success-box" : "info-box"}>{emailSent ? t("invite.emailed", { email }) : t("invite.not_emailed")}</div>}
       <div style={{ display: "flex", gap: 6 }}>
         <input className="input mono" readOnly value={url} onFocus={(e) => e.target.select()} aria-label={t("invite.link_label")} />
         <button className="btn" onClick={copy} type="button">
           {copied ? <Check size={14} /> : <Copy size={14} />} {copied ? t("common.copied") : t("common.copy")}
         </button>
       </div>
-      <p className="small muted">{t("invite.warning")}</p>
+      {!hideNotice && <p className="small muted">{t("invite.warning")}</p>}
     </div>
   );
 }

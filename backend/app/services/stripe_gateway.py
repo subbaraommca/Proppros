@@ -99,6 +99,24 @@ def checkout_payment(
     return session.id, session.url
 
 
+def checkout_application_fee(
+    *, destination: str, amount_cents: int, email: str, description: str, metadata: dict[str, str], success_url: str, cancel_url: str
+) -> tuple[str, str]:
+    """Hosted card Checkout for a rental application fee, paid to the owner's connected account."""
+    _client()
+    session = stripe.checkout.Session.create(
+        mode="payment",
+        customer_email=email,
+        payment_method_types=["card"],
+        line_items=[{"price_data": {"currency": "usd", "product_data": {"name": description}, "unit_amount": amount_cents}, "quantity": 1}],
+        payment_intent_data={"transfer_data": {"destination": destination}, "metadata": metadata, "description": description},
+        metadata=metadata,
+        success_url=success_url,
+        cancel_url=cancel_url,
+    )
+    return session.id, session.url
+
+
 def checkout_setup(*, customer_id: str, metadata: dict[str, str], success_url: str, cancel_url: str) -> tuple[str, str]:
     """Hosted Checkout that only saves a payment method (for autopay). Returns (session_id, url)."""
     _client()

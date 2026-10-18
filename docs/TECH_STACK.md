@@ -177,6 +177,14 @@ Stripe Connect **Express** with **destination charges**: each owner onboards the
 - **Schedules** (`maintenance_schedules`): `routers/vendors.py → daily_maintenance` (called from the daily job) opens a work order when `next_due_on − lead_days ≤ today`, then advances `next_due_on` by `interval_months` until it's in the future — idempotent across reruns.
 - **Assets / access items** (`assets`, `access_items`): property-scoped like units. Access codes are masked for accountants and changes are audited without the code value.
 
+### Vacancy, applications & screening (Iteration 14)
+
+- **Listings** (`listings`): unique `slug`; photos are listing documents. Public JSON at `/api/public/listings/<slug>` (published only) and photos at `/api/public/listings/<slug>/photos/<id>`. `/l/<slug>` is rewritten to the backend (`vercel.json`) and returns a tiny HTML page with Open Graph/Twitter tags and schema.org JSON-LD, then redirects to the SPA page — so link previews and crawlers see the title, price and photo.
+- **Applications** (`applications`): created without an account (rate-limited, honeypot field). The applicant's private status link is a random token stored as a SHA-256 hash. No SSN or date of birth is collected.
+- **Screening report**: `credit_score`, `credit_summary` (JSON), `criminal_records` / `eviction_records` (JSON lists), provider PDF. Entered from the consumer reporting agency's report today; a provider adapter can fill the same fields later. Access: `owner`/`manager` only (`require_roles`), property scope via the listing; application documents are hidden from other roles and from the general documents library; the audit log records *that* a report was saved, never its contents.
+- **Adverse action**: `POST /applications/{id}/adverse-action` renders an FCRA notice PDF (reasons, agency contact, rights, optional credit score) with fpdf2, stores it on the application and emails it.
+- **Application fee**: `stripe_gateway.checkout_application_fee` (destination charge to the owner's Connect account); `checkout.session.completed` with `metadata.purpose = application_fee` marks it paid. Rent handlers ignore it (`source` ≠ online/autopay).
+
 ### Translations (i18n)
 
 All UI text lives in `frontend/src/locales/en.json`, grouped by area (`nav`, `leases`, `portal`, …); API enum values (statuses, categories, roles) are labelled in the `enums` section and rendered through `label()`. Use `t("section.key")` in components, i18next plural keys (`_one` / `_other`) for counts, and `<Trans>` for sentences with links or bold text. To add a language: copy `en.json` to `<code>.json`, translate the values, register it in `LANGUAGES` in `src/i18n.ts`. `src/locales/locales.test.ts` fails if code uses a missing key or a locale is missing keys. Server-generated text (API error details, emails, PDF receipts) is still English.

@@ -365,6 +365,10 @@ def _reverse(session: Session, org: Organization, p: Payment, reason: str) -> No
 
 def _checkout_completed(session: Session, cs: dict) -> str:
     meta = _meta(cs)
+    if meta.get("purpose") == "application_fee":
+        from app.routers.listings import application_fee_paid
+
+        return application_fee_paid(session, cs)
     if cs.get("mode") != "setup" or meta.get("purpose") != "autopay":
         return "ignored"  # payment sessions are handled through payment_intent.* events
     org = _org_for(session, meta)

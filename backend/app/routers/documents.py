@@ -20,7 +20,9 @@ from app.models import (
     Organization,
     Property,
     Tenant,
+    Application,
     Asset,
+    Listing,
     Unit,
     User,
     Vendor,
@@ -41,6 +43,8 @@ OWNER_MODELS = {
     "work_order": WorkOrder,
     "vendor": Vendor,
     "asset": Asset,
+    "listing": Listing,
+    "application": Application,
 }
 
 ALLOWED_TYPES = {
@@ -147,6 +151,8 @@ def serve(doc: Document, download: bool = False):
 
 def owner_in_scope(ctx: Ctx, owner_type: str, owner_id: uuid.UUID) -> bool:
     """Whether a property-scoped member may see records attached to this owner."""
+    if owner_type == "application" and ctx.role not in ("owner", "manager"):
+        return False  # applicant files and screening reports: owners and managers only
     if ctx.scope is None:
         return True
     if owner_type == "organization":
@@ -231,7 +237,9 @@ def list_documents(
     if expiring_within_days is not None:
         q = q.where(Document.expires_on.is_not(None), Document.expires_on <= today_in(ctx.org.timezone) + timedelta(days=expiring_within_days))
     docs = ctx.session.exec(q.order_by(Document.created_at.desc()).limit(1000)).all()
-    if ctx.scope is not None:
+    if owner_type != "application":  # applicant files stay on the application, not in the documents library
+        docs = [d for d in docs if d.owner_type != "application"]
+    if ctx.scope is not None or owner_type == "application":
         docs = [d for d in docs if doc_in_scope(ctx, d)]
     return _with_owner_label(ctx.session, list(docs))
 
@@ -251,7 +259,7 @@ async def upload_document(
     if ctx.role == "maintenance" and owner_type != "work_order":
         raise HTTPException(status_code=403, detail="Maintenance staff can only attach files to work orders.")
     check_owner(ctx.session, ctx.org_id, owner_type, owner_id)
-    if ctx.scope is not None and not owner_in_scope(ctx, owner_type, owner_id):
+    if (ctx.scope is not None or owner_type == "application") and not owner_in_scope(ctx, owner_type, owner_id):
         raise HTTPException(status_code=404, detail="Record not found")
     doc = await store_upload(ctx.session, ctx.org_id, ctx.user.id, file, owner_type, owner_id, kind, expires_on, visible_to_tenant)
     ctx.session.flush()
@@ -276,7 +284,7 @@ def download_document(document_id: uuid.UUID, download: bool = False, ctx: Ctx =
 @router.patch("/{document_id}")
 def update_document(document_id: uuid.UUID, payload: DocumentUpdate, ctx: Ctx = Depends(writer)):
     doc = ctx.session.get(Document, document_id)
-    if not doc or doc.org_id != ctx.org_id:
+    if not doc or doc.org_id != ctx.org_id or not doc_in_scope(ctx, doc):
         raise HTTPException(status_code=404, detail="Document not found")
     data = payload.model_dump(exclude_unset=True)
     if data.pop("clear_expiry", False):
@@ -295,7 +303,7 @@ def update_document(document_id: uuid.UUID, payload: DocumentUpdate, ctx: Ctx = 
 @router.delete("/{document_id}")
 def delete_document(document_id: uuid.UUID, ctx: Ctx = Depends(writer)):
     doc = ctx.session.get(Document, document_id)
-    if not doc or doc.org_id != ctx.org_id:
+    if not doc or doc.org_id != ctx.org_id or not doc_in_scope(ctx, doc):
         raise HTTPException(status_code=404, detail="Document not found")
     for prop in ctx.session.exec(select(Property).where(Property.cover_photo_id == doc.id)).all():
         prop.cover_photo_id = None
