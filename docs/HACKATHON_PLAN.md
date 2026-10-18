@@ -98,7 +98,7 @@ The workshop deck also uses seo-audit and programmatic-seo from coreyhaines31/ma
 
 ## 3. Product concept
 
-**Draft (to confirm):** **A new public marketing site for Proppros.** Proppros is property-management software for small landlords who own 1–20 rental units. The site must make the offer clear, prove it with real product screens, and turn visitors into sign-ups. The entry is an **existing project**, so the weekend's "Receipts" are the before-and-after changes to the public site.
+**Final:** **A public marketing site for Proppros.** Proppros is property management software for landlords and property management companies. The site makes the offer clear, proves it with real product screens, and turns visitors into sign-ups. Proppros itself was built new this weekend (first commit Sat Oct 17, 12:06 PM MST); "Receipts" compare the first version of the site with the final one.
 
 **Main visitor action (CTA):** "Start free" (sign up). A second action could be the lead magnet (see H5).
 

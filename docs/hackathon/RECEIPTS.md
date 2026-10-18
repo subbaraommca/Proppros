@@ -1,6 +1,7 @@
 # Receipts: what we shipped this weekend
 
-**Project:** Proppros (an existing product). **Live site:** https://proppros.vercel.app
+**Project:** Proppros, built new this weekend (first commit Sat 2026-10-17 12:06 MST). **Live site:** https://proppros.vercel.app
+"Before" below means the first version of the site, deployed earlier the same weekend; "After" is the final version.
 **Window:** Sat 2026-10-17 → Sun 2026-10-18 (MST)
 
 ## Before (captured 2026-10-17, 22:45 MST)
