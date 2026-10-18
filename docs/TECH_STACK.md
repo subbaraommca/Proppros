@@ -185,6 +185,13 @@ Stripe Connect **Express** with **destination charges**: each owner onboards the
 - **Adverse action**: `POST /applications/{id}/adverse-action` renders an FCRA notice PDF (reasons, agency contact, rights, optional credit score) with fpdf2, stores it on the application and emails it.
 - **Application fee**: `stripe_gateway.checkout_application_fee` (destination charge to the owner's Connect account); `checkout.session.completed` with `metadata.purpose = application_fee` marks it paid. Rent handlers ignore it (`source` ≠ online/autopay).
 
+### Communication (Iteration 15)
+
+- **Threads** (`message_threads`, `messages`): one tenant per thread, property copied from the tenant's lease for scope checks. Unread = last message from the other side after that side's `*_read_at`.
+- **SMS** (`app/services/sms.py`): Twilio REST via `httpx`; numbers normalized to E.164; logged to `notifications` (template `sms_*`, phone in `to_email`). Sent only to tenants with `sms_opt_in`. `POST /api/twilio/inbound` verifies `X-Twilio-Signature` (HMAC-SHA1 of `FRONTEND_URL/api/twilio/inbound` + sorted params).
+- **Notices** (`notices`): templates in `routers/communication.py` reuse the lease merge fields plus notice fields; rendered → fpdf2 PDF → lease document (`kind = notice`, shared with tenants).
+- **Move-out notices** (`move_out_notices`) and **renter's insurance** (tenant documents of kind `insurance` with `expires_on`; reminders via the daily job).
+
 ### Translations (i18n)
 
 All UI text lives in `frontend/src/locales/en.json`, grouped by area (`nav`, `leases`, `portal`, …); API enum values (statuses, categories, roles) are labelled in the `enums` section and rendered through `label()`. Use `t("section.key")` in components, i18next plural keys (`_one` / `_other`) for counts, and `<Trans>` for sentences with links or bold text. To add a language: copy `en.json` to `<code>.json`, translate the values, register it in `LANGUAGES` in `src/i18n.ts`. `src/locales/locales.test.ts` fails if code uses a missing key or a locale is missing keys. Server-generated text (API error details, emails, PDF receipts) is still English.

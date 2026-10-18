@@ -37,6 +37,11 @@ class Settings(BaseSettings):
     smtp_password: str = ""
     email_from: str = "Proppros <noreply@proppros.app>"
 
+    # SMS (Twilio). Blank → texts are logged instead of sent.
+    twilio_account_sid: str = ""
+    twilio_auth_token: str = ""
+    twilio_from_number: str = ""  # E.164, e.g. +16025550100 (or a Messaging Service SID starting with MG)
+
     # File storage (Vercel Blob). Neither set → files saved to local_upload_dir.
     blob_read_write_token: str = ""
     blob_store_id: str = ""  # with Vercel OIDC auth (no static token)
@@ -95,6 +100,10 @@ class Settings(BaseSettings):
 
     def is_superadmin_email(self, email: str) -> bool:
         return email.lower() in {e.strip().lower() for e in self.superadmin_emails.split(",") if e.strip()}
+
+    @property
+    def sms_enabled(self) -> bool:
+        return bool(self.twilio_account_sid and self.twilio_auth_token and self.twilio_from_number)
 
     @property
     def stripe_enabled(self) -> bool:

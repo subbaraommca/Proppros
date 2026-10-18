@@ -8,6 +8,7 @@ os.environ["SMTP_HOST"] = ""
 os.environ["BLOB_READ_WRITE_TOKEN"] = ""
 os.environ["UPSTASH_REDIS_REST_URL"] = ""
 os.environ["CRON_SECRET"] = "test-cron-secret"
+os.environ["TWILIO_ACCOUNT_SID"] = ""
 
 import tempfile  # noqa: E402
 
@@ -25,6 +26,7 @@ import app.core.database as _db  # noqa: E402
 _db.engine = _ENGINE
 
 from app.core import email as _email  # noqa: E402
+from app.services import sms as _sms  # noqa: E402
 from app.core import limiter as _limiter  # noqa: E402
 from app.main import app  # noqa: E402
 
@@ -33,6 +35,7 @@ from app.main import app  # noqa: E402
 def _fresh_db():
     SQLModel.metadata.create_all(_ENGINE)
     _email.outbox.clear()
+    _sms.outbox.clear()
     _limiter.reset()
     yield
     SQLModel.metadata.drop_all(_ENGINE)
@@ -52,3 +55,8 @@ def client():
 @pytest.fixture
 def outbox():
     return _email.outbox
+
+
+@pytest.fixture
+def sms_outbox():
+    return _sms.outbox

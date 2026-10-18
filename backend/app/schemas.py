@@ -746,3 +746,71 @@ class AdverseActionIn(Base):
     agency_address: str = Field(min_length=5, max_length=300)
     agency_phone: str = Field(min_length=7, max_length=40)
     credit_score_used: bool = False
+
+
+# ── Communication ────────────────────────────────────────────────────────────
+
+
+class ThreadIn(Base):
+    tenant_id: uuid.UUID
+    subject: str = Field(min_length=1, max_length=160)
+    body: str = Field(min_length=1, max_length=5000)
+
+
+class PortalThreadIn(Base):
+    subject: str = Field(min_length=1, max_length=160)
+    body: str = Field(min_length=1, max_length=5000)
+
+
+class MessageIn(Base):
+    body: str = Field(min_length=1, max_length=5000)
+
+
+class ThreadUpdate(Base):
+    archived: bool
+
+
+class AnnouncementIn(Base):
+    property_id: uuid.UUID | None = None
+    title: str = Field(min_length=1, max_length=160)
+    body: str = Field(min_length=1, max_length=5000)
+    send_email: bool = True
+    send_sms: bool = False
+
+
+class NoticeFields(Base):
+    effective_date: date | None = None
+    new_rent_cents: int | None = Field(default=None, gt=0, le=100_000_000)
+    entry_date: date | None = None
+    entry_window: str | None = Field(default=None, max_length=60)
+    entry_reason: str | None = Field(default=None, max_length=300)
+    violation: str | None = Field(default=None, max_length=1000)
+    cure_days: int | None = Field(default=None, ge=0, le=90)
+    amount_due_cents: int | None = Field(default=None, ge=0, le=100_000_000)
+    pay_days: int | None = Field(default=None, ge=1, le=60)
+
+
+class NoticePreviewIn(NoticeFields):
+    kind: Literal["rent_increase", "entry", "violation", "pay_or_quit", "general"]
+    body: str | None = Field(default=None, max_length=20_000)  # edited template text; blank → default template
+
+
+class NoticeIn(NoticePreviewIn):
+    title: str = Field(min_length=1, max_length=160)
+    send_email: bool = True
+    send_sms: bool = True
+
+
+class SmsPrefsIn(Base):
+    opt_in: bool
+    phone: str | None = Field(default=None, max_length=40)
+
+
+class MoveOutIn(Base):
+    move_out_date: date
+    forwarding_address: str | None = Field(default=None, max_length=500)
+    reason: str | None = Field(default=None, max_length=2000)
+
+
+class MoveOutAckIn(Base):
+    set_lease_end: bool = True

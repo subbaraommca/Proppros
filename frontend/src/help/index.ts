@@ -5,6 +5,7 @@ import teamAndAccess from "./team-and-access.md?raw";
 import tenantPortal from "./tenant-portal.md?raw";
 import leasing from "./leasing.md?raw";
 import vacancies from "./vacancies.md?raw";
+import communication from "./communication.md?raw";
 import security from "./security.md?raw";
 import plansAndBilling from "./plans-and-billing.md?raw";
 
@@ -16,6 +17,7 @@ export const HELP_ARTICLES: { slug: string; content: string }[] = [
   { slug: "team-and-access", content: teamAndAccess },
   { slug: "vacancies", content: vacancies },
   { slug: "leasing", content: leasing },
+  { slug: "communication", content: communication },
   { slug: "tenant-portal", content: tenantPortal },
   { slug: "security", content: security },
   { slug: "plans-and-billing", content: plansAndBilling },

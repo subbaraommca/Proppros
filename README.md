@@ -76,6 +76,14 @@ Online payments stay hidden until these are set.
 3. In Stripe → Developers → Webhooks, add the endpoint `https://<your-domain>/api/stripe/webhook` with these events: `payment_intent.processing`, `payment_intent.succeeded`, `payment_intent.payment_failed`, `charge.refunded`, `charge.dispute.created`, `checkout.session.completed`, `account.updated`. Copy its signing secret into `STRIPE_WEBHOOK_SECRET`, then redeploy.
 4. In Proppros, go to **Settings → Payments → Connect with Stripe**, finish onboarding, and turn on **Accept online payments**. Test with card `4242 4242 4242 4242` or Stripe's test bank account.
 
+### Optional: text messages (Twilio)
+
+1. Create a Twilio account and buy a phone number (or create a Messaging Service). For US long codes, register the number for A2P 10DLC messaging in the Twilio console.
+2. In Vercel, add `TWILIO_ACCOUNT_SID`, `TWILIO_AUTH_TOKEN` and `TWILIO_FROM_NUMBER`, then redeploy.
+3. In Twilio → the number → Messaging, set **A message comes in** to `https://<your-domain>/api/twilio/inbound` (HTTP POST). Replies then land in the tenant's conversation, and STOP / START update the tenant's consent.
+
+Texts only go to tenants who turned them on in the portal.
+
 ### Tenant screening
 
 Credit, criminal and eviction reports come from a consumer reporting agency such as TransUnion SmartMove (applicant-pay, no business API needed). Put your SmartMove (or other provider) link in each listing's **Screening provider link**; Proppros emails it to applicants and you record the report's results on the application. An automatic feed requires a partner agreement with the provider (e.g. TransUnion ShareAble API) — the data model is ready for it.

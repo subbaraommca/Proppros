@@ -36,7 +36,8 @@
     "help": "Help",
     "admin": "Admin",
     "vendors": "Vendors",
-    "vacancy": "Vacancies"
+    "vacancy": "Vacancies",
+    "messages": "Messages"
   },
   "common": {
     "save": "Save",
@@ -913,6 +914,10 @@
         "title": "Leases, signatures and renewals",
         "summary": "Lease templates, e-signatures, renewals, inspections and deposit statements."
       },
+      "communication": {
+        "title": "Messages, notices & texts",
+        "summary": "Tenant messages, announcements, formal notices, SMS, move-out notices and renter's insurance."
+      },
       "tenant-portal": {
         "title": "Tenant portal",
         "summary": "What your tenants can see and do."
@@ -1647,5 +1652,149 @@
     "aa_score_used": "A credit score was used in the decision (include it in the notice)",
     "aa_send": "Send notice and decline",
     "aa_sent": "Adverse action notice sent {{date}}."
+  },
+  "messages": {
+    "subtitle": "Conversations with your tenants, and announcements to whole properties.",
+    "inbox": "Conversations",
+    "new": "New message",
+    "to": "To",
+    "subject": "Subject",
+    "message": "Message",
+    "write": "Write a message… (Ctrl+Enter to send)",
+    "send": "Send",
+    "delivery_note": "The tenant gets it in their portal and by email, and by text if they've turned texts on.",
+    "show_archived": "Show archived",
+    "empty_title": "No conversations yet",
+    "empty_body": "Start a conversation with a tenant, or wait for one to message you from their portal.",
+    "pick": "Pick a conversation",
+    "pick_body": "Choose a conversation on the left, or start a new one.",
+    "new_badge": "New",
+    "you": "You",
+    "archive": "Archive",
+    "unarchive": "Unarchive",
+    "via_sms": "by text",
+    "delivered_by": "Delivered by {{channels}}",
+    "no_channel": "This tenant has no email, portal account or texts — they won't be notified.",
+    "ch_email": "email",
+    "ch_portal": "portal",
+    "ch_sms": "text",
+    "seen": "Seen"
+  },
+  "announcements": {
+    "title": "Announcements",
+    "new": "New announcement",
+    "send": "Send announcement",
+    "to": "Send to tenants at",
+    "all_properties": "All properties",
+    "title_label": "Title",
+    "title_placeholder": "e.g. Water shut-off on Tuesday",
+    "by_email": "Email",
+    "by_sms": "Text message (tenants who turned texts on)",
+    "note": "Goes to every tenant with an active lease at the property. It also appears on their portal home page for 90 days.",
+    "empty_title": "No announcements yet",
+    "empty_body": "Let all tenants at a property know about a water shut-off, pest treatment or parking-lot repaving.",
+    "reach": "{{tenants}} tenants · {{emails}} emails · {{texts}} texts"
+  },
+  "notices": {
+    "tab": "Notices",
+    "send_title": "Send a notice",
+    "kind": "Notice type",
+    "kind_rent_increase": "Rent increase",
+    "kind_entry": "Notice of entry",
+    "kind_violation": "Lease violation",
+    "kind_pay_or_quit": "Pay rent or quit",
+    "kind_general": "General notice",
+    "title": "Title",
+    "new_rent": "New rent",
+    "current": "Currently {{amount}}",
+    "effective": "Effective date",
+    "entry_date": "Date of entry",
+    "entry_window": "Time window",
+    "entry_reason": "Reason",
+    "entry_reason_placeholder": "e.g. annual smoke detector test",
+    "violation": "What's the violation?",
+    "cure_days": "Days to correct it",
+    "amount_due": "Amount past due",
+    "balance_is": "Lease balance: {{amount}}",
+    "pay_days": "Days to pay",
+    "pay_days_hint": "Many states require 3 to 14 days",
+    "edit_wording": "Edit the wording",
+    "preview": "Preview",
+    "send": "Send notice",
+    "by_email": "Email it to the tenants (PDF attached)",
+    "by_sms": "Text tenants who turned texts on",
+    "delivery_note": "The notice is saved as a PDF in the lease's documents and shared in the tenant portal. Some notices must also be delivered in person or by mail — check your local rules.",
+    "empty_title": "No notices sent",
+    "empty_body": "Send a rent increase, notice of entry, lease violation or pay-or-quit notice from a ready-made template.",
+    "sent": "Sent",
+    "delivery": "Delivery",
+    "emailed_one": "Emailed to {{count}} tenant",
+    "emailed_other": "Emailed to {{count}} tenants",
+    "not_emailed": "Portal only",
+    "viewed": "Opened in portal {{when}}"
+  },
+  "moveout": {
+    "banner": "{{name}} gave notice to move out on {{date}}.",
+    "banner_ack": "{{name}} is moving out on {{date}} (acknowledged).",
+    "forwarding": "Forwarding address: {{address}}",
+    "acknowledge": "Acknowledge",
+    "ack_title": "Acknowledge move-out notice",
+    "ack_body": "{{name}} plans to move out on {{date}}. They'll get an email confirming you received the notice.",
+    "set_end": "Set the lease end date to {{date}}"
+  },
+  "insurance": {
+    "title": "Renter's insurance",
+    "ok": "Valid until {{date}}",
+    "expiring": "Expires {{date}}",
+    "expired": "Expired {{date}}",
+    "missing": "Not on file",
+    "staff_hint": "Tenants upload their policy in the portal and get a reminder before it expires."
+  },
+  "pmessages": {
+    "subtitle": "Message your landlord. For repairs, use Maintenance so it's tracked.",
+    "new": "Message landlord",
+    "repairs_hint": "Reporting a repair? Use Maintenance → New request so it's tracked with photos.",
+    "empty_title": "No messages yet",
+    "empty_body": "Questions about your lease, parking or anything else? Send your landlord a message.",
+    "pick": "Choose a conversation"
+  },
+  "psms": {
+    "title": "Text messages",
+    "intro": "Get texts about messages from your landlord, notices and announcements like water shut-offs.",
+    "mobile": "Mobile number",
+    "consent": "I agree to receive text messages about my rental. Message frequency varies. Msg & data rates may apply. Reply STOP to opt out.",
+    "turn_on": "Turn on texts",
+    "turn_off": "Turn off texts",
+    "on": "Texts are on for {{phone}}. Reply STOP to any text to turn them off."
+  },
+  "pportal": {
+    "announcements": "Announcements",
+    "notices": "Notices"
+  },
+  "pmoveout": {
+    "title": "Moving out?",
+    "intro": "Give your landlord written notice of your move-out date here.",
+    "give": "Give move-out notice",
+    "date": "Move-out date",
+    "forwarding": "Forwarding address",
+    "forwarding_hint": "Where to send your deposit statement",
+    "reason": "Reason (optional)",
+    "note": "Check your lease for the required notice period (often 30 or 60 days).",
+    "submit": "Send notice",
+    "confirm": "Give notice to move out on {{date}}?",
+    "submitted": "You gave notice to move out on {{date}}. Waiting for your landlord to confirm.",
+    "acknowledged": "Your landlord confirmed your move-out on {{date}}.",
+    "withdraw": "Withdraw notice",
+    "withdraw_confirm": "Withdraw your move-out notice?"
+  },
+  "pinsurance": {
+    "title": "Renter's insurance",
+    "none": "Upload proof of your renter's insurance (the declarations page is best).",
+    "valid_until": "valid until {{date}}",
+    "provider": "Insurance company",
+    "expires": "Policy expires",
+    "choose": "Choose file",
+    "upload": "Upload",
+    "upload_new": "Upload renewal"
   }
 }

@@ -47,6 +47,8 @@ const SchedulesPage = page(() => import("./pages/VendorPages"), "SchedulesPage")
 const VacancyPage = page(() => import("./pages/VacancyPages"), "VacancyPage");
 const ListingManagePage = page(() => import("./pages/VacancyPages"), "ListingManagePage");
 const ApplicationPage = page(() => import("./pages/VacancyPages"), "ApplicationPage");
+const MessagesPage = page(() => import("./pages/MessagesPages"), "MessagesPage");
+const PortalMessagesPage = page(() => import("./pages/portal/PortalComms"), "PortalMessagesPage");
 const PublicListingPage = page(() => import("./pages/ListingPublicPages"), "PublicListingPage");
 const ApplicationStatusPage = page(() => import("./pages/ListingPublicPages"), "ApplicationStatusPage");
 
@@ -126,6 +128,8 @@ export default function App() {
           <Route path="help" element={<HelpPage />} />
           <Route path="help/:slug" element={<HelpPage />} />
           <Route path="sign/:signerId" element={<PortalSignPage />} />
+          <Route path="messages" element={<PortalMessagesPage />} />
+          <Route path="messages/:id" element={<PortalMessagesPage />} />
         </Route>
         <Route path="*" element={<Navigate to="/portal" replace />} />
       </Routes>
@@ -156,6 +160,8 @@ export default function App() {
         <Route path="maintenance/schedules" element={<SchedulesPage />} />
         <Route path="maintenance/:id" element={<WorkOrderDetailPage />} />
         <Route path="vendors" element={<VendorsPage />} />
+        <Route path="messages" element={<MessagesPage />} />
+        <Route path="messages/:id" element={<MessagesPage />} />
         <Route path="vacancy" element={<VacancyPage />} />
         <Route path="vacancy/applications/:id" element={<ApplicationPage />} />
         <Route path="vacancy/:id" element={<ListingManagePage />} />

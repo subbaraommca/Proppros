@@ -8,6 +8,7 @@ import { useAuth } from "../hooks/useAuth";
 import type { Lease, LedgerRow, Payment } from "../types";
 import { DocumentsPanel } from "../components/Documents";
 import { MovePanel, RenewalPanel, SignaturesPanel } from "../components/LeasingPanels";
+import { InsuranceStatus, MoveOutBanner, NoticesPanel } from "../components/LeaseComms";
 import { PaymentBadges } from "../components/OnlinePayments";
 import { Badge, BalanceText, Card, ErrorBox, Field, Input, Modal, MoneyInput, PageHeader, Select, Spinner, Tabs, Textarea } from "../components/ui";
 import { date, fromCents, label, money, ordinal, toCents, todayISO } from "../utils/format";
@@ -343,7 +344,7 @@ export function LeaseDetailPage() {
   const { can, org } = useAuth();
   const navigate = useNavigate();
   const qc = useQueryClient();
-  const [tab, setTab] = useState<"ledger" | "payments" | "documents" | "signing" | "renewal" | "move">("ledger");
+  const [tab, setTab] = useState<"ledger" | "payments" | "documents" | "signing" | "renewal" | "move" | "notices">("ledger");
   const [modal, setModal] = useState<"payment" | "adjust" | "terms" | "charge" | "end" | null>(null);
   const canEdit = can("owner", "manager");
 
@@ -419,6 +420,7 @@ export function LeaseDetailPage() {
       />
       <div className="stack">
         <ErrorBox error={removeEntry.error || voidPayment.error || removeCharge.error || deleteLease.error} />
+        <MoveOutBanner lease={lease} />
         <div className="grid grid-4">
           <div className="card stat">
             <div className="stat-label">{t("common.balance")}</div>
@@ -461,6 +463,7 @@ export function LeaseDetailPage() {
                 { id: "signing", label: t("signing.tab") },
                 { id: "renewal", label: t("renewal.tab") },
                 { id: "move", label: t("inspections.tab") },
+                { id: "notices", label: t("notices.tab") },
               ]}
             />
             {tab === "ledger" && (
@@ -591,6 +594,7 @@ export function LeaseDetailPage() {
             {tab === "signing" && <SignaturesPanel lease={lease} />}
             {tab === "renewal" && <RenewalPanel lease={lease} />}
             {tab === "move" && <MovePanel lease={lease} />}
+            {tab === "notices" && <NoticesPanel lease={lease} />}
           </div>
 
           <div className="stack">
@@ -609,6 +613,7 @@ export function LeaseDetailPage() {
                 ))}
               </ul>
             </Card>
+            <InsuranceStatus lease={lease} />
             <Card
               title={t("leases.recurring_charges")}
               actions={

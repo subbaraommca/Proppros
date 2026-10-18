@@ -734,3 +734,26 @@ main:focus { outline: none; }
   .record-row { grid-template-columns: 1fr 1fr; }
   .screen-credit { grid-template-columns: 1fr; }
 }
+
+/* ── Iteration 15: messages ────────────────────────────────────────────────── */
+.nav-count { margin-left: auto; min-width: 18px; height: 18px; padding: 0 5px; border-radius: var(--pp-radius-pill); background: var(--pp-carnelian); color: var(--pp-on-carnelian); font-size: 11px; font-weight: 700; display: inline-grid; place-items: center; }
+.inbox { display: grid; grid-template-columns: 340px minmax(0, 1fr); gap: 16px; align-items: start; }
+.inbox-head { padding: 10px 16px; border-bottom: 1px solid var(--pp-border-subtle); }
+.thread-list { list-style: none; margin: 0; padding: 0; max-height: 70vh; overflow-y: auto; }
+.thread-list a { display: block; padding: 12px 16px; border-bottom: 1px solid var(--pp-border-subtle); color: var(--pp-text); text-decoration: none; }
+.thread-list a:hover { background: var(--pp-surface-hover); }
+.thread-list a.active { background: var(--pp-carnelian-soft); }
+.thread-list a.unread strong { color: var(--pp-text-loud); }
+.thread-top { display: flex; justify-content: space-between; gap: 8px; align-items: baseline; }
+.thread-preview { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; margin-top: 2px; }
+.chat { display: flex; flex-direction: column; gap: 12px; }
+.chat-log { display: flex; flex-direction: column; gap: 10px; max-height: 55vh; overflow-y: auto; padding: 4px 2px; }
+.bubble { max-width: 78%; display: flex; flex-direction: column; gap: 3px; }
+.bubble.mine { align-self: flex-end; align-items: flex-end; }
+.bubble.theirs { align-self: flex-start; }
+.bubble-body { padding: 9px 13px; border-radius: 12px; white-space: pre-wrap; overflow-wrap: anywhere; background: var(--pp-surface-muted); border: 1px solid var(--pp-border-subtle); }
+.bubble.mine .bubble-body { background: var(--pp-carnelian-soft); border-color: transparent; }
+.bubble-meta { font-size: var(--pp-text-xs); color: var(--pp-text-muted); display: inline-flex; gap: 4px; align-items: center; }
+.chat-reply { display: flex; flex-direction: column; gap: 8px; border-top: 1px solid var(--pp-border-subtle); padding-top: 12px; }
+.chat-reply-bar { display: flex; justify-content: space-between; align-items: center; gap: 8px; flex-wrap: wrap; }
+@media (max-width: 900px) { .inbox { grid-template-columns: minmax(0, 1fr); } .thread-list { max-height: 40vh; } }

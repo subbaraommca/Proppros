@@ -37,7 +37,7 @@ This is the step-by-step execution plan. Work is split into **iterations**. Each
 | 12 | Leasing workflows (templates, e-sign, renewals) | v2 | 🟦 Code done — try it on one of your leases |
 | 13 | Vendors & preventive maintenance | v2 | 🟦 Code done — add your vendors, appliances and recurring tasks |
 | 14 | Vacancy, listings & screening | v2 | 🟦 Code done — screening reports entered from your provider; automatic feed needs a provider partnership |
-| 15 | Communication (messaging, SMS, notices) | v2 | ⬜ |
+| 15 | Communication (messaging, SMS, notices) | v2 | 🟦 Code done — SMS logged until Twilio is configured |
 | 16 | Advanced finance (Plaid, tax, exports) | v2 | ⬜ |
 | 17 | AI features | v2 | ⬜ |
 | 18 | Mobile app (Expo) | v3 | ⬜ |
@@ -313,11 +313,12 @@ Legend: ⬜ Not started · 🟨 In progress · 🟦 Code complete, waiting on a 
 
 **Requirements:** COM-02 – COM-05, TPT-04, TPT-05
 
-- [ ] In-app message threads (by property / work order)
-- [ ] Property-wide announcements
-- [ ] Twilio SMS channel
-- [ ] Notice templates (rent increase, entry, violation, pay-or-quit)
-- [ ] Tenant: upload renter's insurance, give move-out notice
+- [x] In-app message threads (by property / work order) — *staff ↔ tenant conversations tagged with the tenant's property; unread counts; email + SMS notifications; work orders keep their own comment thread*
+- [x] Property-wide announcements — *one property or all; email and/or SMS; shown on the portal home for 90 days*
+- [x] Twilio SMS channel — *REST API without SDK; tenant opt-in with consent text; STOP/START handled; inbound texts become messages (signature-verified webhook); logged until configured*
+- [x] Notice templates (rent increase, entry, violation, pay-or-quit) — *plus a general notice; fill fields → preview → PDF saved to the lease, emailed with attachment, optional text; portal "opened" tracking*
+- [x] Tenant: upload renter's insurance, give move-out notice — *insurance with expiry (status on the lease page, tenant reminder 14 days before); move-out notice with forwarding address → landlord acknowledges and can set the lease end date*
+- [ ] **Your part (optional):** Twilio account + number for real texts (README → "Optional: text messages")
 
 ## Iteration 16 — Advanced finance
 
@@ -377,3 +378,4 @@ Record notes when each iteration closes.
 | 2026-10-18 | 12 | Leasing workflows: lease templates with merge fields, built-in e-signature (signing links work without an account; portal signing for tenants with accounts; landlord signs in-app), renewal offers with portal accept/decline and automatic successor lease, move-in/move-out inspections with photos and PDF reports, itemized security-deposit statements. Decision: built-in e-signature instead of Dropbox Sign/DocuSign (no cost or account; records consent, IP, device, time and a SHA-256 fingerprint of the text). Migration `0004` (new tables + one nullable column). 10 new tests (93 total). Checked in a browser: template editor, send → public link signing → landlord signing → signed PDF, renewal offer → tenant portal card, inspection checklist (desktop + phone). |
 | 2026-10-18 | 13 | Vendors & preventive maintenance: vendor directory with insurance/W-9 tracking and ratings, vendor assignment with job-details email, quotes with approve/decline, vendor invoices that create expenses automatically, preventive schedules run by the daily job, appliance/system register with warranty reminders, keys & access codes per property/unit. Migration `0005` (new tables + nullable work-order columns). 7 new tests (100 total). Checked in a browser: add vendor, quotes → approve → invoice → expense, schedule from a preset, assets and keys tabs, phone width. |
 | 2026-10-18 | 14 | Vacancy & screening: listings with public page + share page (OG/JSON-LD), public application form with status page and uploads, application fee via Stripe (reusing Connect), screening reports with credit/criminal/eviction sections (user request: landlords must see these histories), FCRA adverse action notice PDF, applicant comparison, approve/decline, convert to tenants + lease. Decisions: no SSNs or report pulls inside Proppros — reports come from a consumer reporting agency and are entered (or later fed) into a structured report; applicant files and reports are owners/managers only and excluded from the documents library; HUD criminal-history guidance shown next to reports. Also fixed: `/properties` list now includes units (schedule/listing unit pickers were empty). Migration `0006`. 6 new tests (106 total). |
+| 2026-10-18 | 15 | Communication: message threads (staff ↔ tenant, portal and email/SMS notifications, unread badge), announcements, notice templates with PDF + email + portal, Twilio SMS (opt-in, STOP/START, inbound webhook with signature check), renter's insurance uploads with reminders, tenant move-out notices with acknowledge. Found and fixed: an effect that returned `scrollIntoView()`'s result crashed the chat in current Chrome (it now returns a Promise). Migration `0007` (server default for `tenants.sms_opt_in`). 7 new tests (113 total). |

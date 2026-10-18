@@ -24,6 +24,7 @@ export function PortalLayout() {
             <NavLink to="/portal/payments">{t("nav.payments")}</NavLink>
             <NavLink to="/portal/maintenance">{t("nav.maintenance")}</NavLink>
             <NavLink to="/portal/documents">{t("nav.documents")}</NavLink>
+            <NavLink to="/portal/messages">{t("nav.messages")}</NavLink>
             <NavLink to="/portal/help">{t("nav.help")}</NavLink>
           </nav>
           {me && me.organizations.length > 1 && (

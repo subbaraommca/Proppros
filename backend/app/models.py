@@ -68,6 +68,7 @@ ACCESS_KINDS = ("key", "fob", "remote", "code", "lockbox", "mailbox", "other")
 LISTING_STATUSES = ("draft", "published", "closed")
 APPLICATION_STATUSES = ("submitted", "screening", "approved", "declined", "withdrawn", "converted")
 APPLICATION_FEE_STATUSES = ("none", "unpaid", "paid", "waived")
+NOTICE_KINDS = ("rent_increase", "entry", "violation", "pay_or_quit", "general")
 
 
 class TimestampMixin(SQLModel):
@@ -215,6 +216,8 @@ class Tenant(TimestampMixin, table=True):
     pets: list[dict[str, Any]] = Field(default_factory=list, sa_column=Column(JSON, nullable=False))
     notes: str | None = None
     stripe_customer_id: str | None = Field(default=None, max_length=64)
+    sms_opt_in: bool = False  # tenant agreed to texts (portal), cleared by STOP
+    sms_opt_in_at: datetime | None = None
 
 
 class Lease(TimestampMixin, table=True):
@@ -716,6 +719,91 @@ class Application(TimestampMixin, table=True):
     decided_by_user_id: uuid.UUID | None = Field(default=None, foreign_key="users.id")
     tenant_id: uuid.UUID | None = Field(default=None, foreign_key="tenants.id")
     lease_id: uuid.UUID | None = Field(default=None, foreign_key="leases.id")
+
+
+# ── Communication ────────────────────────────────────────────────────────────
+
+
+class MessageThread(TimestampMixin, table=True):
+    """A conversation between the landlord's team and one tenant."""
+
+    __tablename__ = "message_threads"
+    id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
+    org_id: uuid.UUID = Field(foreign_key="organizations.id", index=True)
+    tenant_id: uuid.UUID = Field(foreign_key="tenants.id", index=True)
+    property_id: uuid.UUID | None = Field(default=None, foreign_key="properties.id", index=True)
+    lease_id: uuid.UUID | None = Field(default=None, foreign_key="leases.id")
+    subject: str = Field(max_length=160)
+    last_message_at: datetime = Field(default_factory=utcnow, index=True)
+    last_author_role: str = Field(default="staff", max_length=8)  # staff | tenant
+    staff_read_at: datetime | None = None
+    tenant_read_at: datetime | None = None
+    archived: bool = False
+
+
+class Message(SQLModel, table=True):
+    __tablename__ = "messages"
+    id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
+    org_id: uuid.UUID = Field(foreign_key="organizations.id", index=True)
+    thread_id: uuid.UUID = Field(foreign_key="message_threads.id", index=True)
+    author_user_id: uuid.UUID | None = Field(default=None, foreign_key="users.id")
+    author_role: str = Field(max_length=8)  # staff | tenant
+    body: str = Field(max_length=5000)
+    via: str = Field(default="app", max_length=8)  # app | sms
+    created_at: datetime = Field(default_factory=utcnow, index=True)
+
+
+class Announcement(SQLModel, table=True):
+    """A message to every tenant at a property (or all properties), e.g. a water shut-off."""
+
+    __tablename__ = "announcements"
+    id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
+    org_id: uuid.UUID = Field(foreign_key="organizations.id", index=True)
+    property_id: uuid.UUID | None = Field(default=None, foreign_key="properties.id", index=True)  # None → all properties
+    title: str = Field(max_length=160)
+    body: str = Field(max_length=5000)
+    send_email: bool = True
+    send_sms: bool = False
+    email_count: int = 0
+    sms_count: int = 0
+    tenant_count: int = 0
+    created_by_user_id: uuid.UUID | None = Field(default=None, foreign_key="users.id")
+    created_at: datetime = Field(default_factory=utcnow, index=True)
+
+
+class Notice(SQLModel, table=True):
+    """A formal notice to the tenants of a lease (rent increase, entry, violation, pay-or-quit)."""
+
+    __tablename__ = "notices"
+    id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
+    org_id: uuid.UUID = Field(foreign_key="organizations.id", index=True)
+    lease_id: uuid.UUID = Field(foreign_key="leases.id", index=True)
+    kind: str = Field(max_length=16)
+    title: str = Field(max_length=160)
+    body: str = Field(max_length=20_000)
+    effective_date: date | None = None
+    document_id: uuid.UUID | None = Field(default=None, foreign_key="documents.id")
+    emailed_to: list[str] = Field(default_factory=list, sa_column=Column(JSON, nullable=False))
+    viewed_at: datetime | None = None  # first opened in the tenant portal
+    created_by_user_id: uuid.UUID | None = Field(default=None, foreign_key="users.id")
+    created_at: datetime = Field(default_factory=utcnow, index=True)
+
+
+class MoveOutNotice(SQLModel, table=True):
+    """A tenant's notice to vacate, given from the portal."""
+
+    __tablename__ = "move_out_notices"
+    id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
+    org_id: uuid.UUID = Field(foreign_key="organizations.id", index=True)
+    lease_id: uuid.UUID = Field(foreign_key="leases.id", index=True)
+    tenant_id: uuid.UUID = Field(foreign_key="tenants.id")
+    move_out_date: date
+    forwarding_address: str | None = Field(default=None, max_length=500)
+    reason: str | None = Field(default=None, max_length=2000)
+    status: str = Field(default="submitted", max_length=12)  # submitted | acknowledged | withdrawn
+    acknowledged_at: datetime | None = None
+    acknowledged_by_user_id: uuid.UUID | None = Field(default=None, foreign_key="users.id")
+    created_at: datetime = Field(default_factory=utcnow)
 
 
 class Feedback(SQLModel, table=True):

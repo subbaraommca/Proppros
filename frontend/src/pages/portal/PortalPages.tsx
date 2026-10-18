@@ -7,6 +7,7 @@ import { api, fileUrl } from "../../services/api";
 import type { DocumentRow, Lease, LedgerRow, Payment, WorkOrder } from "../../types";
 import { DocIcon } from "../../components/Documents";
 import { PendingSignatures, PortalRenewalCard } from "../../components/PortalLeasing";
+import { InsuranceCard, MoveOutCard, PortalUpdates } from "./PortalComms";
 import { PortalPayActions, PaymentBadges, usePortalPayOptions } from "../../components/OnlinePayments";
 import { Badge, BalanceText, Card, Empty, ErrorBox, Field, Input, Modal, PageHeader, Select, Spinner, Textarea } from "../../components/ui";
 import { date, dateTime, fileSize, label, money, ordinal } from "../../utils/format";
@@ -39,6 +40,7 @@ export function PortalHomePage() {
       <div className="stack">
         {flash && <div className={flash === "payment_cancelled" ? "info-box" : "success-box"}>{t(`online.${flash}`)}</div>}
         <PendingSignatures />
+        <PortalUpdates />
         {data.leases.length === 0 && (
           <Card>
             <Empty title={t("portal.no_lease_title")}>{t("portal.no_lease_body")}</Empty>
@@ -163,6 +165,12 @@ export function PortalLeasePage() {
           </div>
         </div>
         {l.status === "active" && <PortalRenewalCard leaseId={l.id} currentRent={l.rent_cents} />}
+        {l.status === "active" && (
+          <div className="grid grid-2">
+            <InsuranceCard />
+            <MoveOutCard leaseId={l.id} endDate={l.end_date} />
+          </div>
+        )}
         <Card title={t("portal.statement_title")} pad={false}>
           <div className="table-wrap">
             <table className="table">

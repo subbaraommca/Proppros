@@ -12,6 +12,7 @@ import {
   LayoutDashboard,
   LifeBuoy,
   Megaphone,
+  MessageSquare,
   LogOut,
   Menu,
   Moon,
@@ -23,6 +24,7 @@ import {
   Wrench,
 } from "lucide-react";
 import { useAuth } from "../hooks/useAuth";
+import { useQuery } from "@tanstack/react-query";
 import { api } from "../services/api";
 import { label } from "../utils/format";
 import type { Role } from "../types";
@@ -42,6 +44,7 @@ const NAV: NavItem[] = [
   { to: "/expenses", key: "expenses", icon: Receipt, roles: FINANCE, group: "money" },
   { to: "/reports", key: "reports", icon: BarChart3, roles: FINANCE, group: "money" },
   { to: "/maintenance", key: "maintenance", icon: Wrench, group: "operations" },
+  { to: "/messages", key: "messages", icon: MessageSquare, roles: ["owner", "manager"], group: "operations" },
   { to: "/vendors", key: "vendors", icon: HardHat, group: "operations" },
   { to: "/documents", key: "documents", icon: FolderOpen, roles: FINANCE, group: "operations" },
   { to: "/settings", key: "settings", icon: Settings, group: "account" },
@@ -91,6 +94,11 @@ function VerifyBanner() {
   );
 }
 
+function UnreadBadge() {
+  const { data } = useQuery({ queryKey: ["unread-count"], queryFn: () => api.get<{ count: number }>("/messages/unread-count"), refetchInterval: 60_000 });
+  return data?.count ? <span className="nav-count">{data.count}</span> : null;
+}
+
 export function Layout() {
   const { t } = useTranslation();
   const { me, org, switchOrg, logout } = useAuth();
@@ -128,6 +136,7 @@ export function Layout() {
                 {groupItems.map(({ to, key, icon: Icon }) => (
                   <NavLink key={to} to={to} end={to === "/"}>
                     <Icon size={17} /> {t(`nav.${key}`)}
+                    {key === "messages" && <UnreadBadge />}
                   </NavLink>
                 ))}
               </div>

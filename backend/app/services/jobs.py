@@ -165,6 +165,9 @@ def run_daily_for_org(
     from app.routers.vendors import daily_maintenance
 
     stats.update(daily_maintenance(session, org, today))
+    from app.routers.communication import daily_communication
+
+    stats.update(daily_communication(session, org, today))
     # Autopay runs after rent has posted, so it charges the up-to-date balance.
     from app.services.online_payments import run_autopay_for_org
 
