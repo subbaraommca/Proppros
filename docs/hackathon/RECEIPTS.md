@@ -35,6 +35,19 @@
 | 10-18 00:55 | Content Creator · Video | 22-second 9:16 promo video "One calm month", rendered with Remotion from editable source | `marketing/video/renders/one-calm-month-1080x1920.mp4`, `marketing/video/src/` |
 | 10-18 00:50 | Frontend Engineer | Font preloading for the hero; no horizontal scroll at 390px on every new page; 10/10 frontend tests pass | `frontend/scripts/prerender.mjs` |
 
-## After
+| 10-18 01:20 | Product Manager | Deployed to production after owner approval (commit `6fbce05`); CI passed | https://proppros.vercel.app |
 
-_To be added after deploy: screenshots, Lighthouse, curl of raw HTML._
+## After (live, captured 2026-10-18 01:25 MST)
+
+| Evidence | Before | After | File |
+|----------|--------|-------|------|
+| Raw HTML for crawlers and AI tools | Empty `<div id="root">`, 745 bytes | Full page content, 28 KB, with Organization, SoftwareApplication and FAQPage (9 questions) JSON-LD | `receipts/after/home-raw-html.html` |
+| Public pages with their own title and description | 0 (one generic title) | 20 (home, features, 6 feature pages, pricing, help + 10 articles) | `/sitemap.xml` |
+| sitemap.xml · robots.txt · llms.txt · Open Graph image | None | All present | `/sitemap.xml`, `/robots.txt`, `/llms.txt`, `/og.png` |
+| Lighthouse mobile (Perf · A11y · Best · SEO) | 92 · 96 · 96 · 91 | 89 · **100** · 96 · **100** | `receipts/after/lh-mobile.json` |
+| Lighthouse desktop | 99 · 97 · 96 · 91 | 99 · **100** · 96 · **100** | `receipts/after/lh-desktop.json` |
+| Screens on desktop and phone | Home, pricing, help | Home, features, vacancies, pricing, help | `receipts/after/*-desktop.png`, `*-phone.png` |
+| Pricing honesty | "Start with Pro" buttons for inactive billing | Paid plans marked "Coming soon" | `receipts/after/pricing-desktop.png` |
+| Vacancy marketing | Share link only | Ad text, share buttons, share image, QR flyer, fair-housing check | `/features/vacancies` |
+
+Note: mobile performance is 3 points lower because the page now ships real content and product images; first paint is 2.2 s and blocking time 80 ms.

@@ -1,6 +1,6 @@
 # Hackathon Plan — Marketing App
 
-**Status:** 📥 Gathering requirements. No build until the owner says go.
+**Status:** ✅ Deployed 2026-10-18 01:20 MST (commit 6fbce05). Submission draft: [hackathon/SUBMISSION.md](hackathon/SUBMISSION.md) · Receipts: [hackathon/RECEIPTS.md](hackathon/RECEIPTS.md)
 **Started:** 2026-10-17
 
 The goal is to enter Proppros in a hackathon whose brief is to build a **marketing app**. This plan is kept separate from [IMPLEMENTATION_PLAN.md](IMPLEMENTATION_PLAN.md). The paused Iterations 16 and 17 and the upcoming Iteration 19 there are not affected.
